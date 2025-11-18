@@ -1,6 +1,6 @@
 /**
  * Unit tests for text and selection properties in User Story 2
- * 
+ *
  * Tests individual property type behavior:
  * - Rich text properties
  * - Select properties with literal type preservation
@@ -9,11 +9,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  validatePropertyStructure, 
+import {
+  validatePropertyStructure,
   validatePropertyValue,
   validateSelectionOptions,
-  validateSchemaStructure
+  validateSchemaStructure,
 } from '../../src/schema/validator.js';
 import { PropertyValidationError, SelectionValidationError } from '../../src/errors/index.js';
 import type { PropertyDefinition } from '../../src/types/core.js';
@@ -28,10 +28,12 @@ describe('Unit Tests: Text and Selection Properties', () => {
 
     it('should validate rich_text property values', () => {
       const definition: PropertyDefinition = { type: 'rich_text' };
-      
+
       // Valid values
       expect(() => validatePropertyValue('Simple text', definition, 'Description')).not.toThrow();
-      expect(() => validatePropertyValue('Complex **bold** and *italic* text', definition, 'Description')).not.toThrow();
+      expect(() =>
+        validatePropertyValue('Complex **bold** and *italic* text', definition, 'Description')
+      ).not.toThrow();
       expect(() => validatePropertyValue('', definition, 'Description')).not.toThrow();
       expect(() => validatePropertyValue(null, definition, 'Description')).not.toThrow();
       expect(() => validatePropertyValue(undefined, definition, 'Description')).not.toThrow();
@@ -39,20 +41,24 @@ describe('Unit Tests: Text and Selection Properties', () => {
 
     it('should reject invalid rich_text property values', () => {
       const definition: PropertyDefinition = { type: 'rich_text' };
-      
-      expect(() => validatePropertyValue(123, definition, 'Description'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(true, definition, 'Description'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue([], definition, 'Description'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue({}, definition, 'Description'))
-        .toThrow(PropertyValidationError);
+
+      expect(() => validatePropertyValue(123, definition, 'Description')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue(true, definition, 'Description')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue([], definition, 'Description')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue({}, definition, 'Description')).toThrow(
+        PropertyValidationError
+      );
     });
 
     it('should provide specific error details for rich_text properties', () => {
       const definition: PropertyDefinition = { type: 'rich_text' };
-      
+
       try {
         validatePropertyValue(123, definition, 'Description');
       } catch (error) {
@@ -67,9 +73,9 @@ describe('Unit Tests: Text and Selection Properties', () => {
 
   describe('Select Property', () => {
     it('should validate select property definition with options', () => {
-      const definition: PropertyDefinition = { 
-        type: 'select', 
-        options: ['Option 1', 'Option 2', 'Option 3'] 
+      const definition: PropertyDefinition = {
+        type: 'select',
+        options: ['Option 1', 'Option 2', 'Option 3'],
       };
       const errors = validatePropertyStructure('Status', definition);
       expect(errors).toHaveLength(0);
@@ -83,11 +89,11 @@ describe('Unit Tests: Text and Selection Properties', () => {
     });
 
     it('should validate select property values', () => {
-      const definition: PropertyDefinition = { 
-        type: 'select', 
-        options: ['Todo', 'In Progress', 'Done'] 
+      const definition: PropertyDefinition = {
+        type: 'select',
+        options: ['Todo', 'In Progress', 'Done'],
       };
-      
+
       // Valid values
       expect(() => validatePropertyValue('Todo', definition, 'Status')).not.toThrow();
       expect(() => validatePropertyValue('In Progress', definition, 'Status')).not.toThrow();
@@ -97,25 +103,28 @@ describe('Unit Tests: Text and Selection Properties', () => {
     });
 
     it('should reject invalid select property values', () => {
-      const definition: PropertyDefinition = { 
-        type: 'select', 
-        options: ['Todo', 'In Progress', 'Done'] 
+      const definition: PropertyDefinition = {
+        type: 'select',
+        options: ['Todo', 'In Progress', 'Done'],
       };
-      
-      expect(() => validatePropertyValue('Invalid Option', definition, 'Status'))
-        .toThrow(SelectionValidationError);
-      expect(() => validatePropertyValue(123, definition, 'Status'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(['Todo'], definition, 'Status'))
-        .toThrow(PropertyValidationError);
+
+      expect(() => validatePropertyValue('Invalid Option', definition, 'Status')).toThrow(
+        SelectionValidationError
+      );
+      expect(() => validatePropertyValue(123, definition, 'Status')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue(['Todo'], definition, 'Status')).toThrow(
+        PropertyValidationError
+      );
     });
 
     it('should provide specific error details for select properties', () => {
-      const definition: PropertyDefinition = { 
-        type: 'select', 
-        options: ['Todo', 'In Progress', 'Done'] 
+      const definition: PropertyDefinition = {
+        type: 'select',
+        options: ['Todo', 'In Progress', 'Done'],
       };
-      
+
       try {
         validatePropertyValue('Invalid Option', definition, 'Status');
       } catch (error) {
@@ -130,9 +139,9 @@ describe('Unit Tests: Text and Selection Properties', () => {
 
   describe('Multi-Select Property', () => {
     it('should validate multi_select property definition with options', () => {
-      const definition: PropertyDefinition = { 
-        type: 'multi_select', 
-        options: ['Tag1', 'Tag2', 'Tag3', 'Tag4'] 
+      const definition: PropertyDefinition = {
+        type: 'multi_select',
+        options: ['Tag1', 'Tag2', 'Tag3', 'Tag4'],
       };
       const errors = validatePropertyStructure('Tags', definition);
       expect(errors).toHaveLength(0);
@@ -146,42 +155,46 @@ describe('Unit Tests: Text and Selection Properties', () => {
     });
 
     it('should validate multi_select property values', () => {
-      const definition: PropertyDefinition = { 
-        type: 'multi_select', 
-        options: ['Bug', 'Feature', 'Enhancement', 'Documentation'] 
+      const definition: PropertyDefinition = {
+        type: 'multi_select',
+        options: ['Bug', 'Feature', 'Enhancement', 'Documentation'],
       };
-      
+
       // Valid values
       expect(() => validatePropertyValue([], definition, 'Tags')).not.toThrow();
       expect(() => validatePropertyValue(['Bug'], definition, 'Tags')).not.toThrow();
       expect(() => validatePropertyValue(['Bug', 'Feature'], definition, 'Tags')).not.toThrow();
-      expect(() => validatePropertyValue(['Bug', 'Feature', 'Enhancement'], definition, 'Tags')).not.toThrow();
+      expect(() =>
+        validatePropertyValue(['Bug', 'Feature', 'Enhancement'], definition, 'Tags')
+      ).not.toThrow();
       expect(() => validatePropertyValue(null, definition, 'Tags')).not.toThrow();
       expect(() => validatePropertyValue(undefined, definition, 'Tags')).not.toThrow();
     });
 
     it('should reject invalid multi_select property values', () => {
-      const definition: PropertyDefinition = { 
-        type: 'multi_select', 
-        options: ['Bug', 'Feature', 'Enhancement', 'Documentation'] 
+      const definition: PropertyDefinition = {
+        type: 'multi_select',
+        options: ['Bug', 'Feature', 'Enhancement', 'Documentation'],
       };
-      
-      expect(() => validatePropertyValue(['Invalid Tag'], definition, 'Tags'))
-        .toThrow(SelectionValidationError);
-      expect(() => validatePropertyValue(['Bug', 'Invalid Tag'], definition, 'Tags'))
-        .toThrow(SelectionValidationError);
-      expect(() => validatePropertyValue('Bug', definition, 'Tags'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(123, definition, 'Tags'))
-        .toThrow(PropertyValidationError);
+
+      expect(() => validatePropertyValue(['Invalid Tag'], definition, 'Tags')).toThrow(
+        SelectionValidationError
+      );
+      expect(() => validatePropertyValue(['Bug', 'Invalid Tag'], definition, 'Tags')).toThrow(
+        SelectionValidationError
+      );
+      expect(() => validatePropertyValue('Bug', definition, 'Tags')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue(123, definition, 'Tags')).toThrow(PropertyValidationError);
     });
 
     it('should handle mixed valid/invalid multi_select values', () => {
-      const definition: PropertyDefinition = { 
-        type: 'multi_select', 
-        options: ['Bug', 'Feature', 'Enhancement', 'Documentation'] 
+      const definition: PropertyDefinition = {
+        type: 'multi_select',
+        options: ['Bug', 'Feature', 'Enhancement', 'Documentation'],
       };
-      
+
       // First invalid value should be reported
       try {
         validatePropertyValue(['Bug', 'InvalidTag', 'Feature'], definition, 'Tags');
@@ -199,7 +212,7 @@ describe('Unit Tests: Text and Selection Properties', () => {
         ['Option1', 'Option2', 'Option3'],
         ['A', 'B', 'C', 'D'],
         ['Status: Active', 'Status: Inactive'],
-        ['Very Long Option Name That Is Still Valid']
+        ['Very Long Option Name That Is Still Valid'],
       ];
 
       validOptions.forEach((options, index) => {
@@ -216,7 +229,7 @@ describe('Unit Tests: Text and Selection Properties', () => {
 
     it('should reject non-array selection options', () => {
       const invalidOptions = ['not an array', 123, {}, null, undefined];
-      
+
       invalidOptions.forEach(options => {
         const errors = validateSelectionOptions(options, 'Status');
         expect(errors.length).toBeGreaterThan(0);
@@ -252,9 +265,9 @@ describe('Unit Tests: Text and Selection Properties', () => {
         'Option-With-Dashes',
         'Option123WithNumbers',
         'OptionWithSpecialChars!@#$%',
-        'Very Long Option Name That Should Still Be Valid Because Length Is Not Restricted'
+        'Very Long Option Name That Should Still Be Valid Because Length Is Not Restricted',
       ];
-      
+
       const errors = validateSelectionOptions(complexOptions, 'ComplexField');
       expect(errors).toHaveLength(0);
     });
@@ -267,15 +280,15 @@ describe('Unit Tests: Text and Selection Properties', () => {
         properties: {
           Title: { type: 'title' },
           Description: { type: 'rich_text' },
-          Status: { 
-            type: 'select', 
-            options: ['Todo', 'In Progress', 'Done'] 
+          Status: {
+            type: 'select',
+            options: ['Todo', 'In Progress', 'Done'],
           },
-          Tags: { 
+          Tags: {
             type: 'multi_select',
-            options: ['Bug', 'Feature', 'Enhancement', 'Documentation'] 
-          }
-        }
+            options: ['Bug', 'Feature', 'Enhancement', 'Documentation'],
+          },
+        },
       };
 
       const result = validateSchemaStructure(schema);
@@ -288,8 +301,8 @@ describe('Unit Tests: Text and Selection Properties', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' },
-          Status: { type: 'select', options: [] }
-        }
+          Status: { type: 'select', options: [] },
+        },
       };
 
       const result = validateSchemaStructure(schemaWithEmptySelect);
@@ -302,8 +315,8 @@ describe('Unit Tests: Text and Selection Properties', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' },
-          Status: { type: 'select', options: ['Todo', 'Done', 'Todo'] }
-        }
+          Status: { type: 'select', options: ['Todo', 'Done', 'Todo'] },
+        },
       };
 
       const result = validateSchemaStructure(schemaWithDuplicates);
@@ -317,17 +330,17 @@ describe('Unit Tests: Text and Selection Properties', () => {
         properties: {
           Title: { type: 'title' },
           Content: { type: 'rich_text' },
-          Status: { 
-            type: 'select', 
-            options: ['Draft', 'Review', 'Published', 'Archived'] 
+          Status: {
+            type: 'select',
+            options: ['Draft', 'Review', 'Published', 'Archived'],
           },
-          Categories: { 
+          Categories: {
             type: 'multi_select',
-            options: ['Technology', 'Business', 'Lifestyle', 'Health', 'Education'] 
+            options: ['Technology', 'Business', 'Lifestyle', 'Health', 'Education'],
           },
           IsHighlighted: { type: 'checkbox' },
-          ViewCount: { type: 'number' }
-        }
+          ViewCount: { type: 'number' },
+        },
       };
 
       const result = validateSchemaStructure(blogSchema);
@@ -342,8 +355,8 @@ describe('Unit Tests: Text and Selection Properties', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' },
-          ManyOptions: { type: 'select', options: manyOptions }
-        }
+          ManyOptions: { type: 'select', options: manyOptions },
+        },
       };
 
       const result = validateSchemaStructure(schemaWithManyOptions);
@@ -359,26 +372,34 @@ describe('Unit Tests: Text and Selection Properties', () => {
 
       // Text properties accept any string
       expect(() => validatePropertyValue('Any text content', textProperty, 'Text')).not.toThrow();
-      
+
       // Select properties only accept predefined options
       expect(() => validatePropertyValue('A', selectProperty, 'Select')).not.toThrow();
-      expect(() => validatePropertyValue('C', selectProperty, 'Select')).toThrow(SelectionValidationError);
-      
+      expect(() => validatePropertyValue('C', selectProperty, 'Select')).toThrow(
+        SelectionValidationError
+      );
+
       // Multi-select properties only accept arrays of predefined options
       expect(() => validatePropertyValue(['X'], multiSelectProperty, 'MultiSelect')).not.toThrow();
-      expect(() => validatePropertyValue(['Z'], multiSelectProperty, 'MultiSelect')).toThrow(SelectionValidationError);
+      expect(() => validatePropertyValue(['Z'], multiSelectProperty, 'MultiSelect')).toThrow(
+        SelectionValidationError
+      );
     });
 
     it('should handle edge cases in text and selection properties', () => {
       const definition: PropertyDefinition = { type: 'rich_text' };
-      
+
       // Edge cases for text
       expect(() => validatePropertyValue('', definition, 'EmptyText')).not.toThrow();
       expect(() => validatePropertyValue('   ', definition, 'WhitespaceText')).not.toThrow();
-      expect(() => validatePropertyValue('Text with\nnewlines\nand\ttabs', definition, 'MultilineText')).not.toThrow();
-      
+      expect(() =>
+        validatePropertyValue('Text with\nnewlines\nand\ttabs', definition, 'MultilineText')
+      ).not.toThrow();
+
       // Unicode and special characters
-      expect(() => validatePropertyValue('Text with émojis 🎉 and ünîcödé', definition, 'UnicodeText')).not.toThrow();
+      expect(() =>
+        validatePropertyValue('Text with émojis 🎉 and ünîcödé', definition, 'UnicodeText')
+      ).not.toThrow();
     });
   });
 });

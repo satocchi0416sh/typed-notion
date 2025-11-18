@@ -1,6 +1,6 @@
 /**
  * Type system exports for MVP Property Types
- * 
+ *
  * Re-exports all type definitions for convenient access
  */
 
@@ -10,20 +10,16 @@ export type {
   SchemaDefinition,
   NotionUser,
   QueryOptions,
-  PerformanceMetrics
+  PerformanceMetrics,
 } from './core.js';
 
 export type {
   InferPropertyType,
   InferSchemaProperties,
-  ExtractSelectionOptions
+  ExtractSelectionOptions,
 } from './inference.js';
 
-export {
-  isValidPropertyType,
-  hasSelectionOptions,
-  isTitleProperty
-} from './inference.js';
+export { isValidPropertyType, hasSelectionOptions, isTitleProperty } from './inference.js';
 
 export type {
   TitleProperty,
@@ -36,7 +32,7 @@ export type {
   SelectProperty,
   MultiSelectProperty,
   PeopleProperty,
-  SpecificPropertyDefinition
+  SpecificPropertyDefinition,
 } from './properties.js';
 
 export {
@@ -45,5 +41,5 @@ export {
   isSelectionProperty,
   isContactProperty,
   isDateProperty,
-  getPropertyCategory
+  getPropertyCategory,
 } from './properties.js';

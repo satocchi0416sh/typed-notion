@@ -1,6 +1,6 @@
 /**
  * Integration tests for User Story 3: Contact Schema Workflow
- * 
+ *
  * Tests the complete end-to-end workflow for schemas with:
  * 1. Date properties with proper Date object handling
  * 2. Email properties with format validation
@@ -11,15 +11,15 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  createTypedSchema, 
+import {
+  createTypedSchema,
   validateSchemaDefinition,
-  isValidSchemaDefinition 
+  isValidSchemaDefinition,
 } from '../../src/schema/index.js';
-import { 
-  SchemaValidationError, 
-  PropertyAccessError, 
-  PropertyValidationError
+import {
+  SchemaValidationError,
+  PropertyAccessError,
+  PropertyValidationError,
 } from '../../src/errors/index.js';
 import type { SchemaDefinition, NotionUser } from '../../src/types/index.js';
 
@@ -36,17 +36,17 @@ describe('Integration Test: Contact Schema Workflow', () => {
           Website: { type: 'url' as const },
           FoundedDate: { type: 'date' as const },
           TeamMembers: { type: 'people' as const },
-          Industry: { 
-            type: 'select' as const, 
-            options: ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail'] as const 
+          Industry: {
+            type: 'select' as const,
+            options: ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail'] as const,
           },
-          Services: { 
+          Services: {
             type: 'multi_select' as const,
-            options: ['Consulting', 'Development', 'Support', 'Training'] as const
+            options: ['Consulting', 'Development', 'Support', 'Training'] as const,
           },
           Budget: { type: 'number' as const, format: 'dollar' as const },
-          IsActive: { type: 'checkbox' as const }
-        }
+          IsActive: { type: 'checkbox' as const },
+        },
       };
 
       // Step 2: Validate schema definition
@@ -55,12 +55,20 @@ describe('Integration Test: Contact Schema Workflow', () => {
 
       // Step 3: Create typed schema
       const typedSchema = createTypedSchema(contactSchema);
-      
+
       // Step 4: Verify schema structure includes all property types
       expect(typedSchema.databaseId).toBe('12345678-1234-5678-9abc-123456789abc');
       expect(typedSchema.propertyNames).toEqual([
-        'CompanyName', 'Description', 'ContactEmail', 'Website', 'FoundedDate', 
-        'TeamMembers', 'Industry', 'Services', 'Budget', 'IsActive'
+        'CompanyName',
+        'Description',
+        'ContactEmail',
+        'Website',
+        'FoundedDate',
+        'TeamMembers',
+        'Industry',
+        'Services',
+        'Budget',
+        'IsActive',
       ]);
 
       // Step 5: Verify contact properties are accessible
@@ -68,7 +76,7 @@ describe('Integration Test: Contact Schema Workflow', () => {
       expect(typedSchema.hasProperty('Website')).toBe(true);
       expect(typedSchema.hasProperty('FoundedDate')).toBe(true);
       expect(typedSchema.hasProperty('TeamMembers')).toBe(true);
-      
+
       // Step 6: Get specific contact property definitions
       const emailProperty = typedSchema.getProperty('ContactEmail');
       expect(emailProperty.type).toBe('email');
@@ -101,14 +109,14 @@ describe('Integration Test: Contact Schema Workflow', () => {
 
       // Step 8: Test property value validation with contact types
       const validator = typedSchema.createPropertyValidator();
-      
+
       const validUser: NotionUser = {
         id: 'user-123',
         name: 'John Doe',
         avatar_url: 'https://example.com/avatar.jpg',
         type: 'person',
         person: { email: 'john@example.com' },
-        bot: null
+        bot: null,
       };
 
       // Email validation
@@ -159,17 +167,17 @@ describe('Integration Test: Contact Schema Workflow', () => {
           RegistrationURL: { type: 'url' as const },
           Speakers: { type: 'people' as const },
           Attendees: { type: 'people' as const },
-          Category: { 
-            type: 'select' as const, 
-            options: ['Conference', 'Workshop', 'Webinar', 'Meetup'] as const 
+          Category: {
+            type: 'select' as const,
+            options: ['Conference', 'Workshop', 'Webinar', 'Meetup'] as const,
           },
-          Tags: { 
+          Tags: {
             type: 'multi_select' as const,
-            options: ['Technology', 'Business', 'Education', 'Networking'] as const
+            options: ['Technology', 'Business', 'Education', 'Networking'] as const,
           },
           MaxAttendees: { type: 'number' as const },
-          IsPublished: { type: 'checkbox' as const }
-        }
+          IsPublished: { type: 'checkbox' as const },
+        },
       };
 
       // Create and validate schema
@@ -188,11 +196,11 @@ describe('Integration Test: Contact Schema Workflow', () => {
 
       // Test contact property workflows
       const validator = typedSchema.createPropertyValidator();
-      
+
       // Multiple date validation
       expect(validator('StartDate', new Date('2024-06-01'))).toBe(true);
       expect(validator('EndDate', new Date('2024-06-03'))).toBe(true);
-      
+
       // Contact information validation
       expect(validator('OrganizerEmail', 'organizer@event.com')).toBe(true);
       expect(validator('RegistrationURL', 'https://event.com/register')).toBe(true);
@@ -203,9 +211,9 @@ describe('Integration Test: Contact Schema Workflow', () => {
         avatar_url: null,
         type: 'person',
         person: { email: 'jane@expert.com' },
-        bot: null
+        bot: null,
       };
-      
+
       expect(validator('Speakers', [speaker])).toBe(true);
       expect(validator('Attendees', [])).toBe(true); // Empty attendees list is valid
     });
@@ -227,19 +235,19 @@ describe('Integration Test: Contact Schema Workflow', () => {
           ProjectManager: { type: 'people' as const },
           TeamMembers: { type: 'people' as const },
           Stakeholders: { type: 'people' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Planning', 'Active', 'On Hold', 'Completed', 'Cancelled'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Planning', 'Active', 'On Hold', 'Completed', 'Cancelled'] as const,
           },
-          Priority: { 
-            type: 'select' as const, 
-            options: ['Low', 'Medium', 'High', 'Critical'] as const 
-          }
-        }
+          Priority: {
+            type: 'select' as const,
+            options: ['Low', 'Medium', 'High', 'Critical'] as const,
+          },
+        },
       };
 
       const typedSchema = createTypedSchema(projectSchema);
-      
+
       // Verify comprehensive contact property coverage
       expect(typedSchema.getPropertiesByType('date')).toHaveLength(3);
       expect(typedSchema.getPropertiesByType('email')).toHaveLength(1);
@@ -248,20 +256,41 @@ describe('Integration Test: Contact Schema Workflow', () => {
 
       // Test complex validation scenarios
       const validator = typedSchema.createPropertyValidator();
-      
+
       // Multiple URLs in same schema
       expect(validator('ProjectURL', 'https://project.internal.com')).toBe(true);
       expect(validator('DocumentationURL', 'https://docs.project.com')).toBe(true);
-      
+
       // Multiple people arrays for different roles
-      const manager: NotionUser = { id: 'mgr-123', type: 'person', name: 'Project Manager', avatar_url: null, person: null, bot: null };
-      const developer: NotionUser = { id: 'dev-456', type: 'person', name: 'Developer', avatar_url: null, person: null, bot: null };
-      const stakeholder: NotionUser = { id: 'stake-789', type: 'person', name: 'Stakeholder', avatar_url: null, person: null, bot: null };
-      
+      const manager: NotionUser = {
+        id: 'mgr-123',
+        type: 'person',
+        name: 'Project Manager',
+        avatar_url: null,
+        person: null,
+        bot: null,
+      };
+      const developer: NotionUser = {
+        id: 'dev-456',
+        type: 'person',
+        name: 'Developer',
+        avatar_url: null,
+        person: null,
+        bot: null,
+      };
+      const stakeholder: NotionUser = {
+        id: 'stake-789',
+        type: 'person',
+        name: 'Stakeholder',
+        avatar_url: null,
+        person: null,
+        bot: null,
+      };
+
       expect(validator('ProjectManager', [manager])).toBe(true);
       expect(validator('TeamMembers', [developer])).toBe(true);
       expect(validator('Stakeholders', [stakeholder, manager])).toBe(true);
-      
+
       // Date timeline validation
       expect(validator('StartDate', new Date('2024-01-01'))).toBe(true);
       expect(validator('DueDate', new Date('2024-06-01'))).toBe(true);
@@ -278,12 +307,12 @@ describe('Integration Test: Contact Schema Workflow', () => {
           Email: { type: 'email' as const },
           Website: { type: 'url' as const },
           DueDate: { type: 'date' as const },
-          Assignees: { type: 'people' as const }
-        }
+          Assignees: { type: 'people' as const },
+        },
       });
 
       const validator = schema.createPropertyValidator();
-      
+
       // Invalid contact property values should be caught
       expect(validator('Email', 'invalid-email')).toBe(false);
       expect(validator('Website', 'not-a-url')).toBe(false);
@@ -300,8 +329,8 @@ describe('Integration Test: Contact Schema Workflow', () => {
           Email: { type: 'email' as const },
           Website: { type: 'url' as const },
           DueDate: { type: 'date' as const },
-          Assignees: { type: 'people' as const }
-        }
+          Assignees: { type: 'people' as const },
+        },
       };
 
       expect(isValidSchemaDefinition(validContactSchema)).toBe(true);
@@ -328,8 +357,8 @@ describe('Integration Test: Contact Schema Workflow', () => {
           UpdatedDate: { type: 'date' as const },
           Owners: { type: 'people' as const },
           Contributors: { type: 'people' as const },
-          Reviewers: { type: 'people' as const }
-        }
+          Reviewers: { type: 'people' as const },
+        },
       };
 
       const startTime = Date.now();
@@ -344,7 +373,7 @@ describe('Integration Test: Contact Schema Workflow', () => {
       expect(validator('Email1', 'user1@example.com')).toBe(true);
       expect(validator('Website', 'https://example.com')).toBe(true);
       expect(validator('StartDate', new Date())).toBe(true);
-      
+
       const validUser = { id: 'user-123', type: 'person' as const };
       expect(validator('Owners', [validUser])).toBe(true);
     });
@@ -357,13 +386,13 @@ describe('Integration Test: Contact Schema Workflow', () => {
           Email: { type: 'email' as const },
           Website: { type: 'url' as const },
           DueDate: { type: 'date' as const },
-          Assignees: { type: 'people' as const }
-        }
+          Assignees: { type: 'people' as const },
+        },
       });
 
       const validator = schema.createPropertyValidator();
       const validUser = { id: 'user-123', type: 'person' as const };
-      
+
       // Perform many validation operations
       for (let i = 0; i < 1000; i++) {
         expect(validator('Email', 'test@example.com')).toBe(true);
@@ -395,17 +424,17 @@ describe('Integration Test: Contact Schema Workflow', () => {
           NextAppointment: { type: 'date' as const },
           PrimaryCareTeam: { type: 'people' as const },
           Specialists: { type: 'people' as const },
-          BloodType: { 
-            type: 'select' as const, 
-            options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const 
+          BloodType: {
+            type: 'select' as const,
+            options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const,
           },
-          Allergies: { 
+          Allergies: {
             type: 'multi_select' as const,
-            options: ['Penicillin', 'Latex', 'Nuts', 'Shellfish', 'Dairy'] as const
+            options: ['Penicillin', 'Latex', 'Nuts', 'Shellfish', 'Dairy'] as const,
           },
           Age: { type: 'number' as const },
-          IsActive: { type: 'checkbox' as const }
-        }
+          IsActive: { type: 'checkbox' as const },
+        },
       };
 
       const typedSchema = createTypedSchema(patientSchema);
@@ -417,13 +446,27 @@ describe('Integration Test: Contact Schema Workflow', () => {
       expect(validator('PortalURL', 'https://portal.hospital.com/patient/123')).toBe(true);
       expect(validator('DateOfBirth', new Date('1990-05-15'))).toBe(true);
       expect(validator('LastVisit', new Date('2024-01-15'))).toBe(true);
-      
-      const doctor: NotionUser = { id: 'doc-123', type: 'person', name: 'Dr. Smith', avatar_url: null, person: null, bot: null };
-      const nurse: NotionUser = { id: 'nurse-456', type: 'person', name: 'Nurse Johnson', avatar_url: null, person: null, bot: null };
-      
+
+      const doctor: NotionUser = {
+        id: 'doc-123',
+        type: 'person',
+        name: 'Dr. Smith',
+        avatar_url: null,
+        person: null,
+        bot: null,
+      };
+      const nurse: NotionUser = {
+        id: 'nurse-456',
+        type: 'person',
+        name: 'Nurse Johnson',
+        avatar_url: null,
+        person: null,
+        bot: null,
+      };
+
       expect(validator('PrimaryCareTeam', [doctor, nurse])).toBe(true);
       expect(validator('Specialists', [doctor])).toBe(true);
-      
+
       // Validate schema structure for healthcare compliance
       expect(typedSchema.getPropertiesByType('email')).toHaveLength(2);
       expect(typedSchema.getPropertiesByType('date')).toHaveLength(3);
@@ -444,21 +487,21 @@ describe('Integration Test: Contact Schema Workflow', () => {
           DateSold: { type: 'date' as const },
           AgentTeam: { type: 'people' as const },
           InterestedBuyers: { type: 'people' as const },
-          PropertyType: { 
-            type: 'select' as const, 
-            options: ['House', 'Apartment', 'Condo', 'Townhouse', 'Land'] as const 
+          PropertyType: {
+            type: 'select' as const,
+            options: ['House', 'Apartment', 'Condo', 'Townhouse', 'Land'] as const,
           },
-          Features: { 
+          Features: {
             type: 'multi_select' as const,
-            options: ['Pool', 'Garage', 'Garden', 'Fireplace', 'Basement', 'Balcony'] as const
+            options: ['Pool', 'Garage', 'Garden', 'Fireplace', 'Basement', 'Balcony'] as const,
           },
           Price: { type: 'number' as const, format: 'dollar' as const },
-          IsAvailable: { type: 'checkbox' as const }
-        }
+          IsAvailable: { type: 'checkbox' as const },
+        },
       };
 
       const typedSchema = createTypedSchema(propertySchema);
-      
+
       // Real estate workflow validation
       const validator = typedSchema.createPropertyValidator();
       expect(validator('AgentEmail', 'agent@realty.com')).toBe(true);
@@ -466,12 +509,26 @@ describe('Integration Test: Contact Schema Workflow', () => {
       expect(validator('VirtualTourURL', 'https://virtualtour.com/property/123')).toBe(true);
       expect(validator('DateListed', new Date('2024-03-01'))).toBe(true);
 
-      const agent: NotionUser = { id: 'agent-123', type: 'person', name: 'Real Estate Agent', avatar_url: null, person: { email: 'agent@realty.com' }, bot: null };
-      const buyer: NotionUser = { id: 'buyer-456', type: 'person', name: 'Potential Buyer', avatar_url: null, person: null, bot: null };
-      
+      const agent: NotionUser = {
+        id: 'agent-123',
+        type: 'person',
+        name: 'Real Estate Agent',
+        avatar_url: null,
+        person: { email: 'agent@realty.com' },
+        bot: null,
+      };
+      const buyer: NotionUser = {
+        id: 'buyer-456',
+        type: 'person',
+        name: 'Potential Buyer',
+        avatar_url: null,
+        person: null,
+        bot: null,
+      };
+
       expect(validator('AgentTeam', [agent])).toBe(true);
       expect(validator('InterestedBuyers', [buyer])).toBe(true);
-      
+
       // Verify comprehensive contact property integration
       expect(typedSchema.getPropertiesByType('email')).toHaveLength(2);
       expect(typedSchema.getPropertiesByType('url')).toHaveLength(2);

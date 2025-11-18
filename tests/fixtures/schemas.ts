@@ -1,6 +1,6 @@
 /**
  * Shared test fixtures for MVP Property Types
- * 
+ *
  * Provides reusable schema definitions and test data for all test files
  * Based on user stories and acceptance scenarios
  */
@@ -20,8 +20,8 @@ export const basicUserSchema = {
   properties: {
     Name: { type: 'title' },
     Age: { type: 'number' },
-    Active: { type: 'checkbox' }
-  }
+    Active: { type: 'checkbox' },
+  },
 } as const satisfies SchemaDefinition;
 
 /**
@@ -30,8 +30,8 @@ export const basicUserSchema = {
 export const minimalSchema = {
   databaseId: '87654321-4321-8765-cba9-987654321cba',
   properties: {
-    Title: { type: 'title' }
-  }
+    Title: { type: 'title' },
+  },
 } as const satisfies SchemaDefinition;
 
 /**
@@ -43,8 +43,8 @@ export const financialSchema = {
     Name: { type: 'title' },
     Price: { type: 'number', format: 'dollar' },
     Discount: { type: 'number', format: 'percent' },
-    Quantity: { type: 'number', format: 'number' }
-  }
+    Quantity: { type: 'number', format: 'number' },
+  },
 } as const satisfies SchemaDefinition;
 
 // ============================================================================
@@ -60,15 +60,15 @@ export const taskSchema = {
   properties: {
     Title: { type: 'title' },
     Description: { type: 'rich_text' },
-    Status: { 
-      type: 'select', 
-      options: ['Todo', 'In Progress', 'Done'] as const 
+    Status: {
+      type: 'select',
+      options: ['Todo', 'In Progress', 'Done'] as const,
     },
-    Tags: { 
+    Tags: {
       type: 'multi_select',
-      options: ['Bug', 'Feature', 'Enhancement', 'Documentation'] as const
-    }
-  }
+      options: ['Bug', 'Feature', 'Enhancement', 'Documentation'] as const,
+    },
+  },
 } as const satisfies SchemaDefinition;
 
 /**
@@ -78,16 +78,16 @@ export const projectSchema = {
   databaseId: 'ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb',
   properties: {
     Name: { type: 'title' },
-    Priority: { 
+    Priority: {
       type: 'select',
-      options: ['Low', 'Medium', 'High', 'Critical'] as const
+      options: ['Low', 'Medium', 'High', 'Critical'] as const,
     },
     Categories: {
       type: 'multi_select',
-      options: ['Frontend', 'Backend', 'DevOps', 'Design', 'Testing'] as const
+      options: ['Frontend', 'Backend', 'DevOps', 'Design', 'Testing'] as const,
     },
-    Notes: { type: 'rich_text' }
-  }
+    Notes: { type: 'rich_text' },
+  },
 } as const satisfies SchemaDefinition;
 
 // ============================================================================
@@ -105,8 +105,8 @@ export const contactSchema = {
     Email: { type: 'email' },
     Website: { type: 'url' },
     JoinedAt: { type: 'date' },
-    TeamMembers: { type: 'people' }
-  }
+    TeamMembers: { type: 'people' },
+  },
 } as const satisfies SchemaDefinition;
 
 /**
@@ -122,8 +122,8 @@ export const eventSchema = {
     RegistrationUrl: { type: 'url' },
     ContactEmail: { type: 'email' },
     Description: { type: 'rich_text' },
-    IsActive: { type: 'checkbox' }
-  }
+    IsActive: { type: 'checkbox' },
+  },
 } as const satisfies SchemaDefinition;
 
 // ============================================================================
@@ -137,8 +137,8 @@ export const schemaWithoutTitle = {
   databaseId: 'invalid1-1111-1111-1111-111111111111',
   properties: {
     Description: { type: 'rich_text' },
-    Count: { type: 'number' }
-  }
+    Count: { type: 'number' },
+  },
 };
 
 /**
@@ -149,8 +149,8 @@ export const schemaWithMultipleTitles = {
   properties: {
     Title1: { type: 'title' },
     Title2: { type: 'title' },
-    Description: { type: 'rich_text' }
-  }
+    Description: { type: 'rich_text' },
+  },
 };
 
 /**
@@ -160,8 +160,8 @@ export const schemaWithEmptySelect = {
   databaseId: 'invalid3-3333-3333-3333-333333333333',
   properties: {
     Name: { type: 'title' },
-    Status: { type: 'select', options: [] }
-  }
+    Status: { type: 'select', options: [] },
+  },
 };
 
 /**
@@ -170,8 +170,8 @@ export const schemaWithEmptySelect = {
 export const schemaWithInvalidId = {
   databaseId: 'not-a-valid-uuid',
   properties: {
-    Name: { type: 'title' }
-  }
+    Name: { type: 'title' },
+  },
 };
 
 // ============================================================================
@@ -186,19 +186,19 @@ export const sampleUsers: NotionUser[] = [
     id: 'user-1111-1111-1111-111111111111',
     name: 'Alice Johnson',
     avatar_url: 'https://example.com/avatar1.jpg',
-    type: 'person'
+    type: 'person',
   },
   {
     id: 'user-2222-2222-2222-222222222222',
     name: 'Bob Smith',
     avatar_url: 'https://example.com/avatar2.jpg',
-    type: 'person'
+    type: 'person',
   },
   {
     id: 'bot-3333-3333-3333-333333333333',
     name: 'AutoBot',
-    type: 'bot'
-  }
+    type: 'bot',
+  },
 ];
 
 /**
@@ -206,7 +206,7 @@ export const sampleUsers: NotionUser[] = [
  */
 export const minimalUser: NotionUser = {
   id: 'user-minimal-1111-1111-111111111111',
-  type: 'person'
+  type: 'person',
 };
 
 // ============================================================================
@@ -222,21 +222,21 @@ export const basicUserResults = [
     props: {
       Name: 'John Doe',
       Age: 25,
-      Active: true
+      Active: true,
     },
     createdTime: new Date('2023-01-01T00:00:00Z'),
-    lastEditedTime: new Date('2023-01-02T00:00:00Z')
+    lastEditedTime: new Date('2023-01-02T00:00:00Z'),
   },
   {
     id: 'page-2222-2222-2222-222222222222',
     props: {
       Name: 'Jane Smith',
       Age: null,
-      Active: false
+      Active: false,
     },
     createdTime: new Date('2023-01-03T00:00:00Z'),
-    lastEditedTime: new Date('2023-01-03T00:00:00Z')
-  }
+    lastEditedTime: new Date('2023-01-03T00:00:00Z'),
+  },
 ] as const;
 
 /**
@@ -249,10 +249,10 @@ export const taskResults = [
       Title: 'Implement user authentication',
       Description: 'Add login and registration functionality',
       Status: 'In Progress' as const,
-      Tags: ['Feature', 'Enhancement'] as const
+      Tags: ['Feature', 'Enhancement'] as const,
     },
     createdTime: new Date('2023-02-01T00:00:00Z'),
-    lastEditedTime: new Date('2023-02-02T00:00:00Z')
+    lastEditedTime: new Date('2023-02-02T00:00:00Z'),
   },
   {
     id: 'task-2222-2222-2222-222222222222',
@@ -260,11 +260,11 @@ export const taskResults = [
       Title: 'Fix login bug',
       Description: null,
       Status: 'Done' as const,
-      Tags: ['Bug'] as const
+      Tags: ['Bug'] as const,
     },
     createdTime: new Date('2023-02-03T00:00:00Z'),
-    lastEditedTime: new Date('2023-02-04T00:00:00Z')
-  }
+    lastEditedTime: new Date('2023-02-04T00:00:00Z'),
+  },
 ] as const;
 
 // ============================================================================
@@ -275,9 +275,9 @@ export const taskResults = [
  * Generate a valid UUID for testing
  */
 export function generateTestUUID(): string {
-  return 'test-' + Math.random().toString(16).substring(2, 15) + '-' +
-         Math.random().toString(16).substring(2, 15) + '-' +
-         Math.random().toString(16).substring(2, 15);
+  return `test-${Math.random().toString(16).substring(2, 15)}-${Math.random()
+    .toString(16)
+    .substring(2, 15)}-${Math.random().toString(16).substring(2, 15)}`;
 }
 
 /**
@@ -286,6 +286,6 @@ export function generateTestUUID(): string {
 export function createTestSchema(properties: Record<string, PropertyDefinition>): SchemaDefinition {
   return {
     databaseId: generateTestUUID(),
-    properties
+    properties,
   };
 }

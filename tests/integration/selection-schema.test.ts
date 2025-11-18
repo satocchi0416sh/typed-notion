@@ -1,6 +1,6 @@
 /**
  * Integration tests for User Story 2: Text and Selection Schema Workflow
- * 
+ *
  * Tests the complete end-to-end workflow for schemas with:
  * 1. Rich text properties
  * 2. Select properties with literal type preservation
@@ -10,16 +10,16 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  createTypedSchema, 
+import {
+  createTypedSchema,
   validateSchemaDefinition,
-  isValidSchemaDefinition 
+  isValidSchemaDefinition,
 } from '../../src/schema/index.js';
-import { 
-  SchemaValidationError, 
-  PropertyAccessError, 
+import {
+  SchemaValidationError,
+  PropertyAccessError,
   PropertyValidationError,
-  SelectionValidationError 
+  SelectionValidationError,
 } from '../../src/errors/index.js';
 import type { SchemaDefinition } from '../../src/types/index.js';
 
@@ -32,23 +32,23 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         properties: {
           Title: { type: 'title' as const },
           Description: { type: 'rich_text' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'] as const,
           },
-          Priority: { 
-            type: 'select' as const, 
-            options: ['Low', 'Medium', 'High', 'Critical'] as const 
+          Priority: {
+            type: 'select' as const,
+            options: ['Low', 'Medium', 'High', 'Critical'] as const,
           },
-          Tags: { 
+          Tags: {
             type: 'multi_select' as const,
-            options: ['Bug', 'Feature', 'Enhancement', 'Documentation', 'Testing'] as const
+            options: ['Bug', 'Feature', 'Enhancement', 'Documentation', 'Testing'] as const,
           },
-          Assignees: { 
+          Assignees: {
             type: 'multi_select' as const,
-            options: ['Alice', 'Bob', 'Charlie', 'Diana'] as const
-          }
-        }
+            options: ['Alice', 'Bob', 'Charlie', 'Diana'] as const,
+          },
+        },
       };
 
       // Step 2: Validate schema definition
@@ -57,18 +57,23 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
 
       // Step 3: Create typed schema
       const typedSchema = createTypedSchema(taskSchema);
-      
+
       // Step 4: Verify schema structure includes all property types
       expect(typedSchema.databaseId).toBe('12345678-1234-5678-9abc-123456789abc');
       expect(typedSchema.propertyNames).toEqual([
-        'Title', 'Description', 'Status', 'Priority', 'Tags', 'Assignees'
+        'Title',
+        'Description',
+        'Status',
+        'Priority',
+        'Tags',
+        'Assignees',
       ]);
 
       // Step 5: Verify text and selection properties are accessible
       expect(typedSchema.hasProperty('Description')).toBe(true);
       expect(typedSchema.hasProperty('Status')).toBe(true);
       expect(typedSchema.hasProperty('Tags')).toBe(true);
-      
+
       // Step 6: Get specific property definitions
       const descriptionProperty = typedSchema.getProperty('Description');
       expect(descriptionProperty.type).toBe('rich_text');
@@ -79,7 +84,13 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
 
       const tagsProperty = typedSchema.getProperty('Tags');
       expect(tagsProperty.type).toBe('multi_select');
-      expect(tagsProperty.options).toEqual(['Bug', 'Feature', 'Enhancement', 'Documentation', 'Testing']);
+      expect(tagsProperty.options).toEqual([
+        'Bug',
+        'Feature',
+        'Enhancement',
+        'Documentation',
+        'Testing',
+      ]);
 
       // Step 7: Test property filtering by type
       const selectProperties = typedSchema.getPropertiesByType('select');
@@ -96,7 +107,7 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
 
       // Step 8: Test property value validation with literal types
       const validator = typedSchema.createPropertyValidator();
-      
+
       // Rich text validation
       expect(validator('Description', 'Detailed task description with **formatting**')).toBe(true);
       expect(validator('Description', '')).toBe(true);
@@ -138,21 +149,28 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
           Title: { type: 'title' as const },
           Content: { type: 'rich_text' as const },
           Summary: { type: 'rich_text' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Draft', 'Review', 'Published', 'Archived'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Draft', 'Review', 'Published', 'Archived'] as const,
           },
-          Categories: { 
+          Categories: {
             type: 'multi_select' as const,
-            options: ['Technology', 'Business', 'Lifestyle', 'Health', 'Education', 'Travel'] as const
+            options: [
+              'Technology',
+              'Business',
+              'Lifestyle',
+              'Health',
+              'Education',
+              'Travel',
+            ] as const,
           },
-          PublishingPlatforms: { 
+          PublishingPlatforms: {
             type: 'multi_select' as const,
-            options: ['Website', 'Medium', 'LinkedIn', 'Twitter', 'Newsletter'] as const
+            options: ['Website', 'Medium', 'LinkedIn', 'Twitter', 'Newsletter'] as const,
           },
           WordCount: { type: 'number' as const },
-          IsFeatured: { type: 'checkbox' as const }
-        }
+          IsFeatured: { type: 'checkbox' as const },
+        },
       };
 
       // Create and validate schema
@@ -166,12 +184,12 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
 
       // Test complex selection workflows
       const validator = typedSchema.createPropertyValidator();
-      
+
       // Complex multi-category selection
       expect(validator('Categories', ['Technology', 'Business'])).toBe(true);
       expect(validator('Categories', ['Technology', 'Health', 'Education'])).toBe(true);
       expect(validator('PublishingPlatforms', ['Website', 'Medium', 'LinkedIn'])).toBe(true);
-      
+
       // Invalid selections should fail
       expect(validator('Categories', ['InvalidCategory'])).toBe(false);
       expect(validator('PublishingPlatforms', ['InvalidPlatform'])).toBe(false);
@@ -191,34 +209,50 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         properties: {
           ProductName: { type: 'title' as const },
           Description: { type: 'rich_text' as const },
-          Category: { 
-            type: 'select' as const, 
-            options: ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports & Outdoors'] as const 
+          Category: {
+            type: 'select' as const,
+            options: [
+              'Electronics',
+              'Clothing',
+              'Books',
+              'Home & Garden',
+              'Sports & Outdoors',
+            ] as const,
           },
-          Subcategory: { 
-            type: 'select' as const, 
-            options: ['Smartphones', 'Laptops', 'Tablets', 'Headphones', 'Cameras'] as const 
+          Subcategory: {
+            type: 'select' as const,
+            options: ['Smartphones', 'Laptops', 'Tablets', 'Headphones', 'Cameras'] as const,
           },
-          Tags: { 
+          Tags: {
             type: 'multi_select' as const,
-            options: ['New Arrival', 'Best Seller', 'Sale', 'Limited Edition', 'Eco-Friendly'] as const
+            options: [
+              'New Arrival',
+              'Best Seller',
+              'Sale',
+              'Limited Edition',
+              'Eco-Friendly',
+            ] as const,
           },
-          Availability: { 
-            type: 'select' as const, 
-            options: ['In Stock', 'Out of Stock', 'Pre-Order', 'Discontinued'] as const 
+          Availability: {
+            type: 'select' as const,
+            options: ['In Stock', 'Out of Stock', 'Pre-Order', 'Discontinued'] as const,
           },
           Price: { type: 'number' as const, format: 'dollar' as const },
-          IsActive: { type: 'checkbox' as const }
-        }
+          IsActive: { type: 'checkbox' as const },
+        },
       };
 
       // Test schema with multiple select properties
       const typedSchema = createTypedSchema(productSchema);
-      
+
       // Verify multiple select properties work correctly
       const selectProperties = typedSchema.getPropertiesByType('select');
       expect(selectProperties).toHaveLength(3);
-      expect(selectProperties.map(p => p.name).sort()).toEqual(['Availability', 'Category', 'Subcategory']);
+      expect(selectProperties.map(p => p.name).sort()).toEqual([
+        'Availability',
+        'Category',
+        'Subcategory',
+      ]);
 
       // Test selection validation across multiple select fields
       const validator = typedSchema.createPropertyValidator();
@@ -239,20 +273,20 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Active', 'Inactive'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Active', 'Inactive'] as const,
           },
-          Tags: { 
+          Tags: {
             type: 'multi_select' as const,
-            options: ['Important', 'Urgent'] as const
-          }
-        }
+            options: ['Important', 'Urgent'] as const,
+          },
+        },
       });
 
       // Test selection validation errors
       const validator = schema.createPropertyValidator();
-      
+
       // Invalid select options should be caught
       expect(validator('Status', 'InvalidStatus')).toBe(false);
       expect(validator('Tags', ['InvalidTag'])).toBe(false);
@@ -265,8 +299,8 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' as const },
-          Status: { type: 'select' as const, options: [] }
-        }
+          Status: { type: 'select' as const, options: [] },
+        },
       };
 
       expect(isValidSchemaDefinition(schemaWithEmptyOptions)).toBe(false);
@@ -277,8 +311,8 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' as const },
-          Status: { type: 'select' as const, options: ['Todo', 'Done', 'Todo'] }
-        }
+          Status: { type: 'select' as const, options: ['Todo', 'Done', 'Todo'] },
+        },
       };
 
       expect(isValidSchemaDefinition(schemaWithDuplicates)).toBe(false);
@@ -290,8 +324,8 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' as const },
-          Status: { type: 'select' as const } // Missing options
-        }
+          Status: { type: 'select' as const }, // Missing options
+        },
       };
 
       expect(isValidSchemaDefinition(malformedSchema)).toBe(false);
@@ -311,8 +345,11 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
           Title: { type: 'title' as const },
           Description: { type: 'rich_text' as const },
           LargeSelect: { type: 'select' as const, options: manyOptions as readonly string[] },
-          LargeMultiSelect: { type: 'multi_select' as const, options: manySelectOptions as readonly string[] }
-        }
+          LargeMultiSelect: {
+            type: 'multi_select' as const,
+            options: manySelectOptions as readonly string[],
+          },
+        },
       };
 
       const startTime = Date.now();
@@ -327,7 +364,7 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
       expect(validator('LargeSelect', 'Option1')).toBe(true);
       expect(validator('LargeSelect', 'Option100')).toBe(true);
       expect(validator('LargeSelect', 'InvalidOption')).toBe(false);
-      
+
       expect(validator('LargeMultiSelect', ['Tag1', 'Tag25', 'Tag50'])).toBe(true);
       expect(validator('LargeMultiSelect', ['InvalidTag'])).toBe(false);
     });
@@ -337,19 +374,19 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Todo', 'Doing', 'Done'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Todo', 'Doing', 'Done'] as const,
           },
-          Tags: { 
+          Tags: {
             type: 'multi_select' as const,
-            options: ['Frontend', 'Backend', 'Mobile', 'Web', 'API'] as const
-          }
-        }
+            options: ['Frontend', 'Backend', 'Mobile', 'Web', 'API'] as const,
+          },
+        },
       });
 
       const validator = schema.createPropertyValidator();
-      
+
       // Perform many validation operations
       for (let i = 0; i < 1000; i++) {
         expect(validator('Status', 'Todo')).toBe(true);
@@ -371,24 +408,37 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         properties: {
           ContactName: { type: 'title' as const },
           Notes: { type: 'rich_text' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Lead', 'Prospect', 'Customer', 'Inactive'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Lead', 'Prospect', 'Customer', 'Inactive'] as const,
           },
-          Source: { 
-            type: 'select' as const, 
-            options: ['Website', 'Referral', 'Social Media', 'Email Campaign', 'Trade Show'] as const 
+          Source: {
+            type: 'select' as const,
+            options: [
+              'Website',
+              'Referral',
+              'Social Media',
+              'Email Campaign',
+              'Trade Show',
+            ] as const,
           },
-          Industries: { 
+          Industries: {
             type: 'multi_select' as const,
-            options: ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing'] as const
+            options: [
+              'Technology',
+              'Healthcare',
+              'Finance',
+              'Education',
+              'Retail',
+              'Manufacturing',
+            ] as const,
           },
-          InteractionTypes: { 
+          InteractionTypes: {
             type: 'multi_select' as const,
-            options: ['Phone Call', 'Email', 'Meeting', 'Demo', 'Proposal', 'Contract'] as const
+            options: ['Phone Call', 'Email', 'Meeting', 'Demo', 'Proposal', 'Contract'] as const,
           },
-          Revenue: { type: 'number' as const, format: 'dollar' as const }
-        }
+          Revenue: { type: 'number' as const, format: 'dollar' as const },
+        },
       };
 
       const typedSchema = createTypedSchema(crmSchema);
@@ -399,7 +449,7 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
       expect(validator('Source', 'Website')).toBe(true);
       expect(validator('Industries', ['Technology', 'Healthcare'])).toBe(true);
       expect(validator('InteractionTypes', ['Phone Call', 'Email', 'Meeting'])).toBe(true);
-      
+
       // Business rule validation
       expect(validator('Status', 'InvalidStatus')).toBe(false);
       expect(validator('Industries', ['NonexistentIndustry'])).toBe(false);
@@ -411,33 +461,49 @@ describe('Integration Test: Text and Selection Schema Workflow', () => {
         properties: {
           ProjectName: { type: 'title' as const },
           Description: { type: 'rich_text' as const },
-          Status: { 
-            type: 'select' as const, 
-            options: ['Planning', 'Active', 'On Hold', 'Completed', 'Cancelled'] as const 
+          Status: {
+            type: 'select' as const,
+            options: ['Planning', 'Active', 'On Hold', 'Completed', 'Cancelled'] as const,
           },
-          Priority: { 
-            type: 'select' as const, 
-            options: ['P0 - Critical', 'P1 - High', 'P2 - Medium', 'P3 - Low'] as const 
+          Priority: {
+            type: 'select' as const,
+            options: ['P0 - Critical', 'P1 - High', 'P2 - Medium', 'P3 - Low'] as const,
           },
-          TechnologyStack: { 
+          TechnologyStack: {
             type: 'multi_select' as const,
-            options: ['React', 'TypeScript', 'Node.js', 'Python', 'PostgreSQL', 'Redis', 'AWS'] as const
+            options: [
+              'React',
+              'TypeScript',
+              'Node.js',
+              'Python',
+              'PostgreSQL',
+              'Redis',
+              'AWS',
+            ] as const,
           },
-          TeamRoles: { 
+          TeamRoles: {
             type: 'multi_select' as const,
-            options: ['Frontend Developer', 'Backend Developer', 'DevOps Engineer', 'Designer', 'Product Manager'] as const
-          }
-        }
+            options: [
+              'Frontend Developer',
+              'Backend Developer',
+              'DevOps Engineer',
+              'Designer',
+              'Product Manager',
+            ] as const,
+          },
+        },
       };
 
       const typedSchema = createTypedSchema(projectSchema);
-      
+
       // Test hierarchical option naming
       const validator = typedSchema.createPropertyValidator();
       expect(validator('Priority', 'P0 - Critical')).toBe(true);
       expect(validator('Priority', 'P1 - High')).toBe(true);
       expect(validator('TechnologyStack', ['React', 'TypeScript', 'Node.js'])).toBe(true);
-      expect(validator('TeamRoles', ['Frontend Developer', 'Backend Developer', 'Designer'])).toBe(true);
+      expect(validator('TeamRoles', ['Frontend Developer', 'Backend Developer', 'Designer'])).toBe(
+        true
+      );
 
       // Verify schema structure
       const priorityProperty = typedSchema.getProperty('Priority');

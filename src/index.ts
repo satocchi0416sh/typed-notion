@@ -1,52 +1,52 @@
 /**
  * Typed Notion - Type-safe Notion API library
- * 
+ *
  * @description A TypeScript library for building type-safe Notion API integrations
  * with compile-time type inference and runtime validation for all MVP property types.
- * 
+ *
  * ## Features
- * 
+ *
  * - **Type-safe schema definition** for 10 MVP Notion property types
  * - **Compile-time type inference** with literal type preservation for selections
  * - **Runtime validation** with comprehensive error handling
  * - **Zero `any` types** in public API
  * - **Performance monitoring** with metrics collection
  * - **Null safety** - all property values are nullable by default
- * 
+ *
  * ## Supported Property Types
- * 
+ *
  * ### Basic Properties (User Story 1)
  * - `title` - Page title (exactly one required per schema)
  * - `number` - Numeric values with optional formatting (number, percent, dollar)
  * - `checkbox` - Boolean values
- * 
+ *
  * ### Text and Selection Properties (User Story 2)
  * - `rich_text` - Formatted text content
  * - `select` - Single selection from predefined options (literal type preservation)
  * - `multi_select` - Multiple selections from predefined options (literal type arrays)
- * 
+ *
  * ### Contact Properties (User Story 3)
  * - `date` - Date values with Date object validation
  * - `email` - Email addresses with format validation
  * - `url` - URLs with protocol validation (http/https only)
  * - `people` - References to Notion users with structure validation
- * 
+ *
  * ## Quick Start
- * 
+ *
  * ```typescript
  * import { createTypedSchema } from 'typed-notion';
- * 
+ *
  * // Define a schema with type-safe property definitions
  * const taskSchema = createTypedSchema({
  *   databaseId: '12345678-1234-5678-9abc-123456789abc',
  *   properties: {
  *     Title: { type: 'title' },
  *     Description: { type: 'rich_text' },
- *     Status: { 
- *       type: 'select', 
- *       options: ['Todo', 'In Progress', 'Done'] as const 
+ *     Status: {
+ *       type: 'select',
+ *       options: ['Todo', 'In Progress', 'Done'] as const
  *     },
- *     Tags: { 
+ *     Tags: {
  *       type: 'multi_select',
  *       options: ['Bug', 'Feature', 'Enhancement'] as const
  *     },
@@ -58,22 +58,22 @@
  *     IsActive: { type: 'checkbox' }
  *   }
  * } as const);
- * 
+ *
  * // TypeScript automatically infers literal types for selections:
  * // Status: 'Todo' | 'In Progress' | 'Done' | null
  * // Tags: ('Bug' | 'Feature' | 'Enhancement')[] | null
- * 
+ *
  * // Use the schema for type-safe property access
  * const statusProperty = taskSchema.getProperty('Status');
  * const validator = taskSchema.createPropertyValidator();
- * 
+ *
  * // Runtime validation with type safety
  * const isValid = validator('Status', 'Todo'); // true
  * const isInvalid = validator('Status', 'Invalid'); // false
  * ```
- * 
+ *
  * ## Advanced Usage Examples
- * 
+ *
  * ### CRM Contact Schema
  * ```typescript
  * const contactSchema = createTypedSchema({
@@ -84,7 +84,7 @@
  *     Website: { type: 'url' },
  *     LastContact: { type: 'date' },
  *     AccountManager: { type: 'people' },
- *     Industry: { 
+ *     Industry: {
  *       type: 'select',
  *       options: ['Technology', 'Healthcare', 'Finance'] as const
  *     },
@@ -93,7 +93,7 @@
  *   }
  * } as const);
  * ```
- * 
+ *
  * ### Event Management Schema
  * ```typescript
  * const eventSchema = createTypedSchema({
@@ -114,12 +114,12 @@
  *   }
  * } as const);
  * ```
- * 
+ *
  * ## Error Handling
- * 
+ *
  * ```typescript
  * import { SchemaValidationError, PropertyValidationError } from 'typed-notion';
- * 
+ *
  * try {
  *   const schema = createTypedSchema(invalidSchemaDefinition);
  * } catch (error) {
@@ -129,17 +129,17 @@
  *   }
  * }
  * ```
- * 
+ *
  * ## Performance Monitoring
- * 
+ *
  * ```typescript
  * import { getPerformanceMetrics } from 'typed-notion';
- * 
+ *
  * const metrics = getPerformanceMetrics();
  * console.log('Schema processing time:', metrics.schemaProcessingTime);
  * console.log('Active schemas:', metrics.activeSchemaCount);
  * ```
- * 
+ *
  * @version 1.0.0
  * @author TypedNotion Team
  */
@@ -153,7 +153,7 @@ export type {
   InferPropertyType,
   InferSchemaProperties,
   QueryOptions,
-  PerformanceMetrics
+  PerformanceMetrics,
 } from './types/index.js';
 
 // Schema classes and functions
@@ -162,7 +162,7 @@ export {
   createTypedSchema,
   validateSchemaDefinition,
   validatePropertyDefinition,
-  isValidSchemaDefinition
+  isValidSchemaDefinition,
 } from './schema/index.js';
 
 // Error classes
@@ -170,7 +170,7 @@ export {
   TypedNotionError,
   SchemaValidationError,
   PropertyAccessError,
-  NotionAPIError
+  NotionAPIError,
 } from './errors/index.js';
 
 // Performance monitoring
@@ -181,7 +181,7 @@ export {
   resetPerformanceMetrics,
   measurePerformance,
   measurePerformanceAsync,
-  timed
+  timed,
 } from './utils/performance.js';
 
 // Version export

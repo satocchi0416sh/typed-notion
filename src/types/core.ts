@@ -1,6 +1,6 @@
 /**
  * Core type system interfaces for the MVP Property Types system
- * 
+ *
  * Based on contracts/schema-api.ts and data-model.md
  * Defines the foundational types used throughout the library
  */
@@ -9,7 +9,7 @@
  * Supported property types for MVP implementation
  * Maps directly to Notion API property types
  */
-export type PropertyType = 
+export type PropertyType =
   | 'title'
   | 'rich_text'
   | 'number'
@@ -25,7 +25,7 @@ export type PropertyType =
  * Property definition configurations
  * Each property type has its own configuration structure
  */
-export type PropertyDefinition = 
+export type PropertyDefinition =
   | { type: 'title' }
   | { type: 'rich_text' }
   | { type: 'number'; format?: 'number' | 'percent' | 'dollar' | undefined }
