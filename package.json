@@ -1,21 +1,46 @@
 {
   "name": "typed-notion",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "Type-safe Notion API library with compile-time type inference and runtime validation",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "notion",
+    "api",
+    "typescript",
+    "type-safe",
+    "schema",
+    "validation"
+  ],
+  "author": "TypedNotion Team",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "expect-type": "^1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@notionhq/client": "^5.4.0",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "valibot": "^1.1.0",
+    "vitest": "^4.0.10"
   }
 }
