@@ -51,11 +51,11 @@
 
 **Objective**: Implement core infrastructure needed by all user stories
 
-- [ ] T008 Create base error classes in src/errors/index.ts (TypedNotionError, SchemaValidationError)
-- [ ] T009 [P] Define core type system interfaces in src/types/core.ts (PropertyType, PropertyDefinition)
-- [ ] T010 [P] Implement property type mapping system in src/types/inference.ts (PropertyTypeMap, InferPropertyType)
-- [ ] T011 [P] Create Valibot validation schemas in src/schema/validation.ts
-- [ ] T012 Create shared test fixtures in tests/fixtures/schemas.ts
+- [x] T008 Create base error classes in src/errors/index.ts (TypedNotionError, SchemaValidationError)
+- [x] T009 [P] Define core type system interfaces in src/types/core.ts (PropertyType, PropertyDefinition)
+- [x] T010 [P] Implement property type mapping system in src/types/inference.ts (PropertyTypeMap, InferPropertyType)
+- [x] T011 [P] Create Valibot validation schemas in src/schema/validation.ts
+- [x] T012 Create shared test fixtures in tests/fixtures/schemas.ts
 
 ---
 
@@ -67,14 +67,14 @@
 
 **Implementation Tasks**:
 
-- [ ] T013 [US1] Implement basic PropertyDefinition types in src/types/properties.ts (title, number, checkbox)
-- [ ] T014 [US1] Create SchemaDefinition interface in src/types/schema.ts with validation rules
-- [ ] T015 [P] [US1] Implement defineSchema function in src/schema/define.ts with creation-time validation
-- [ ] T016 [US1] Create TypedSchema class in src/schema/typed-schema.ts with property access methods
-- [ ] T017 [P] [US1] Implement schema validation logic in src/schema/validator.ts (title requirement, basic types)
-- [ ] T018 [P] [US1] Write unit tests for basic property types in tests/unit/basic-properties.test.ts
-- [ ] T019 [P] [US1] Write type inference tests in tests/unit/type-inference.test.ts using expect-type
-- [ ] T020 [US1] Create integration test for basic schema workflow in tests/integration/basic-schema.test.ts
+- [x] T013 [US1] Implement basic PropertyDefinition types in src/types/properties.ts (title, number, checkbox)
+- [x] T014 [US1] Create SchemaDefinition interface in src/types/schema.ts with validation rules
+- [x] T015 [P] [US1] Implement defineSchema function in src/schema/define.ts with creation-time validation
+- [x] T016 [US1] Create TypedSchema class in src/schema/typed-schema.ts with property access methods
+- [x] T017 [P] [US1] Implement schema validation logic in src/schema/validator.ts (title requirement, basic types)
+- [x] T018 [P] [US1] Write unit tests for basic property types in tests/unit/basic-properties.test.ts
+- [x] T019 [P] [US1] Write type inference tests in tests/unit/type-inference.test.ts using expect-type
+- [x] T020 [US1] Create integration test for basic schema workflow in tests/integration/basic-schema.test.ts
 
 ---
 
@@ -86,14 +86,14 @@
 
 **Implementation Tasks**:
 
-- [ ] T021 [US2] Extend PropertyDefinition with rich_text type in src/types/properties.ts
-- [ ] T022 [US2] Implement select and multi_select PropertyDefinition with options in src/types/properties.ts
-- [ ] T023 [P] [US2] Create literal type inference system in src/types/inference.ts for select options
-- [ ] T024 [P] [US2] Add selection validation logic in src/schema/validator.ts (options validation, uniqueness)
-- [ ] T025 [US2] Extend TypedSchema to handle selection properties in src/schema/typed-schema.ts
-- [ ] T026 [P] [US2] Write unit tests for text and selection properties in tests/unit/selection-properties.test.ts
-- [ ] T027 [P] [US2] Write literal type preservation tests in tests/unit/literal-types.test.ts
-- [ ] T028 [US2] Create integration test for selection schema workflow in tests/integration/selection-schema.test.ts
+- [x] T021 [US2] Extend PropertyDefinition with rich_text type in src/types/properties.ts
+- [x] T022 [US2] Implement select and multi_select PropertyDefinition with options in src/types/properties.ts
+- [x] T023 [P] [US2] Create literal type inference system in src/types/inference.ts for select options
+- [x] T024 [P] [US2] Add selection validation logic in src/schema/validator.ts (options validation, uniqueness)
+- [x] T025 [US2] Extend TypedSchema to handle selection properties in src/schema/typed-schema.ts
+- [x] T026 [P] [US2] Write unit tests for text and selection properties in tests/unit/selection-properties.test.ts
+- [x] T027 [P] [US2] Write literal type preservation tests in tests/unit/literal-types.test.ts
+- [x] T028 [US2] Create integration test for selection schema workflow in tests/integration/selection-schema.test.ts
 
 ---
 
@@ -105,12 +105,12 @@
 
 **Implementation Tasks**:
 
-- [ ] T029 [US3] Implement date, email, url property types in src/types/properties.ts
-- [ ] T030 [US3] Create NotionUser interface and people property type in src/types/properties.ts
-- [ ] T031 [P] [US3] Add contact property validation in src/schema/validator.ts (email format, url format)
-- [ ] T032 [US3] Extend TypedSchema for contact properties in src/schema/typed-schema.ts
-- [ ] T033 [P] [US3] Write unit tests for contact properties in tests/unit/contact-properties.test.ts
-- [ ] T034 [US3] Create integration test for contact schema workflow in tests/integration/contact-schema.test.ts
+- [x] T029 [US3] Implement date, email, url property types in src/types/properties.ts
+- [x] T030 [US3] Create NotionUser interface and people property type in src/types/properties.ts
+- [x] T031 [P] [US3] Add contact property validation in src/schema/validator.ts (email format, url format)
+- [x] T032 [US3] Extend TypedSchema for contact properties in src/schema/typed-schema.ts
+- [x] T033 [P] [US3] Write unit tests for contact properties in tests/unit/contact-properties.test.ts
+- [x] T034 [US3] Create integration test for contact schema workflow in tests/integration/contact-schema.test.ts
 
 ---
 
@@ -118,8 +118,8 @@
 
 **Objective**: Cross-cutting concerns and final optimizations
 
-- [ ] T035 [P] Implement performance monitoring in src/utils/performance.ts (getPerformanceMetrics)
-- [ ] T036 [P] Create comprehensive API documentation and examples in src/index.ts exports
+- [x] T035 [P] Implement performance monitoring in src/utils/performance.ts (getPerformanceMetrics)
+- [x] T036 [P] Create comprehensive API documentation and examples in src/index.ts exports
 
 ---
 
