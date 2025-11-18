@@ -74,3 +74,10 @@ Required environment variables:
 NOTION_TOKEN=<your_integration_token>
 NOTION_DATABASE_ID=<optional_database_id>
 ```
+
+## Active Technologies
+- TypeScript 5.9+ (from tsconfig.json, required for advanced type inference) (001-mvp-properties)
+- N/A (library wraps external Notion databases) (001-mvp-properties)
+
+## Recent Changes
+- 001-mvp-properties: Added TypeScript 5.9+ (from tsconfig.json, required for advanced type inference)
