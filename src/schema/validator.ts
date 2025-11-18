@@ -261,10 +261,26 @@ export function validatePropertyValue(
   switch (definition.type) {
     case 'title':
     case 'rich_text':
-    case 'url':
+      if (typeof value !== 'string') {
+        throw new PropertyValidationError(propertyName, value, 'string');
+      }
+      break;
+      
     case 'email':
       if (typeof value !== 'string') {
         throw new PropertyValidationError(propertyName, value, 'string');
+      }
+      if (!isValidEmail(value)) {
+        throw new PropertyValidationError(propertyName, value, 'valid email address');
+      }
+      break;
+      
+    case 'url':
+      if (typeof value !== 'string') {
+        throw new PropertyValidationError(propertyName, value, 'string');
+      }
+      if (!isValidURL(value)) {
+        throw new PropertyValidationError(propertyName, value, 'valid URL');
       }
       break;
       
@@ -314,6 +330,9 @@ export function validatePropertyValue(
       if (!Array.isArray(value)) {
         throw new PropertyValidationError(propertyName, value, 'NotionUser[]');
       }
+      if (!value.every(isValidNotionUser)) {
+        throw new PropertyValidationError(propertyName, value, 'array of valid NotionUser objects');
+      }
       break;
   }
 }
@@ -345,6 +364,43 @@ function isPropertyDefinition(value: unknown): value is PropertyDefinition {
  */
 function isValidDatabaseId(id: string): boolean {
   return /^[a-f0-9\-]{36}$/.test(id);
+}
+
+/**
+ * Validates email format
+ */
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
+}
+
+/**
+ * Validates URL format
+ */
+function isValidURL(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates NotionUser object structure
+ */
+function isValidNotionUser(user: unknown): user is { id: string; name?: string | null; type: 'person' | 'bot' } {
+  if (!user || typeof user !== 'object') {
+    return false;
+  }
+  
+  const userObj = user as Record<string, unknown>;
+  return (
+    typeof userObj.id === 'string' &&
+    userObj.id.length > 0 &&
+    (userObj.name === null || userObj.name === undefined || typeof userObj.name === 'string') &&
+    (userObj.type === 'person' || userObj.type === 'bot')
+  );
 }
 
 /**

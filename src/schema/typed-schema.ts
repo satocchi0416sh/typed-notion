@@ -185,6 +185,43 @@ export class TypedSchema<S extends SchemaDefinition> {
   }
 
   /**
+   * Validates email format
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 254;
+  }
+
+  /**
+   * Validates URL format
+   */
+  private isValidURL(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Validates NotionUser object structure
+   */
+  private isValidNotionUser(user: unknown): boolean {
+    if (!user || typeof user !== 'object') {
+      return false;
+    }
+    
+    const userObj = user as Record<string, unknown>;
+    return (
+      typeof userObj.id === 'string' &&
+      userObj.id.length > 0 &&
+      (userObj.name === null || userObj.name === undefined || typeof userObj.name === 'string') &&
+      (userObj.type === 'person' || userObj.type === 'bot')
+    );
+  }
+
+  /**
    * Create a type-safe property value validator
    * Returns a function that validates property values match schema types
    */
@@ -208,9 +245,13 @@ export class TypedSchema<S extends SchemaDefinition> {
       switch (propDef.type) {
         case 'title':
         case 'rich_text':
-        case 'url':
-        case 'email':
           return typeof value === 'string';
+          
+        case 'email':
+          return typeof value === 'string' && this.isValidEmail(value);
+          
+        case 'url':
+          return typeof value === 'string' && this.isValidURL(value);
           
         case 'number':
           return typeof value === 'number' && !isNaN(value);
@@ -234,7 +275,7 @@ export class TypedSchema<S extends SchemaDefinition> {
           return false;
           
         case 'people':
-          return Array.isArray(value);
+          return Array.isArray(value) && value.every(user => this.isValidNotionUser(user));
           
         default:
           return false;

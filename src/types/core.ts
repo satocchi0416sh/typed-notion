@@ -52,9 +52,13 @@ export interface SchemaDefinition {
  */
 export interface NotionUser {
   readonly id: string;
-  readonly name?: string;
-  readonly avatar_url?: string;
+  readonly name?: string | null;
+  readonly avatar_url?: string | null;
   readonly type: 'person' | 'bot';
+  readonly person?: {
+    readonly email?: string;
+  } | null;
+  readonly bot?: Record<string, unknown> | null;
 }
 
 /**
