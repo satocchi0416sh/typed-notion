@@ -1,6 +1,6 @@
 /**
  * Performance monitoring utilities for MVP Property Types
- * 
+ *
  * Implements NFR-001 performance monitoring requirements
  * Provides metrics collection and analysis for schema operations
  */
@@ -18,7 +18,9 @@ class PerformanceMonitor {
   private lastQueryDuration: number = 0;
   private operationTimings: Map<string, number[]> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    // Singleton instance - no initialization needed
+  }
 
   /**
    * Get singleton instance
@@ -70,7 +72,7 @@ class PerformanceMonitor {
     }
     const timings = this.operationTimings.get(operation)!;
     timings.push(duration);
-    
+
     // Keep only last 100 measurements to prevent memory leaks
     if (timings.length > 100) {
       timings.shift();
@@ -84,7 +86,7 @@ class PerformanceMonitor {
     return {
       schemaProcessingTime: this.getAverageProcessingTime(),
       activeSchemaCount: this.schemaCount,
-      lastQueryDuration: this.lastQueryDuration
+      lastQueryDuration: this.lastQueryDuration,
     };
   }
 
@@ -108,7 +110,7 @@ class PerformanceMonitor {
       counts[operation] = timings.length;
       totals[operation] = timings.reduce((sum, time) => sum + time, 0);
       averages[operation] = totals[operation] / timings.length;
-      
+
       // Calculate 95th percentile
       const sorted = [...timings].sort((a, b) => a - b);
       const p95Index = Math.floor(sorted.length * 0.95);
@@ -147,17 +149,23 @@ class PerformanceMonitor {
 
     // Check schema processing time (should be < 2s for 20 properties)
     if (stats.averages.schema_creation && stats.averages.schema_creation > 2000) {
-      issues.push(`Schema creation too slow: ${stats.averages.schema_creation}ms (target: <2000ms)`);
+      issues.push(
+        `Schema creation too slow: ${stats.averages.schema_creation}ms (target: <2000ms)`
+      );
     }
 
     // Check query execution time (should be reasonable)
     if (stats.averages.query_execution && stats.averages.query_execution > 5000) {
-      issues.push(`Query execution too slow: ${stats.averages.query_execution}ms (target: <5000ms)`);
+      issues.push(
+        `Query execution too slow: ${stats.averages.query_execution}ms (target: <5000ms)`
+      );
     }
 
     // Check property validation time (should be fast)
     if (stats.averages.property_validation && stats.averages.property_validation > 100) {
-      issues.push(`Property validation too slow: ${stats.averages.property_validation}ms (target: <100ms)`);
+      issues.push(
+        `Property validation too slow: ${stats.averages.property_validation}ms (target: <100ms)`
+      );
     }
 
     // Check active schema count (performance degrades with too many)
@@ -167,7 +175,7 @@ class PerformanceMonitor {
 
     return {
       isHealthy: issues.length === 0,
-      issues
+      issues,
     };
   }
 }
@@ -175,17 +183,14 @@ class PerformanceMonitor {
 /**
  * High-level function to measure operation performance
  */
-export function measurePerformance<T>(
-  operation: string,
-  fn: () => T
-): T {
+export function measurePerformance<T>(operation: string, fn: () => T): T {
   const monitor = PerformanceMonitor.getInstance();
   const startTime = performance.now();
-  
+
   try {
     const result = fn();
     const duration = performance.now() - startTime;
-    
+
     // Record based on operation type
     switch (operation) {
       case 'schema_creation':
@@ -204,7 +209,7 @@ export function measurePerformance<T>(
         // Generic operation timing
         monitor.recordOperation(operation, duration);
     }
-    
+
     return result;
   } catch (error) {
     const duration = performance.now() - startTime;
@@ -222,11 +227,11 @@ export async function measurePerformanceAsync<T>(
 ): Promise<T> {
   const monitor = PerformanceMonitor.getInstance();
   const startTime = performance.now();
-  
+
   try {
     const result = await fn();
     const duration = performance.now() - startTime;
-    
+
     switch (operation) {
       case 'schema_creation':
         monitor.recordSchemaCreation(duration);
@@ -243,7 +248,7 @@ export async function measurePerformanceAsync<T>(
       default:
         monitor.recordOperation(operation, duration);
     }
-    
+
     return result;
   } catch (error) {
     const duration = performance.now() - startTime;
@@ -285,10 +290,10 @@ export function resetPerformanceMetrics(): void {
  * Performance timing decorator for class methods
  */
 export function timed(operation: string) {
-  return function (_target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       return measurePerformance(`${operation}_${propertyKey}`, () => {
         return originalMethod.apply(this, args);
       });

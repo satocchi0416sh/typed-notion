@@ -1,6 +1,6 @@
 /**
  * Property-specific type definitions for MVP Property Types
- * 
+ *
  * Extends core types with specialized property interfaces
  * Implements User Story 1: Basic Schema Definition support
  */
@@ -94,7 +94,7 @@ export interface PeopleProperty {
  * Union of all property types for type narrowing
  * Matches the PropertyDefinition from core types
  */
-export type SpecificPropertyDefinition = 
+export type SpecificPropertyDefinition =
   | TitleProperty
   | RichTextProperty
   | NumberProperty
@@ -113,9 +113,7 @@ export type SpecificPropertyDefinition =
 export function isBasicProperty(
   property: PropertyDefinition
 ): property is TitleProperty | NumberProperty | CheckboxProperty {
-  return property.type === 'title' || 
-         property.type === 'number' || 
-         property.type === 'checkbox';
+  return property.type === 'title' || property.type === 'number' || property.type === 'checkbox';
 }
 
 /**
@@ -145,30 +143,28 @@ export function isSelectionProperty(
 export function isContactProperty(
   property: PropertyDefinition
 ): property is EmailProperty | URLProperty | PeopleProperty {
-  return property.type === 'email' || 
-         property.type === 'url' || 
-         property.type === 'people';
+  return property.type === 'email' || property.type === 'url' || property.type === 'people';
 }
 
 /**
  * Type guard to check if a property is a date property (User Story 3)
  */
-export function isDateProperty(
-  property: PropertyDefinition
-): property is DateProperty {
+export function isDateProperty(property: PropertyDefinition): property is DateProperty {
   return property.type === 'date';
 }
 
 /**
  * Get the category of a property for organization
  */
-export function getPropertyCategory(property: PropertyDefinition): 'basic' | 'text' | 'selection' | 'contact' | 'date' {
+export function getPropertyCategory(
+  property: PropertyDefinition
+): 'basic' | 'text' | 'selection' | 'contact' | 'date' {
   if (isBasicProperty(property)) return 'basic';
   if (isTextProperty(property)) return 'text';
   if (isSelectionProperty(property)) return 'selection';
   if (isContactProperty(property)) return 'contact';
   if (isDateProperty(property)) return 'date';
-  
+
   // This should never happen with proper typing, but provides fallback
   return 'basic';
 }

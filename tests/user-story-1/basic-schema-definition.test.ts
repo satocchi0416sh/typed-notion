@@ -1,19 +1,23 @@
 /**
  * User Story 1: Basic Schema Definition - Acceptance Tests
- * 
+ *
  * Tests the core functionality for creating type-safe schemas with
  * basic property types (title, number, checkbox)
  */
 
 import { describe, it, expect } from 'vitest';
-import { TypedSchema, createTypedSchema, validateSchemaDefinition } from '../../src/schema/index.js';
+import {
+  TypedSchema,
+  createTypedSchema,
+  validateSchemaDefinition,
+} from '../../src/schema/index.js';
 import { SchemaValidationError, PropertyAccessError } from '../../src/errors/index.js';
-import { 
-  basicUserSchema, 
-  minimalSchema, 
+import {
+  basicUserSchema,
+  minimalSchema,
   financialSchema,
   schemaWithoutTitle,
-  schemaWithMultipleTitles
+  schemaWithMultipleTitles,
 } from '../fixtures/schemas.js';
 
 describe('User Story 1: Basic Schema Definition', () => {
@@ -21,7 +25,7 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should create a schema with title, number, and checkbox properties', () => {
       // Given: I want to create a user schema with basic properties
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I examine the created schema
       // Then: It should have the correct structure
       expect(schema.databaseId).toBe('12345678-1234-5678-9abc-123456789abc');
@@ -34,12 +38,12 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should provide type-safe property access', () => {
       // Given: A created schema
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I access properties
       const nameProperty = schema.getProperty('Name');
       const ageProperty = schema.getProperty('Age');
       const activeProperty = schema.getProperty('Active');
-      
+
       // Then: Properties should have correct types
       expect(nameProperty.type).toBe('title');
       expect(ageProperty.type).toBe('number');
@@ -49,7 +53,7 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should validate property existence', () => {
       // Given: A created schema
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I check for existing and non-existing properties
       // Then: hasProperty should return correct boolean values
       expect(schema.hasProperty('Name')).toBe(true);
@@ -61,7 +65,7 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should throw error when accessing non-existent property', () => {
       // Given: A created schema
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When/Then: Accessing non-existent property should throw PropertyAccessError
       expect(() => {
         schema.getProperty('NonExistent' as any);
@@ -73,7 +77,7 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should create schema with only title property', () => {
       // Given: I want to create a minimal schema
       const schema = createTypedSchema(minimalSchema);
-      
+
       // When: I examine the schema
       // Then: It should have only the title property
       expect(schema.databaseId).toBe('87654321-4321-8765-cba9-987654321cba');
@@ -84,10 +88,10 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should identify the title property correctly', () => {
       // Given: A minimal schema
       const schema = createTypedSchema(minimalSchema);
-      
+
       // When: I get the title property
       const titleProperty = schema.getTitleProperty();
-      
+
       // Then: It should return the correct title property
       expect(titleProperty.name).toBe('Title');
       expect(titleProperty.definition.type).toBe('title');
@@ -98,12 +102,12 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should create schema with number format options', () => {
       // Given: I want to create a financial schema with number formatting
       const schema = createTypedSchema(financialSchema);
-      
+
       // When: I examine number properties
       const priceProperty = schema.getProperty('Price');
       const discountProperty = schema.getProperty('Discount');
       const quantityProperty = schema.getProperty('Quantity');
-      
+
       // Then: Number properties should have correct format options
       expect(priceProperty).toEqual({ type: 'number', format: 'dollar' });
       expect(discountProperty).toEqual({ type: 'number', format: 'percent' });
@@ -113,10 +117,10 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should handle number properties without format', () => {
       // Given: A basic schema with unformatted number
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I examine the number property
       const ageProperty = schema.getProperty('Age');
-      
+
       // Then: Format should be undefined (default)
       expect(ageProperty).toEqual({ type: 'number' });
       expect('format' in ageProperty).toBe(false);
@@ -154,10 +158,10 @@ describe('User Story 1: Basic Schema Definition', () => {
       const invalidSchema = {
         databaseId: 'not-a-valid-uuid',
         properties: {
-          Title: { type: 'title' as const }
-        }
+          Title: { type: 'title' as const },
+        },
       };
-      
+
       // When/Then: Validation should fail
       expect(() => {
         createTypedSchema(invalidSchema);
@@ -169,19 +173,19 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should filter properties by type', () => {
       // Given: A schema with multiple property types
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I filter properties by type
       const titleProperties = schema.getPropertiesByType('title');
       const numberProperties = schema.getPropertiesByType('number');
       const checkboxProperties = schema.getPropertiesByType('checkbox');
-      
+
       // Then: Each filter should return correct properties
       expect(titleProperties).toHaveLength(1);
       expect(titleProperties[0]?.name).toBe('Name');
-      
+
       expect(numberProperties).toHaveLength(1);
       expect(numberProperties[0]?.name).toBe('Age');
-      
+
       expect(checkboxProperties).toHaveLength(1);
       expect(checkboxProperties[0]?.name).toBe('Active');
     });
@@ -189,10 +193,10 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should return empty array for non-existent property types', () => {
       // Given: A basic schema
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I filter for property types not in the schema
       const selectProperties = schema.getPropertiesByType('select');
-      
+
       // Then: Should return empty array
       expect(selectProperties).toHaveLength(0);
     });
@@ -204,10 +208,10 @@ describe('User Story 1: Basic Schema Definition', () => {
       const before = Date.now();
       const schema = createTypedSchema(basicUserSchema);
       const after = Date.now();
-      
+
       // When: I get performance metrics
       const metrics = schema.getPerformanceMetrics();
-      
+
       // Then: Creation time should be tracked
       expect(metrics.schemaProcessingTime).toBeGreaterThanOrEqual(0);
       expect(metrics.schemaProcessingTime).toBeLessThan(after - before + 100); // Allow some tolerance
@@ -218,10 +222,10 @@ describe('User Story 1: Basic Schema Definition', () => {
     it('should provide JSON representation', () => {
       // Given: A created schema
       const schema = createTypedSchema(basicUserSchema);
-      
+
       // When: I convert to JSON
       const json = schema.toJSON();
-      
+
       // Then: JSON should contain essential information
       expect(json.databaseId).toBe(basicUserSchema.databaseId);
       expect(json.properties).toEqual(basicUserSchema.properties);
@@ -235,14 +239,14 @@ describe('User Story 1: Basic Schema Definition', () => {
       // Given: A schema with various property types
       const schema = createTypedSchema(basicUserSchema);
       const validator = schema.createPropertyValidator();
-      
+
       // When: I validate property values
       // Then: Valid values should pass
       expect(validator('Name', 'John Doe')).toBe(true);
       expect(validator('Age', 25)).toBe(true);
       expect(validator('Active', true)).toBe(true);
       expect(validator('Active', false)).toBe(true);
-      
+
       // And: Null values should pass (nullable by default)
       expect(validator('Name', null)).toBe(true);
       expect(validator('Age', null)).toBe(true);
@@ -253,7 +257,7 @@ describe('User Story 1: Basic Schema Definition', () => {
       // Given: A schema and validator
       const schema = createTypedSchema(basicUserSchema);
       const validator = schema.createPropertyValidator();
-      
+
       // When: I validate invalid values
       // Then: They should be rejected
       expect(validator('Name', 123)).toBe(false);

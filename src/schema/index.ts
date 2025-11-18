@@ -1,13 +1,10 @@
 /**
  * Schema system exports for MVP Property Types
- * 
+ *
  * Re-exports all schema-related functionality
  */
 
-export {
-  TypedSchema,
-  createTypedSchema
-} from './typed-schema.js';
+export { TypedSchema, createTypedSchema } from './typed-schema.js';
 
 export {
   validatePropertyType,
@@ -17,7 +14,7 @@ export {
   validatePropertyName,
   validateSelectionOptions,
   isValidSchemaDefinition,
-  isValidPropertyDefinition
+  isValidPropertyDefinition,
 } from './validation.js';
 
 export {
@@ -25,7 +22,7 @@ export {
   validatePropertyStructure,
   validatePropertyValue,
   validateSchema,
-  DEFAULT_VALIDATION_CONFIG
+  DEFAULT_VALIDATION_CONFIG,
 } from './validator.js';
 
 export type { ValidationResult, ValidationConfig } from './validator.js';

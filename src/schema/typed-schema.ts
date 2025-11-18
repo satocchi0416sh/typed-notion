@@ -1,6 +1,6 @@
 /**
  * TypedSchema base class for MVP Property Types
- * 
+ *
  * Implements User Story 1: Basic Schema Definition
  * Provides type-safe schema creation with compile-time and runtime validation
  */
@@ -12,7 +12,7 @@ import { SchemaValidationError, PropertyAccessError } from '../errors/index.js';
 
 /**
  * TypedSchema class provides type-safe schema management
- * 
+ *
  * Generic parameter S extends SchemaDefinition to enable:
  * - Compile-time type inference for property access
  * - Runtime validation of schema structure
@@ -25,7 +25,7 @@ export class TypedSchema<S extends SchemaDefinition> {
 
   /**
    * Create a new TypedSchema instance
-   * 
+   *
    * @param definition - Schema definition object
    * @throws {SchemaValidationError} When schema validation fails
    */
@@ -81,7 +81,7 @@ export class TypedSchema<S extends SchemaDefinition> {
 
   /**
    * Check if a property exists in this schema
-   * 
+   *
    * @param propertyName - Name of the property to check
    * @returns True if property exists
    */
@@ -91,7 +91,7 @@ export class TypedSchema<S extends SchemaDefinition> {
 
   /**
    * Get a specific property definition
-   * 
+   *
    * @param propertyName - Name of the property
    * @returns Property definition
    * @throws {PropertyAccessError} When property doesn't exist
@@ -101,13 +101,13 @@ export class TypedSchema<S extends SchemaDefinition> {
     if (!this.hasProperty(propName)) {
       throw new PropertyAccessError(propName, this._definition.databaseId);
     }
-    
+
     return this._definition.properties[propertyName as string] as S['properties'][K];
   }
 
   /**
    * Validate a property name follows naming conventions
-   * 
+   *
    * @param name - Property name to validate
    * @throws {SchemaValidationError} When name is invalid
    */
@@ -127,15 +127,20 @@ export class TypedSchema<S extends SchemaDefinition> {
    * Every schema must have exactly one title property
    */
   getTitleProperty(): { name: keyof S['properties']; definition: PropertyDefinition } {
-    const titleEntries = Object.entries(this._definition.properties)
-      .filter(([, def]) => def.type === 'title');
-    
+    const titleEntries = Object.entries(this._definition.properties).filter(
+      ([, def]) => def.type === 'title'
+    );
+
     if (titleEntries.length === 0) {
       throw new SchemaValidationError('titleProperty', 'exactly one title property', 'none found');
     }
-    
+
     if (titleEntries.length > 1) {
-      throw new SchemaValidationError('titleProperty', 'exactly one title property', `${titleEntries.length} found`);
+      throw new SchemaValidationError(
+        'titleProperty',
+        'exactly one title property',
+        `${titleEntries.length} found`
+      );
     }
 
     const [name, definition] = titleEntries[0]!;
@@ -144,21 +149,28 @@ export class TypedSchema<S extends SchemaDefinition> {
 
   /**
    * Get properties by type
-   * 
+   *
    * @param type - Property type to filter by
    * @returns Array of property entries matching the type
    */
   getPropertiesByType<T extends PropertyDefinition['type']>(
     type: T
-  ): Array<{ name: keyof S['properties']; definition: Extract<S['properties'][keyof S['properties']], { type: T }> }> {
+  ): Array<{
+    name: keyof S['properties'];
+    definition: Extract<S['properties'][keyof S['properties']], { type: T }>;
+  }> {
     return Object.entries(this._definition.properties)
-      .filter((entry): entry is [string, Extract<S['properties'][keyof S['properties']], { type: T }>] => {
-        const [, def] = entry;
-        return def.type === type;
-      })
-      .map(([name, definition]) => ({ 
-        name: name as keyof S['properties'], 
-        definition 
+      .filter(
+        (
+          entry
+        ): entry is [string, Extract<S['properties'][keyof S['properties']], { type: T }>] => {
+          const [, def] = entry;
+          return def.type === type;
+        }
+      )
+      .map(([name, definition]) => ({
+        name: name as keyof S['properties'],
+        definition,
       }));
   }
 
@@ -176,11 +188,11 @@ export class TypedSchema<S extends SchemaDefinition> {
   getPerformanceMetrics(): PerformanceMetrics {
     const now = Date.now();
     const schemaProcessingTime = now - this._createdAt.getTime();
-    
+
     return {
       schemaProcessingTime,
       activeSchemaCount: 1, // Single schema instance
-      lastQueryDuration: this._lastQueryDuration
+      lastQueryDuration: this._lastQueryDuration,
     };
   }
 
@@ -211,7 +223,7 @@ export class TypedSchema<S extends SchemaDefinition> {
     if (!user || typeof user !== 'object') {
       return false;
     }
-    
+
     const userObj = user as Record<string, unknown>;
     return (
       typeof userObj.id === 'string' &&
@@ -225,17 +237,14 @@ export class TypedSchema<S extends SchemaDefinition> {
    * Create a type-safe property value validator
    * Returns a function that validates property values match schema types
    */
-  createPropertyValidator(): <K extends keyof InferSchemaProperties<S>>(
-    propertyName: K,
-    value: unknown
-  ) => value is InferSchemaProperties<S>[K] {
+  createPropertyValidator() {
     return <K extends keyof InferSchemaProperties<S>>(
       propertyName: K,
       value: unknown
     ): value is InferSchemaProperties<S>[K] => {
       // Get property definition
       const propDef = this.getProperty(propertyName);
-      
+
       // Handle null values (all properties are nullable)
       if (value === null || value === undefined) {
         return true;
@@ -246,37 +255,37 @@ export class TypedSchema<S extends SchemaDefinition> {
         case 'title':
         case 'rich_text':
           return typeof value === 'string';
-          
+
         case 'email':
           return typeof value === 'string' && this.isValidEmail(value);
-          
+
         case 'url':
           return typeof value === 'string' && this.isValidURL(value);
-          
+
         case 'number':
           return typeof value === 'number' && !isNaN(value);
-          
+
         case 'checkbox':
           return typeof value === 'boolean';
-          
+
         case 'date':
           return value instanceof Date;
-          
+
         case 'select':
           if ('options' in propDef && typeof value === 'string') {
             return propDef.options.includes(value);
           }
           return false;
-          
+
         case 'multi_select':
           if ('options' in propDef && Array.isArray(value)) {
             return value.every(v => typeof v === 'string' && propDef.options.includes(v));
           }
           return false;
-          
+
         case 'people':
           return Array.isArray(value) && value.every(user => this.isValidNotionUser(user));
-          
+
         default:
           return false;
       }
@@ -291,19 +300,17 @@ export class TypedSchema<S extends SchemaDefinition> {
       databaseId: this._definition.databaseId,
       properties: this._definition.properties,
       createdAt: this._createdAt.toISOString(),
-      propertyCount: Object.keys(this._definition.properties).length
+      propertyCount: Object.keys(this._definition.properties).length,
     };
   }
 }
 
 /**
  * Factory function to create a TypedSchema with type inference
- * 
+ *
  * @param definition - Schema definition
  * @returns TypedSchema instance with inferred types
  */
-export function createTypedSchema<S extends SchemaDefinition>(
-  definition: S
-): TypedSchema<S> {
+export function createTypedSchema<S extends SchemaDefinition>(definition: S): TypedSchema<S> {
   return new TypedSchema(definition);
 }

@@ -1,6 +1,6 @@
 /**
  * Valibot validation schemas for runtime validation
- * 
+ *
  * Based on research decisions (Valibot chosen for performance and bundle size)
  * Implements creation-time validation as per clarifications
  */
@@ -21,7 +21,7 @@ const propertyTypeSchema = v.picklist([
   'email',
   'select',
   'multi_select',
-  'people'
+  'people',
 ] as const);
 
 /**
@@ -30,46 +30,49 @@ const propertyTypeSchema = v.picklist([
  */
 const propertyDefinitionSchema = v.variant('type', [
   v.object({
-    type: v.literal('title')
+    type: v.literal('title'),
   }),
   v.object({
-    type: v.literal('rich_text')
+    type: v.literal('rich_text'),
   }),
   v.object({
     type: v.literal('number'),
-    format: v.optional(v.picklist(['number', 'percent', 'dollar']))
+    format: v.optional(v.picklist(['number', 'percent', 'dollar'])),
   }),
   v.object({
-    type: v.literal('checkbox')
+    type: v.literal('checkbox'),
   }),
   v.object({
-    type: v.literal('date')
+    type: v.literal('date'),
   }),
   v.object({
-    type: v.literal('url')
+    type: v.literal('url'),
   }),
   v.object({
-    type: v.literal('email')
+    type: v.literal('email'),
   }),
   v.object({
     type: v.literal('select'),
     options: v.pipe(
       v.array(v.string()),
-      v.check((options) => options.length > 0, 'Select options cannot be empty'),
-      v.check((options) => new Set(options).size === options.length, 'Select options must be unique')
-    )
+      v.check(options => options.length > 0, 'Select options cannot be empty'),
+      v.check(options => new Set(options).size === options.length, 'Select options must be unique')
+    ),
   }),
   v.object({
     type: v.literal('multi_select'),
     options: v.pipe(
       v.array(v.string()),
-      v.check((options) => options.length > 0, 'Multi-select options cannot be empty'),
-      v.check((options) => new Set(options).size === options.length, 'Multi-select options must be unique')
-    )
+      v.check(options => options.length > 0, 'Multi-select options cannot be empty'),
+      v.check(
+        options => new Set(options).size === options.length,
+        'Multi-select options must be unique'
+      )
+    ),
   }),
   v.object({
-    type: v.literal('people')
-  })
+    type: v.literal('people'),
+  }),
 ]);
 
 /**
@@ -81,20 +84,23 @@ const schemaDefinitionSchema = v.pipe(
     databaseId: v.pipe(
       v.string(),
       v.minLength(1, 'Database ID cannot be empty'),
-      v.regex(/^[a-f0-9\-]{36}$/, 'Database ID must be a valid UUID format')
+      v.regex(/^[a-f0-9-]{36}$/, 'Database ID must be a valid UUID format')
     ),
     properties: v.pipe(
       v.record(v.string(), propertyDefinitionSchema),
-      v.check((properties) => Object.keys(properties).length > 0, 'Schema must have at least one property'),
-      v.check((properties) => Object.keys(properties).length <= 20, 'Schema cannot have more than 20 properties'),
       v.check(
-        (properties) => {
-          const titleProperties = Object.values(properties).filter((prop) => prop.type === 'title');
-          return titleProperties.length === 1;
-        },
-        'Schema must have exactly one title property'
-      )
-    )
+        properties => Object.keys(properties).length > 0,
+        'Schema must have at least one property'
+      ),
+      v.check(
+        properties => Object.keys(properties).length <= 20,
+        'Schema cannot have more than 20 properties'
+      ),
+      v.check(properties => {
+        const titleProperties = Object.values(properties).filter(prop => prop.type === 'title');
+        return titleProperties.length === 1;
+      }, 'Schema must have exactly one title property')
+    ),
   })
 );
 
@@ -104,7 +110,7 @@ const schemaDefinitionSchema = v.pipe(
 const databaseIdSchema = v.pipe(
   v.string(),
   v.minLength(1),
-  v.regex(/^[a-f0-9\-]{36}$/, 'Invalid database ID format')
+  v.regex(/^[a-f0-9-]{36}$/, 'Invalid database ID format')
 );
 
 /**
@@ -114,7 +120,10 @@ const propertyNameSchema = v.pipe(
   v.string(),
   v.minLength(1, 'Property name cannot be empty'),
   v.maxLength(100, 'Property name too long'),
-  v.regex(/^[a-zA-Z][a-zA-Z0-9_\s]*$/, 'Property name must start with letter and contain only letters, numbers, underscores, and spaces')
+  v.regex(
+    /^[a-zA-Z][a-zA-Z0-9_\s]*$/,
+    'Property name must start with letter and contain only letters, numbers, underscores, and spaces'
+  )
 );
 
 /**
@@ -159,11 +168,14 @@ export function validatePropertyName(name: string): string {
 export function validateSelectionOptions(options: unknown): string[] {
   const optionsSchema = v.pipe(
     v.array(v.string()),
-    v.check((opts) => opts.length > 0, 'Selection options cannot be empty'),
-    v.check((opts) => new Set(opts).size === opts.length, 'Selection options must be unique'),
-    v.check((opts) => opts.every(opt => opt.trim().length > 0), 'Selection options cannot be empty strings')
+    v.check(opts => opts.length > 0, 'Selection options cannot be empty'),
+    v.check(opts => new Set(opts).size === opts.length, 'Selection options must be unique'),
+    v.check(
+      opts => opts.every(opt => opt.trim().length > 0),
+      'Selection options cannot be empty strings'
+    )
   );
-  
+
   return v.parse(optionsSchema, options);
 }
 

@@ -1,6 +1,6 @@
 /**
  * Typed exception classes for the MVP Property Types system
- * 
+ *
  * Based on design from contracts/schema-api.ts and clarifications
  * All errors follow exception-based error handling strategy
  */
@@ -16,7 +16,7 @@ export abstract class TypedNotionError extends Error {
   constructor(message: string) {
     super(message);
     this.name = this.constructor.name;
-    
+
     // Ensure proper prototype chain for instanceof checks
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -30,7 +30,7 @@ export abstract class TypedNotionError extends Error {
       code: this.code,
       message: this.message,
       context: this.context,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 }
@@ -42,9 +42,11 @@ export abstract class TypedNotionError extends Error {
 export class SchemaValidationError extends TypedNotionError {
   readonly code = 'SCHEMA_VALIDATION_ERROR';
   readonly context: { property: string; expected: string; received: unknown };
-  
+
   constructor(property: string, expected: string, received: unknown) {
-    super(`Invalid property type for '${property}': expected ${expected}, received ${typeof received}`);
+    super(
+      `Invalid property type for '${property}': expected ${expected}, received ${typeof received}`
+    );
     this.context = { property, expected, received };
   }
 }
@@ -56,7 +58,7 @@ export class SchemaValidationError extends TypedNotionError {
 export class PropertyAccessError extends TypedNotionError {
   readonly code = 'PROPERTY_ACCESS_ERROR';
   readonly context: { property: string; schema: string };
-  
+
   constructor(property: string, schema: string) {
     super(`Property '${property}' not defined in schema`);
     this.context = { property, schema };
@@ -70,12 +72,10 @@ export class PropertyAccessError extends TypedNotionError {
 export class NotionAPIError extends TypedNotionError {
   readonly code = 'NOTION_API_ERROR';
   readonly context: { status: number; message: string; request_id?: string };
-  
+
   constructor(status: number, message: string, request_id?: string) {
     super(`Notion API error (${status}): ${message}`);
-    this.context = request_id 
-      ? { status, message, request_id }
-      : { status, message };
+    this.context = request_id ? { status, message, request_id } : { status, message };
   }
 }
 
@@ -88,7 +88,9 @@ export class PropertyValidationError extends TypedNotionError {
   readonly context: { property: string; value: unknown; expectedType: string };
 
   constructor(property: string, value: unknown, expectedType: string) {
-    super(`Invalid value for property '${property}': expected ${expectedType}, received ${typeof value}`);
+    super(
+      `Invalid value for property '${property}': expected ${expectedType}, received ${typeof value}`
+    );
     this.context = { property, value, expectedType };
   }
 }
@@ -102,7 +104,9 @@ export class SelectionValidationError extends TypedNotionError {
   readonly context: { property: string; value: unknown; validOptions: readonly string[] };
 
   constructor(property: string, value: unknown, validOptions: readonly string[]) {
-    super(`Invalid selection value for property '${property}': '${value}' is not one of [${validOptions.join(', ')}]`);
+    super(
+      `Invalid selection value for property '${property}': '${value}' is not one of [${validOptions.join(', ')}]`
+    );
     this.context = { property, value, validOptions };
   }
 }

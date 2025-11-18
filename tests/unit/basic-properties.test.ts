@@ -1,6 +1,6 @@
 /**
  * Unit tests for basic property types in User Story 1
- * 
+ *
  * Tests individual property type behavior:
  * - Title properties
  * - Number properties (with formatting)
@@ -8,13 +8,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  validatePropertyStructure, 
+import {
+  validatePropertyStructure,
   validatePropertyValue,
   validatePropertyName,
   validateSelectionOptions,
   validateSchemaStructure,
-  DEFAULT_VALIDATION_CONFIG
+  DEFAULT_VALIDATION_CONFIG,
 } from '../../src/schema/validator.js';
 import { PropertyValidationError, SelectionValidationError } from '../../src/errors/index.js';
 import type { PropertyDefinition } from '../../src/types/core.js';
@@ -29,7 +29,7 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should validate title property values', () => {
       const definition: PropertyDefinition = { type: 'title' };
-      
+
       // Valid values
       expect(() => validatePropertyValue('John Doe', definition, 'Name')).not.toThrow();
       expect(() => validatePropertyValue('', definition, 'Name')).not.toThrow();
@@ -39,20 +39,18 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should reject invalid title property values', () => {
       const definition: PropertyDefinition = { type: 'title' };
-      
-      expect(() => validatePropertyValue(123, definition, 'Name'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(true, definition, 'Name'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue([], definition, 'Name'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue({}, definition, 'Name'))
-        .toThrow(PropertyValidationError);
+
+      expect(() => validatePropertyValue(123, definition, 'Name')).toThrow(PropertyValidationError);
+      expect(() => validatePropertyValue(true, definition, 'Name')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue([], definition, 'Name')).toThrow(PropertyValidationError);
+      expect(() => validatePropertyValue({}, definition, 'Name')).toThrow(PropertyValidationError);
     });
 
     it('should provide specific error details for title properties', () => {
       const definition: PropertyDefinition = { type: 'title' };
-      
+
       try {
         validatePropertyValue(123, definition, 'Name');
       } catch (error) {
@@ -76,9 +74,9 @@ describe('Unit Tests: Basic Property Types', () => {
       const definitions = [
         { type: 'number' as const, format: 'number' as const },
         { type: 'number' as const, format: 'percent' as const },
-        { type: 'number' as const, format: 'dollar' as const }
+        { type: 'number' as const, format: 'dollar' as const },
       ];
-      
+
       definitions.forEach((definition, index) => {
         const errors = validatePropertyStructure(`Number${index}`, definition);
         expect(errors).toHaveLength(0);
@@ -86,9 +84,9 @@ describe('Unit Tests: Basic Property Types', () => {
     });
 
     it('should reject number property with invalid format', () => {
-      const definition = { 
-        type: 'number' as const, 
-        format: 'invalid-format' as any 
+      const definition = {
+        type: 'number' as const,
+        format: 'invalid-format' as any,
       };
       const errors = validatePropertyStructure('Price', definition);
       expect(errors.length).toBeGreaterThan(0);
@@ -97,7 +95,7 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should validate number property values', () => {
       const definition: PropertyDefinition = { type: 'number' };
-      
+
       // Valid values
       expect(() => validatePropertyValue(42, definition, 'Age')).not.toThrow();
       expect(() => validatePropertyValue(0, definition, 'Age')).not.toThrow();
@@ -109,27 +107,25 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should reject invalid number property values', () => {
       const definition: PropertyDefinition = { type: 'number' };
-      
-      expect(() => validatePropertyValue('123', definition, 'Age'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(NaN, definition, 'Age'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(true, definition, 'Age'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue([], definition, 'Age'))
-        .toThrow(PropertyValidationError);
+
+      expect(() => validatePropertyValue('123', definition, 'Age')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue(NaN, definition, 'Age')).toThrow(PropertyValidationError);
+      expect(() => validatePropertyValue(true, definition, 'Age')).toThrow(PropertyValidationError);
+      expect(() => validatePropertyValue([], definition, 'Age')).toThrow(PropertyValidationError);
     });
 
     it('should handle number formatting validation', () => {
-      const dollarDefinition: PropertyDefinition = { 
-        type: 'number', 
-        format: 'dollar' 
+      const dollarDefinition: PropertyDefinition = {
+        type: 'number',
+        format: 'dollar',
       };
-      const percentDefinition: PropertyDefinition = { 
-        type: 'number', 
-        format: 'percent' 
+      const percentDefinition: PropertyDefinition = {
+        type: 'number',
+        format: 'percent',
       };
-      
+
       // Format doesn't affect value validation, only definition validation
       expect(() => validatePropertyValue(99.99, dollarDefinition, 'Price')).not.toThrow();
       expect(() => validatePropertyValue(0.15, percentDefinition, 'Discount')).not.toThrow();
@@ -145,7 +141,7 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should validate checkbox property values', () => {
       const definition: PropertyDefinition = { type: 'checkbox' };
-      
+
       // Valid values
       expect(() => validatePropertyValue(true, definition, 'Active')).not.toThrow();
       expect(() => validatePropertyValue(false, definition, 'Active')).not.toThrow();
@@ -155,15 +151,15 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should reject invalid checkbox property values', () => {
       const definition: PropertyDefinition = { type: 'checkbox' };
-      
-      expect(() => validatePropertyValue('true', definition, 'Active'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(1, definition, 'Active'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue(0, definition, 'Active'))
-        .toThrow(PropertyValidationError);
-      expect(() => validatePropertyValue([], definition, 'Active'))
-        .toThrow(PropertyValidationError);
+
+      expect(() => validatePropertyValue('true', definition, 'Active')).toThrow(
+        PropertyValidationError
+      );
+      expect(() => validatePropertyValue(1, definition, 'Active')).toThrow(PropertyValidationError);
+      expect(() => validatePropertyValue(0, definition, 'Active')).toThrow(PropertyValidationError);
+      expect(() => validatePropertyValue([], definition, 'Active')).toThrow(
+        PropertyValidationError
+      );
     });
   });
 
@@ -179,7 +175,7 @@ describe('Unit Tests: Basic Property Types', () => {
         'Email Address',
         'A',
         'a1',
-        'Property123'
+        'Property123',
       ];
 
       validNames.forEach(name => {
@@ -196,7 +192,7 @@ describe('Unit Tests: Basic Property Types', () => {
         { name: 'Invalid@Name', reason: 'contains special characters' },
         { name: 'Invalid-Name', reason: 'contains hyphen' },
         { name: 'Invalid.Name', reason: 'contains dot' },
-        { name: 'a'.repeat(101), reason: 'too long' }
+        { name: 'a'.repeat(101), reason: 'too long' },
       ];
 
       invalidCases.forEach(({ name, reason }) => {
@@ -207,7 +203,7 @@ describe('Unit Tests: Basic Property Types', () => {
 
     it('should handle non-string property names', () => {
       const invalidNames = [null, undefined, 123, true, {}, []];
-      
+
       invalidNames.forEach(name => {
         const errors = validatePropertyName(name as any);
         expect(errors.length).toBeGreaterThan(0);
@@ -223,8 +219,8 @@ describe('Unit Tests: Basic Property Types', () => {
         properties: {
           Name: { type: 'title' },
           Age: { type: 'number' },
-          Active: { type: 'checkbox' }
-        }
+          Active: { type: 'checkbox' },
+        },
       };
 
       const result = validateSchemaStructure(schema);
@@ -237,8 +233,8 @@ describe('Unit Tests: Basic Property Types', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Age: { type: 'number' },
-          Active: { type: 'checkbox' }
-        }
+          Active: { type: 'checkbox' },
+        },
       };
 
       const result = validateSchemaStructure(schema);
@@ -252,8 +248,8 @@ describe('Unit Tests: Basic Property Types', () => {
         properties: {
           Title1: { type: 'title' },
           Title2: { type: 'title' },
-          Age: { type: 'number' }
-        }
+          Age: { type: 'number' },
+        },
       };
 
       const result = validateSchemaStructure(schema);
@@ -265,7 +261,7 @@ describe('Unit Tests: Basic Property Types', () => {
       // Test minimum properties
       const emptySchema = {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
-        properties: {}
+        properties: {},
       };
 
       const emptyResult = validateSchemaStructure(emptySchema);
@@ -278,9 +274,9 @@ describe('Unit Tests: Basic Property Types', () => {
         properties: Object.fromEntries(
           Array.from({ length: 25 }, (_, i) => [
             i === 0 ? 'Title' : `Prop${i}`,
-            i === 0 ? { type: 'title' } : { type: 'number' }
+            i === 0 ? { type: 'title' } : { type: 'number' },
           ])
-        )
+        ),
       };
 
       const tooManyResult = validateSchemaStructure(tooManyProperties);
@@ -294,15 +290,15 @@ describe('Unit Tests: Basic Property Types', () => {
         '12345',
         '12345678123456789abc123456789abc', // Too short
         '12345678-1234-5678-9abc-123456789abcd', // Too long
-        'GGGGGGGG-1234-5678-9abc-123456789abc' // Invalid characters
+        'GGGGGGGG-1234-5678-9abc-123456789abc', // Invalid characters
       ];
 
       invalidIdCases.forEach(invalidId => {
         const schema = {
           databaseId: invalidId,
           properties: {
-            Name: { type: 'title' }
-          }
+            Name: { type: 'title' },
+          },
         };
 
         const result = validateSchemaStructure(schema);
@@ -319,7 +315,7 @@ describe('Unit Tests: Basic Property Types', () => {
         123,
         [],
         { databaseId: '12345678-1234-5678-9abc-123456789abc' }, // Missing properties
-        { properties: { Name: { type: 'title' } } } // Missing databaseId
+        { properties: { Name: { type: 'title' } } }, // Missing databaseId
       ];
 
       malformedCases.forEach(malformed => {
@@ -336,7 +332,7 @@ describe('Unit Tests: Basic Property Types', () => {
         maxProperties: 5,
         minProperties: 2,
         requireTitle: false,
-        allowMultipleTitles: true
+        allowMultipleTitles: true,
       };
 
       // Schema without title (should pass with custom config)
@@ -344,8 +340,8 @@ describe('Unit Tests: Basic Property Types', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Age: { type: 'number' },
-          Active: { type: 'checkbox' }
-        }
+          Active: { type: 'checkbox' },
+        },
       };
 
       const result = validateSchemaStructure(schemaWithoutTitle, customConfig);
@@ -357,7 +353,7 @@ describe('Unit Tests: Basic Property Types', () => {
         maxProperties: 2,
         minProperties: 1,
         requireTitle: true,
-        allowMultipleTitles: false
+        allowMultipleTitles: false,
       };
 
       const tooManyPropsSchema = {
@@ -365,8 +361,8 @@ describe('Unit Tests: Basic Property Types', () => {
         properties: {
           Name: { type: 'title' },
           Age: { type: 'number' },
-          Active: { type: 'checkbox' }
-        }
+          Active: { type: 'checkbox' },
+        },
       };
 
       const result = validateSchemaStructure(tooManyPropsSchema, strictConfig);

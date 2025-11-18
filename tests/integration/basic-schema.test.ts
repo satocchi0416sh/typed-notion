@@ -1,6 +1,6 @@
 /**
  * Integration tests for User Story 1: Basic Schema Workflow
- * 
+ *
  * Tests the complete end-to-end workflow of:
  * 1. Creating a schema with basic properties
  * 2. Validating the schema structure
@@ -10,15 +10,15 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  createTypedSchema, 
+import {
+  createTypedSchema,
   validateSchemaDefinition,
-  isValidSchemaDefinition 
+  isValidSchemaDefinition,
 } from '../../src/schema/index.js';
-import { 
-  SchemaValidationError, 
-  PropertyAccessError, 
-  PropertyValidationError 
+import {
+  SchemaValidationError,
+  PropertyAccessError,
+  PropertyValidationError,
 } from '../../src/errors/index.js';
 import type { SchemaDefinition } from '../../src/types/index.js';
 
@@ -34,8 +34,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
           IsActive: { type: 'checkbox' as const },
           LastUpdated: { type: 'date' as const },
           Email: { type: 'email' as const },
-          ProfileUrl: { type: 'url' as const }
-        }
+          ProfileUrl: { type: 'url' as const },
+        },
       };
 
       // Step 2: Validate schema definition
@@ -44,11 +44,16 @@ describe('Integration Test: Basic Schema Workflow', () => {
 
       // Step 3: Create typed schema
       const typedSchema = createTypedSchema(userSchema);
-      
+
       // Step 4: Verify schema structure
       expect(typedSchema.databaseId).toBe('12345678-1234-5678-9abc-123456789abc');
       expect(typedSchema.propertyNames).toEqual([
-        'FullName', 'Age', 'IsActive', 'LastUpdated', 'Email', 'ProfileUrl'
+        'FullName',
+        'Age',
+        'IsActive',
+        'LastUpdated',
+        'Email',
+        'ProfileUrl',
       ]);
 
       // Step 5: Verify property access works
@@ -81,7 +86,7 @@ describe('Integration Test: Basic Schema Workflow', () => {
 
       // Step 9: Test property value validation
       const validator = typedSchema.createPropertyValidator();
-      
+
       // Valid values
       expect(validator('FullName', 'John Doe')).toBe(true);
       expect(validator('Age', 30)).toBe(true);
@@ -121,8 +126,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
           Price: { type: 'number' as const, format: 'dollar' as const },
           DiscountRate: { type: 'number' as const, format: 'percent' as const },
           Stock: { type: 'number' as const, format: 'number' as const },
-          InStock: { type: 'checkbox' as const }
-        }
+          InStock: { type: 'checkbox' as const },
+        },
       };
 
       // Create and validate schema
@@ -157,13 +162,13 @@ describe('Integration Test: Basic Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Age: { type: 'number' as const },
-          Active: { type: 'checkbox' as const }
-        }
+          Active: { type: 'checkbox' as const },
+        },
       };
 
       // Validation should fail
       expect(isValidSchemaDefinition(invalidSchema)).toBe(false);
-      
+
       // Creating schema should throw
       expect(() => createTypedSchema(invalidSchema as any)).toThrow(SchemaValidationError);
 
@@ -181,8 +186,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
       const validSchema = {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
-          Title: { type: 'title' as const }
-        }
+          Title: { type: 'title' as const },
+        },
       };
 
       const typedSchema = createTypedSchema(validSchema);
@@ -208,8 +213,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
       const invalidIdSchema = {
         databaseId: 'not-a-valid-uuid',
         properties: {
-          Title: { type: 'title' as const }
-        }
+          Title: { type: 'title' as const },
+        },
       };
 
       expect(isValidSchemaDefinition(invalidIdSchema)).toBe(false);
@@ -221,8 +226,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           Title: { type: 'title' as const },
-          BadProperty: { type: 'unknown_type' } as any
-        }
+          BadProperty: { type: 'unknown_type' } as any,
+        },
       };
 
       expect(isValidSchemaDefinition(malformedSchema)).toBe(false);
@@ -235,8 +240,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
       const minimalSchema = {
         databaseId: '00000000-1111-2222-3333-444444444444',
         properties: {
-          OnlyTitle: { type: 'title' as const }
-        }
+          OnlyTitle: { type: 'title' as const },
+        },
       };
 
       expect(isValidSchemaDefinition(minimalSchema)).toBe(true);
@@ -244,7 +249,7 @@ describe('Integration Test: Basic Schema Workflow', () => {
 
       expect(typedSchema.propertyNames).toEqual(['OnlyTitle']);
       expect(typedSchema.getTitleProperty().name).toBe('OnlyTitle');
-      
+
       // Should have exactly one property of each type we filter for
       expect(typedSchema.getPropertiesByType('title')).toHaveLength(1);
       expect(typedSchema.getPropertiesByType('number')).toHaveLength(0);
@@ -254,7 +259,7 @@ describe('Integration Test: Basic Schema Workflow', () => {
     it('should handle schema with maximum allowed properties', () => {
       // Create schema with 20 properties (the maximum)
       const properties: Record<string, any> = {
-        Title: { type: 'title' }
+        Title: { type: 'title' },
       };
 
       for (let i = 1; i < 20; i++) {
@@ -263,7 +268,7 @@ describe('Integration Test: Basic Schema Workflow', () => {
 
       const maxPropsSchema = {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
-        properties
+        properties,
       };
 
       expect(isValidSchemaDefinition(maxPropsSchema)).toBe(true);
@@ -280,10 +285,10 @@ describe('Integration Test: Basic Schema Workflow', () => {
         properties: {
           Title: { type: 'title' as const },
           'Property Name': { type: 'number' as const }, // Space
-          'Property_123': { type: 'checkbox' as const }, // Underscore and numbers
-          'A': { type: 'date' as const }, // Single character
-          'VeryLongPropertyNameThatIsStillValid': { type: 'email' as const }
-        }
+          Property_123: { type: 'checkbox' as const }, // Underscore and numbers
+          A: { type: 'date' as const }, // Single character
+          VeryLongPropertyNameThatIsStillValid: { type: 'email' as const },
+        },
       };
 
       expect(isValidSchemaDefinition(specialNamesSchema)).toBe(true);
@@ -308,8 +313,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
           properties: {
             Title: { type: 'title' as const },
             Number: { type: 'number' as const },
-            Flag: { type: 'checkbox' as const }
-          }
+            Flag: { type: 'checkbox' as const },
+          },
         });
         schemas.push(schema);
       }
@@ -324,7 +329,7 @@ describe('Integration Test: Basic Schema Workflow', () => {
       for (const schema of schemas) {
         expect(schema.propertyNames).toEqual(['Title', 'Number', 'Flag']);
         expect(schema.hasProperty('Title')).toBe(true);
-        
+
         const metrics = schema.getPerformanceMetrics();
         expect(metrics.activeSchemaCount).toBe(1); // Each tracks itself only
       }
@@ -336,8 +341,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
         properties: {
           Name: { type: 'title' as const },
           Score: { type: 'number' as const },
-          Active: { type: 'checkbox' as const }
-        }
+          Active: { type: 'checkbox' as const },
+        },
       });
 
       // Perform multiple operations
