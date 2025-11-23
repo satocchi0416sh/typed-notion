@@ -52,6 +52,7 @@ export default [
       // General rules
       'no-console': 'warn',
       'no-debugger': 'error',
+      'no-unused-vars': 'off', // Disable base rule in favor of @typescript-eslint/no-unused-vars
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
