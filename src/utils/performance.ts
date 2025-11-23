@@ -268,14 +268,22 @@ export function getPerformanceMetrics(): PerformanceMetrics {
 /**
  * Get detailed performance statistics
  */
-export function getDetailedPerformanceStats() {
+export function getDetailedPerformanceStats(): {
+  averages: Record<string, number>;
+  totals: Record<string, number>;
+  counts: Record<string, number>;
+  p95: Record<string, number>;
+} {
   return PerformanceMonitor.getInstance().getDetailedStats();
 }
 
 /**
  * Check system performance health
  */
-export function checkPerformanceHealth() {
+export function checkPerformanceHealth(): {
+  isHealthy: boolean;
+  issues: string[];
+} {
   return PerformanceMonitor.getInstance().isPerformanceHealthy();
 }
 
@@ -289,12 +297,14 @@ export function resetPerformanceMetrics(): void {
 /**
  * Performance timing decorator for class methods
  */
-export function timed(operation: string) {
-  return function (_target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+export function timed(
+  operation: string
+): (_target: unknown, _propertyKey: string, _descriptor: PropertyDescriptor) => PropertyDescriptor {
+  return function (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: unknown[]) {
-      return measurePerformance(`${operation}_${propertyKey}`, () => {
+      return measurePerformance(`${operation}_${_propertyKey}`, () => {
         return originalMethod.apply(this, args);
       });
     };
