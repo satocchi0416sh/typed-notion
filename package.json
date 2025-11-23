@@ -42,7 +42,10 @@
     "validate": "npm run validate:types && npm run validate:package && npm run validate:size",
     "validate:types": "attw --pack .",
     "validate:package": "publint",
-    "validate:size": "bundlesize"
+    "validate:size": "bundlesize",
+    "release": "semantic-release",
+    "release:dry": "semantic-release --dry-run",
+    "release:debug": "semantic-release --debug"
   },
   "keywords": [
     "notion",
@@ -64,6 +67,11 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^12.0.2",
+    "@semantic-release/npm": "^13.1.2",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
@@ -76,6 +84,7 @@
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "publint": "^0.3.15",
+    "semantic-release": "^25.0.2",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
