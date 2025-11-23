@@ -22,6 +22,10 @@ interface PropertyTypeMap {
   select: string | null; // Overridden by literal unions
   multi_select: string[] | null; // Overridden by literal unions
   people: NotionUser[] | null;
+  created_time: Date | null;
+  created_by: NotionUser | null;
+  last_edited_time: Date | null;
+  last_edited_by: NotionUser | null;
 }
 
 /**

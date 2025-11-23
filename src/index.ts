@@ -245,6 +245,14 @@ export function getNotionPropertyValue<T>(property: unknown, type: string): T | 
       return prop.phone_number as T;
     case 'url':
       return prop.url as T;
+    case 'created_time':
+    case 'last_edited_time':
+      return (prop[type] ? new Date(prop[type] as string) : null) as T;
+    case 'created_by':
+    case 'last_edited_by':
+      return prop[type] as T;
+    case 'people':
+      return prop.people as T;
     default:
       return null;
   }
