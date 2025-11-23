@@ -19,7 +19,11 @@ export type PropertyType =
   | 'email'
   | 'select'
   | 'multi_select'
-  | 'people';
+  | 'people'
+  | 'created_time'
+  | 'created_by'
+  | 'last_edited_time'
+  | 'last_edited_by';
 
 /**
  * Property definition configurations
@@ -35,7 +39,11 @@ export type PropertyDefinition =
   | { type: 'email' }
   | { type: 'select'; options: readonly string[] }
   | { type: 'multi_select'; options: readonly string[] }
-  | { type: 'people' };
+  | { type: 'people' }
+  | { type: 'created_time' }
+  | { type: 'created_by' }
+  | { type: 'last_edited_time' }
+  | { type: 'last_edited_by' };
 
 /**
  * Schema definition structure
