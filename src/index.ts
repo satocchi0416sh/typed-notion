@@ -209,5 +209,43 @@ export type {
 // Publishing module exports
 export * from './publishing/index.js';
 
-// Version export
+// Version export - managed by semantic-release
 export const VERSION = '1.0.0';
+
+// Utility function for better developer experience
+export function getNotionPropertyValue<T>(property: unknown, type: string): T | null {
+  if (!property || typeof property !== 'object' || property === null) {
+    return null;
+  }
+
+  const prop = property as { type?: string; [key: string]: unknown };
+  if (prop.type !== type) {
+    return null;
+  }
+
+  switch (type) {
+    case 'title':
+    case 'rich_text':
+      return ((prop[type] as Array<{ plain_text?: string }>)?.[0]?.plain_text as T) || null;
+    case 'number':
+      return prop.number as T;
+    case 'checkbox':
+      return prop.checkbox as T;
+    case 'select':
+      return ((prop.select as { name?: string })?.name as T) || null;
+    case 'multi_select':
+      return (
+        ((prop.multi_select as Array<{ name: string }>)?.map(item => item.name) as T) || ([] as T)
+      );
+    case 'date':
+      return ((prop.date as { start?: string })?.start as T) || null;
+    case 'email':
+      return prop.email as T;
+    case 'phone_number':
+      return prop.phone_number as T;
+    case 'url':
+      return prop.url as T;
+    default:
+      return null;
+  }
+}
