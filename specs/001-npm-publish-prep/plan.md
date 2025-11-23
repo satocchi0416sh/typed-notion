@@ -1,100 +1,73 @@
-# Implementation Plan: NPM Package Publication Preparation
+# Implementation Plan: NPM Package Publication Automation Pipeline
 
-**Branch**: `001-npm-publish-prep` | **Date**: 2025-11-18 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-npm-publish-prep` | **Date**: 2025-11-23 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-npm-publish-prep/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Note**: This extends the existing npm publishing preparation with automation pipeline (Phase 2 implementation).
 
 ## Summary
 
-Prepare the TypedNotion TypeScript library for npm publication by implementing package validation, build pipeline verification, and publication configuration. Primary goal is to establish a complete npm publishing workflow that ensures package quality, proper metadata, and successful consumer installation with full TypeScript support.
+Implement automated CI/CD pipeline for semantic versioning, automated npm publishing, and GitHub Actions workflow. This builds upon the completed Phase 1 foundation (package configuration, build pipeline, validation tools) to provide fully automated release management based on conventional commits. The automation pipeline will enable hands-off publishing triggered by commits to main branch while maintaining quality gates and proper semantic versioning.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
 **Language/Version**: TypeScript 5.9.3, Node.js 18+ (ESNext target)  
-**Primary Dependencies**: TypeScript compiler, npm CLI, package validation tools  
+**Primary Dependencies**: semantic-release, GitHub Actions, npm CLI, package validation tools  
 **Storage**: N/A (configuration and metadata only)  
-**Testing**: Vitest (existing), npm pack/link for local testing  
-**Target Platform**: npm registry, Node.js/Browser (dual ESM/CommonJS support)
-**Project Type**: Library/Package (TypeScript library for publication)  
-**Performance Goals**: Build time <30 seconds, package size <50KB  
-**Constraints**: npm registry limits, semantic versioning requirements, TypeScript strict mode  
-**Scale/Scope**: Single TypeScript library package, multiple export formats, comprehensive type definitions
+**Testing**: vitest (162 tests already passing), @arethetypeswrong/cli, publint  
+**Target Platform**: GitHub Actions runners (ubuntu-latest), npm registry  
+**Project Type**: TypeScript library with automation tooling  
+**Performance Goals**: CI/CD pipeline <5 minutes, semantic-release processing <30 seconds  
+**Constraints**: GitHub Actions free tier limits, npm registry rate limits, semantic versioning compliance  
+**Scale/Scope**: Single TypeScript package with automated versioning and publishing
 
 ## Constitution Check
 
 _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-### ✅ Type Safety First
+### Type Safety Compliance ✅
 
-- **Compliance**: PASS - TypeScript strict mode required for build pipeline
-- **Evidence**: Build process must validate TypeScript compilation without errors or warnings
+- **Requirement**: No `any` types in public interfaces
+- **Status**: PASS - Automation pipeline involves configuration files only, no public TypeScript APIs
+- **Validation**: Configuration files will be validated using JSON schemas
 
-### ✅ Schema Validation
+### Schema Validation ✅
 
-- **Compliance**: PASS - Package.json validation ensures schema compliance
-- **Evidence**: npm package schema validation and dependency validation required
+- **Requirement**: Runtime validation of all external data
+- **Status**: PASS - semantic-release and GitHub Actions use validated configuration schemas
+- **Validation**: YAML/JSON configuration files have built-in schema validation
 
-### ✅ Clean API Abstraction
+### Developer Experience ✅
 
-- **Compliance**: PASS - Package provides clean npm publishing workflow abstraction
-- **Evidence**: Simplified validation and build commands hide complex npm publishing details
+- **Requirement**: Clear error messages and documentation
+- **Status**: PASS - Automation will provide clear CI/CD feedback and comprehensive documentation
+- **Validation**: GitHub Actions logs provide detailed error reporting
 
-### ✅ Developer Experience
+### Robustness & Resilience ✅
 
-- **Compliance**: PASS - Clear documentation, error messages, and validation feedback required
-- **Evidence**: Success criteria include comprehensive documentation and clear error reporting
+- **Requirement**: Proper error handling for external APIs
+- **Status**: PASS - semantic-release includes retry logic and graceful failure handling
+- **Validation**: CI/CD pipeline includes rollback strategies and failure notifications
 
-### ✅ Robustness & Resilience
+### Performance Standards ✅
 
-- **Compliance**: PASS - Error handling for build failures, validation errors, and npm registry issues
-- **Evidence**: Edge cases defined for validation failures and registry conflicts
+- **Requirement**: Respect API rate limits and performance constraints
+- **Status**: PASS - npm publishing respects registry rate limits, CI/CD optimized for speed
+- **Validation**: Pipeline designed for <5 minute execution time
 
-**Overall**: ✅ PASS - All constitutional requirements aligned with npm publishing workflow
+**Overall Gate Status**: ✅ PASS - All constitution requirements satisfied
 
-## Post-Design Constitution Review
+### Post-Design Re-evaluation ✅
 
-_Re-evaluated after Phase 1 design completion_
+After completing Phase 1 design (research, data model, contracts, quickstart):
 
-### ✅ Type Safety First (Confirmed)
+- **Type Safety**: No TypeScript code generated, only configuration files with schema validation ✅
+- **Schema Validation**: All configuration files (JSON, YAML) have built-in validation ✅
+- **Developer Experience**: Comprehensive documentation and error handling in quickstart guide ✅
+- **Robustness**: Automation pipeline includes retry logic, rollback strategies, and monitoring ✅
+- **Performance**: Pipeline optimized for <5 minute execution with caching and parallel jobs ✅
 
-- **Implementation**: tsup with TypeScript strict mode, isolatedDeclarations enabled
-- **Validation**: Build pipeline enforces zero TypeScript errors/warnings
-- **Evidence**: API contracts use comprehensive TypeScript interfaces with no `any` types
-
-### ✅ Schema Validation (Confirmed)
-
-- **Implementation**: Package validation pipeline with @arethetypeswrong/cli and publint
-- **Validation**: package.json schema validation, dependency validation, export validation
-- **Evidence**: Comprehensive validation contracts in validation-api.ts
-
-### ✅ Clean API Abstraction (Confirmed)
-
-- **Implementation**: Publishing pipeline abstracts complex npm workflow behind simple interfaces
-- **Validation**: PublishingPipeline interface provides clean developer experience
-- **Evidence**: Quickstart guide shows simplified workflow compared to manual npm publishing
-
-### ✅ Developer Experience (Confirmed)
-
-- **Implementation**: Comprehensive documentation, clear error messages, automated workflows
-- **Validation**: Full quickstart guide, detailed API contracts, troubleshooting section
-- **Evidence**: Built-in validation with actionable error messages and suggestions
-
-### ✅ Robustness & Resilience (Confirmed)
-
-- **Implementation**: Error handling for all failure modes, local testing before publish
-- **Validation**: Comprehensive error types defined, retry strategies, fallback options
-- **Evidence**: Error contracts cover all identified failure scenarios with recovery paths
-
-**Final Assessment**: ✅ COMPLETE CONSTITUTIONAL COMPLIANCE
-
-The implemented design fully satisfies all constitutional requirements with specific technical implementations for each principle.
+**Final Gate Status**: ✅ PASS - Design maintains full constitutional compliance
 
 ## Project Structure
 
@@ -112,44 +85,62 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
 ```text
-src/
-├── schema/              # Existing - schema and type definitions
-├── types/               # Existing - TypeScript type definitions
-├── errors/              # Existing - error classes
-├── utils/               # Existing - utility functions
-├── validation/          # New - npm package validation logic
-├── publishing/          # New - npm publishing workflow
-└── index.ts            # Existing - main entry point
+# TypeScript Library Structure (existing + automation additions)
+src/                         # Existing TypeScript source
+├── validation/              # ✅ Already implemented
+├── publishing/              # ✅ Already implemented
+└── index.ts                 # ✅ Already implemented
 
-dist/                    # Generated - compiled JavaScript output
-├── types/               # Generated - TypeScript declarations
-├── index.js            # Generated - CommonJS entry
-├── index.d.ts          # Generated - type definitions
-└── index.js.map        # Generated - source maps
+tests/                       # ✅ Already implemented (162 tests)
+├── integration/
+├── unit/
+└── user-story-1/
 
-tests/
-├── unit/               # Existing - unit tests
-├── integration/        # Existing - integration tests
-└── publish/            # New - npm publish workflow tests
+.github/                     # 🔄 NEW - CI/CD automation
+└── workflows/
+    └── publish.yml          # 🔄 NEW - Automated publishing
 
-docs/                   # New - package documentation
-├── README.md           # Updated - installation and usage
-├── API.md              # New - API documentation
-└── CHANGELOG.md        # New - version history
+.releaserc.json              # 🔄 NEW - semantic-release config
+CHANGELOG.md                 # 🔄 NEW - Auto-generated changelog
+package.json                 # ✅ Updated with automation scripts
+
+# Existing build and validation infrastructure
+dist/                        # ✅ Build outputs
+tsup.config.ts              # ✅ Build configuration
+.npmignore                   # ✅ Publication files
 ```
 
-**Structure Decision**: Selected single TypeScript library project structure. Leverages existing src/ organization while adding new validation/ and publishing/ modules. Maintains existing test structure while adding publish/ for npm-specific tests. Adds docs/ for package documentation required for npm publication.
+**Structure Decision**: Single TypeScript library project with automation tooling added to existing foundation. The automation layer adds CI/CD workflows and semantic versioning without changing the core library structure. All Phase 1 implementation (validation, build pipeline, package configuration) remains intact and serves as the foundation for automation.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+**Status**: No violations - no complexity tracking required.
 
-No constitutional violations detected. All requirements align with existing project principles.
+## Implementation Summary
+
+**Phase 0 Complete**: ✅ Research findings documented in [research.md](./research.md)
+
+- Technology decisions: semantic-release, GitHub Actions, conventional commits
+- Implementation approach: Conservative plugin selection, parallel execution
+- Security strategy: OIDC authentication, package provenance
+
+**Phase 1 Complete**: ✅ Design artifacts generated
+
+- **Data Model**: [data-model.md](./data-model.md) - Automation pipeline entities and relationships
+- **API Contracts**: [contracts/](./contracts/) - Configuration schemas and TypeScript interfaces
+- **Quick Start**: [quickstart.md](./quickstart.md) - Step-by-step automation setup guide
+- **Agent Context**: CLAUDE.md updated with automation technologies
+
+## Deliverables Summary
+
+1. **research.md** - Complete technology research and implementation decisions
+2. **data-model.md** - Data structures for CI/CD configuration and pipeline status
+3. **contracts/release-config.json** - JSON schema for semantic-release configuration
+4. **contracts/workflow-config.yml** - GitHub Actions workflow template
+5. **contracts/pipeline-status.ts** - TypeScript interfaces for automation entities
+6. **quickstart.md** - Comprehensive setup guide for automation pipeline
+
+**Ready for**: `/speckit.tasks` command to generate implementation tasks
+
+**Branch Status**: All planning artifacts completed for automation pipeline extension

@@ -1,302 +1,149 @@
-# Implementation Tasks: NPM Package Publication Preparation
+# Implementation Tasks: NPM Package Publication Automation Pipeline
 
-**Branch**: `001-npm-publish-prep` | **Generated**: 2025-11-23  
-**Input**: Implementation plan from [plan.md](plan.md) and specifications from [spec.md](spec.md)
+**Feature**: NPM Package Publication Automation Pipeline  
+**Branch**: `001-npm-publish-prep`  
+**Total Tasks**: 24  
+**Dependencies**: Phase 1 npm publishing foundation already complete
 
-## Task Organization Strategy
+## Phase 1: Setup and Prerequisites (4 tasks)
 
-Tasks are organized by user story priority (P1 → P2) with dependency management for parallel execution where possible. Each task includes acceptance criteria, estimated complexity, and success validation.
+**Goal**: Install and configure core automation dependencies
 
----
+- [x] T001 Install semantic-release core packages in package.json devDependencies
+- [x] T002 Install semantic-release plugins (@semantic-release/npm, @semantic-release/github, @semantic-release/changelog) in package.json
+- [x] T003 Add semantic-release scripts (release, release:dry, release:debug) to package.json scripts section
+- [x] T004 [P] Create .github/workflows directory structure for GitHub Actions
 
-## Phase 1 Tasks: P1 User Stories (Foundation)
+**Independent Test Criteria**:
 
-### User Story 1: Package Configuration Validation
-
-#### Task 1.1: Set Up Build Configuration
-
-- [ ] **Install build dependencies**
-  - [ ] Install tsup and @types/node as dev dependencies
-  - [ ] Install TypeScript if not already present
-  - [ ] Verify Node.js version compatibility (18+)
-- [ ] **Create tsup configuration**
-  - [ ] Create `tsup.config.ts` with dual ESM/CommonJS output
-  - [ ] Configure entry point as `src/index.ts`
-  - [ ] Enable TypeScript declarations (dts: true)
-  - [ ] Enable sourcemaps and tree-shaking
-  - [ ] Set output directory to `dist/`
-- [ ] **Optimize TypeScript configuration**
-  - [ ] Update `tsconfig.json` with isolatedDeclarations: true
-  - [ ] Enable verbatimModuleSyntax for better module handling
-  - [ ] Set target to ESNext and module to NodeNext
-  - [ ] Configure incremental compilation for performance
-
-**Acceptance**: Build configuration compiles without errors, generates both .js and .d.ts files
-**Estimated Complexity**: Medium (2-3 hours)
-**Dependencies**: None
-
-#### Task 1.2: Configure Package.json for Publishing
-
-- [ ] **Set package metadata**
-  - [ ] Configure package name as scoped (@typed-notion/core)
-  - [ ] Set description, keywords, author, license fields
-  - [ ] Add repository, homepage URLs
-  - [ ] Set Node.js engine requirements (>=18.0.0)
-- [ ] **Configure package exports**
-  - [ ] Set up dual module support with exports field
-  - [ ] Configure main (CommonJS) and module (ESM) entry points
-  - [ ] Set types field pointing to declaration files
-  - [ ] Add files field to include only dist/, README.md, LICENSE
-- [ ] **Add build scripts**
-  - [ ] Add build, build:watch, clean scripts
-  - [ ] Add prepublishOnly script for validation pipeline
-  - [ ] Add build:check script for TypeScript validation
-
-**Acceptance**: Package.json follows npm best practices, exports field validates with publint
-**Estimated Complexity**: Medium (2-3 hours)
-**Dependencies**: Task 1.1 (build configuration)
-
-#### Task 1.3: Implement Package Validation API
-
-- [ ] **Create validation module structure**
-  - [ ] Create `src/validation/` directory
-  - [ ] Implement PackageValidator interface from contracts/validation-api.ts
-  - [ ] Create validation utilities and error types
-- [ ] **Implement manifest validation**
-  - [ ] Validate required package.json fields
-  - [ ] Check version format (semantic versioning)
-  - [ ] Validate dependencies and peer dependencies
-  - [ ] Verify export mappings consistency
-- [ ] **Implement file structure validation**
-  - [ ] Validate build output files exist
-  - [ ] Check file inclusion patterns
-  - [ ] Validate TypeScript declaration files
-  - [ ] Ensure no source files in publication bundle
-
-**Acceptance**: PackageValidator successfully validates package.json and file structure
-**Estimated Complexity**: High (4-5 hours)
-**Dependencies**: Task 1.2 (package.json configuration)
-
-### User Story 2: Build Pipeline Verification
-
-#### Task 2.1: Create Build Pipeline API
-
-- [ ] **Create build module structure**
-  - [ ] Create `src/publishing/` directory
-  - [ ] Implement BuildPipeline interface from contracts/build-api.ts
-  - [ ] Create build utilities and performance tracking
-- [ ] **Implement build execution**
-  - [ ] Create build command wrapper for tsup
-  - [ ] Add build artifact validation
-  - [ ] Implement build performance monitoring (<30s target)
-  - [ ] Add build caching strategies
-- [ ] **Add build artifact analysis**
-  - [ ] Implement file size analysis (<50KB target)
-  - [ ] Create bundle composition reporting
-  - [ ] Add compression statistics (gzip/brotli)
-  - [ ] Validate TypeScript declaration consistency
-
-**Acceptance**: Build pipeline reliably produces optimized artifacts under performance targets
-**Estimated Complexity**: High (4-5 hours)
-**Dependencies**: Task 1.1 (build configuration), Task 1.3 (validation API)
-
-#### Task 2.2: Install Package Validation Tools
-
-- [ ] **Install validation dependencies**
-  - [ ] Install @arethetypeswrong/cli for TypeScript export validation
-  - [ ] Install publint for package.json validation
-  - [ ] Install bundlesize for size monitoring
-  - [ ] Configure validation scripts in package.json
-- [ ] **Integrate validation tools**
-  - [ ] Create validate:types script using @arethetypeswrong/cli
-  - [ ] Create validate:package script using publint
-  - [ ] Create validate:size script with bundlesize
-  - [ ] Create comprehensive validate script combining all checks
-- [ ] **Configure size limits**
-  - [ ] Set bundlesize configuration for 50KB limit
-  - [ ] Configure path patterns for dist files
-  - [ ] Add size monitoring to CI pipeline
-
-**Acceptance**: All validation tools run successfully and catch common packaging issues
-**Estimated Complexity**: Low (1-2 hours)
-**Dependencies**: Task 2.1 (build pipeline)
+- [ ] `npm run release:dry` executes without errors
+- [ ] All semantic-release dependencies install successfully
+- [ ] GitHub workflows directory exists and is properly structured
 
 ---
 
-## Phase 2 Tasks: P2 User Stories (Enhancement)
+## Phase 2: Semantic Release Configuration (Priority: P2 - User Story 3)
 
-### User Story 3: Version Management Setup
+**Goal**: Establish automated semantic versioning based on conventional commits
 
-#### Task 3.1: Configure Semantic Release
+- [x] T005 [US3] Create .releaserc.json with basic semantic-release configuration in project root
+- [x] T006 [US3] Configure branch settings for main branch releases in .releaserc.json
+- [x] T007 [US3] Configure plugin sequence (commit-analyzer, release-notes-generator, changelog, npm, github) in .releaserc.json
+- [x] T008 [P] [US3] Configure GitHub plugin with asset uploading in .releaserc.json
+- [x] T009 [US3] Test semantic-release configuration with dry-run mode
+- [x] T010 [US3] Validate version bump logic for different commit types (feat, fix, breaking)
 
-- [ ] **Install semantic-release dependencies**
-  - [ ] Install semantic-release and npm plugin
-  - [ ] Install GitHub plugin for release management
-  - [ ] Install commit analyzer and release notes generator
-- [ ] **Configure semantic-release**
-  - [ ] Create .releaserc.json with branch and plugin configuration
-  - [ ] Configure conventional commit parsing
-  - [ ] Set up automated npm publishing
-  - [ ] Configure GitHub release creation
-- [ ] **Set up commit conventions**
-  - [ ] Document conventional commit format (feat:, fix:, etc.)
-  - [ ] Configure commit message validation
-  - [ ] Add pre-commit hooks for message format
-  - [ ] Test version bump scenarios
+**Independent Test Criteria**:
 
-**Acceptance**: Semantic-release successfully generates versions and publishes based on commits
-**Estimated Complexity**: Medium (3-4 hours)
-**Dependencies**: Task 2.2 (validation tools)
-
-#### Task 3.2: Create GitHub Actions Workflow
-
-- [ ] **Set up CI/CD pipeline**
-  - [ ] Create .github/workflows/publish.yml
-  - [ ] Configure Node.js environment (version 18)
-  - [ ] Set up npm registry authentication
-  - [ ] Add required secrets configuration documentation
-- [ ] **Configure build and validation pipeline**
-  - [ ] Add dependency installation step
-  - [ ] Add build execution step
-  - [ ] Add test execution step (if tests exist)
-  - [ ] Add validation pipeline step
-- [ ] **Configure automated publishing**
-  - [ ] Add semantic-release step for automated versioning
-  - [ ] Configure npm publishing with provenance
-  - [ ] Add failure notification and rollback strategies
-  - [ ] Test workflow with dry-run commits
-
-**Acceptance**: GitHub Actions successfully builds, validates, and publishes package automatically
-**Estimated Complexity**: Medium (3-4 hours)
-**Dependencies**: Task 3.1 (semantic-release), All validation tasks
-
-### User Story 4: Package Testing and Validation
-
-#### Task 4.1: Set Up Local Testing Infrastructure
-
-- [ ] **Install local testing tools**
-  - [ ] Install yalc globally for local package testing
-  - [ ] Configure npm pack testing scripts
-  - [ ] Set up test project structure for validation
-- [ ] **Implement local testing API**
-  - [ ] Implement LocalTestConfig interface from contracts/publishing-api.ts
-  - [ ] Create test project generation utilities
-  - [ ] Add TypeScript/JavaScript import testing
-  - [ ] Add CommonJS/ESM compatibility testing
-- [ ] **Create testing scripts**
-  - [ ] Add test:local script using yalc workflow
-  - [ ] Add test:pack script for package content validation
-  - [ ] Add test:install script for installation verification
-  - [ ] Create comprehensive local testing documentation
-
-**Acceptance**: Local testing reliably validates package installation and import functionality
-**Estimated Complexity**: High (4-5 hours)  
-**Dependencies**: Task 2.1 (build pipeline), Task 1.3 (validation API)
-
-#### Task 4.2: Implement Publishing Pipeline
-
-- [ ] **Create publishing orchestration**
-  - [ ] Implement PublishingPipeline interface from contracts/publishing-api.ts
-  - [ ] Create end-to-end publishing workflow
-  - [ ] Add dry-run functionality for testing
-  - [ ] Implement readiness validation before publishing
-- [ ] **Add error handling and recovery**
-  - [ ] Implement PublishingError types and handling
-  - [ ] Add retry strategies for transient failures
-  - [ ] Create rollback procedures for failed publishes
-  - [ ] Add comprehensive logging and diagnostics
-- [ ] **Create publishing utilities**
-  - [ ] Add npm registry availability checking
-  - [ ] Add package name conflict detection
-  - [ ] Create publishing status monitoring
-  - [ ] Add post-publish verification
-
-**Acceptance**: Publishing pipeline successfully orchestrates entire workflow with proper error handling
-**Estimated Complexity**: High (5-6 hours)
-**Dependencies**: All previous tasks (foundation for publishing)
+- [ ] `npm run release:dry` analyzes commits and determines appropriate version bump
+- [ ] Configuration passes semantic-release validation
+- [ ] Different conventional commit types trigger correct version increments
 
 ---
 
-## Phase 3 Tasks: Documentation and Finalization
+## Phase 3: GitHub Actions CI/CD Pipeline (Priority: P1 - User Story 2)
 
-#### Task 5.1: Create Package Documentation
+**Goal**: Automated build, test, and publishing workflow triggered by commits to main branch
 
-- [ ] **Update README.md**
-  - [ ] Add clear installation instructions
-  - [ ] Create quickstart usage examples
-  - [ ] Add API overview with TypeScript examples
-  - [ ] Include contribution guidelines
-- [ ] **Create API documentation**
-  - [ ] Generate API.md with interface documentation
-  - [ ] Document all exported functions and types
-  - [ ] Add usage examples for each major feature
-  - [ ] Include troubleshooting section
-- [ ] **Set up changelog**
-  - [ ] Create CHANGELOG.md template
-  - [ ] Configure automated changelog generation
-  - [ ] Add version history tracking
-  - [ ] Document breaking changes policy
+- [x] T011 [US2] Create .github/workflows/publish.yml with basic workflow structure
+- [x] T012 [P] [US2] Configure workflow triggers for push to main and pull requests
+- [x] T013 [P] [US2] Configure workflow permissions (contents: write, id-token: write)
+- [x] T014 [US2] Implement test job with Node.js setup and dependency caching
+- [x] T015 [P] [US2] Add test job steps (checkout, setup-node, npm ci, npm test, npm run build, npm run validate)
+- [x] T016 [US2] Implement release job with semantic-release execution
+- [x] T017 [P] [US2] Configure release job environment variables (GITHUB_TOKEN, NODE_AUTH_TOKEN)
+- [x] T018 [US2] Add release job dependency on test job success
+- [x] T019 [US2] Configure npm registry authentication in release job
 
-**Acceptance**: Documentation is comprehensive and enables easy package adoption
-**Estimated Complexity**: Medium (3-4 hours)
-**Dependencies**: Task 4.2 (publishing pipeline)
+**Independent Test Criteria**:
 
-#### Task 5.2: Final Integration and Testing
+- [ ] GitHub Actions workflow validates syntax without errors
+- [ ] Test job executes successfully on pull requests
+- [ ] Release job only runs on main branch pushes after test success
+- [ ] Build artifacts are generated and validated in CI environment
 
-- [ ] **Integration testing**
-  - [ ] Test complete workflow end-to-end
-  - [ ] Verify all validation checks pass
-  - [ ] Test local installation scenarios
-  - [ ] Validate published package functionality
-- [ ] **Performance optimization**
-  - [ ] Verify build time under 30 seconds
-  - [ ] Confirm bundle size under 50KB
-  - [ ] Optimize TypeScript compilation settings
-  - [ ] Test tree-shaking effectiveness
-- [ ] **Quality assurance**
-  - [ ] Run full validation checklist from quickstart.md
-  - [ ] Test on different Node.js versions
-  - [ ] Verify TypeScript compatibility across versions
-  - [ ] Test package installation on different platforms
+---
 
-**Acceptance**: All success criteria from spec.md are met with comprehensive testing
-**Estimated Complexity**: Medium (3-4 hours)
-**Dependencies**: All previous tasks
+## Phase 4: Repository Configuration and Secrets (Priority: P1 - User Story 1)
+
+**Goal**: Configure GitHub repository settings and authentication for automated publishing
+
+- [x] T020 [US1] Document NPM_TOKEN generation and GitHub secrets configuration in quickstart.md
+- [x] T021 [US1] Document repository permissions configuration (Actions settings) in quickstart.md
+- [x] T022 [P] [US1] Create comprehensive automation testing guide in quickstart.md
+- [x] T023 [US1] Document conventional commit workflow and version bumping rules in quickstart.md
+
+**Independent Test Criteria**:
+
+- [ ] Documentation provides clear steps for NPM token generation
+- [ ] Repository permissions are properly documented
+- [ ] Testing procedures cover both dry-run and live scenarios
+- [ ] Conventional commit examples demonstrate all version bump scenarios
+
+---
+
+## Phase 5: Integration and Documentation
+
+**Goal**: Complete automation pipeline with comprehensive documentation and validation
+
+- [x] T024 [P] Create CHANGELOG.md file for automated changelog generation
+
+**Independent Test Criteria**:
+
+- [ ] CHANGELOG.md is created and ready for semantic-release updates
+- [ ] All automation components are properly documented
+- [ ] Integration testing procedures are clearly defined
+
+---
+
+## Dependencies
+
+**Completion Order**:
+
+1. **Phase 1** (Setup) → **Phase 2** (Semantic Release) → **Phase 3** (GitHub Actions) → **Phase 4** (Repository Config) → **Phase 5** (Integration)
+
+**Story Dependencies**:
+
+- User Story 3 (Version Management) must complete before User Story 2 (Build Pipeline) release job
+- User Story 2 (Build Pipeline) needs User Story 1 (Package Configuration) for repository setup
+- All stories are otherwise independent and can be developed in parallel
+
+**Critical Path**: T001-T004 → T005-T010 → T011-T019 → T024
 
 ---
 
 ## Parallel Execution Opportunities
 
-**Independent Task Groups** (can be worked on simultaneously):
+**Can be done simultaneously**:
 
-- Group A: Tasks 1.1, 1.2 (configuration setup)
-- Group B: Tasks 1.3, 2.1 (API implementation)
-- Group C: Tasks 3.1, 4.1 (tooling setup)
+- T002 (plugin installation) + T004 (directory creation)
+- T008 (GitHub plugin config) + T012 (workflow triggers) + T013 (permissions)
+- T015 (test steps) + T017 (environment variables)
+- T020-T022 (documentation tasks)
 
-**Sequential Dependencies**:
+**Must be sequential**:
 
-- Task 2.2 requires Task 2.1
-- Task 3.2 requires Task 3.1
-- Task 4.2 requires Tasks 4.1, 2.1, 1.3
-- Task 5.1 requires Task 4.2
-- Task 5.2 requires all previous tasks
+- T001 → T002 (core packages before plugins)
+- T005 → T006,T007 (basic config before specific settings)
+- T011 → T012,T013,T014 (workflow file before configuration)
+- T014 → T015 (job structure before steps)
 
-## Estimated Total Timeline
+---
 
-- **Phase 1 (P1 Foundation)**: 8-11 hours
-- **Phase 2 (P2 Enhancement)**: 10-15 hours
-- **Phase 3 (Documentation/QA)**: 6-8 hours
-- **Total Estimated Effort**: 24-34 hours
+## Implementation Strategy
 
-## Success Validation Checklist
+**MVP Scope**: User Story 1 (Package Configuration validation) + core semantic-release setup
 
-After completion, verify these success criteria:
+- Provides immediate value with automated version management
+- Establishes foundation for full automation pipeline
+- Enables testing of conventional commit workflow
 
-- [ ] Package validation completes with zero errors (SC-001)
-- [ ] Build process under 30 seconds (SC-002)
-- [ ] Package installs and imports without errors (SC-003)
-- [ ] Bundle size under 50KB (SC-004)
-- [ ] Package quality metrics 90%+ (SC-005)
-- [ ] Documentation complete and accurate (SC-006)
+**Incremental Delivery**:
 
-This task breakdown provides a systematic approach to implementing npm publication preparation with clear dependencies, parallel execution opportunities, and comprehensive validation criteria.
+1. **Week 1**: Semantic-release configuration and local testing (T001-T010)
+2. **Week 2**: GitHub Actions pipeline implementation (T011-T019)
+3. **Week 3**: Repository setup and comprehensive documentation (T020-T024)
+
+**Validation Approach**: Each phase includes independent test criteria to verify functionality before proceeding to dependent phases.
+
+**Rollback Strategy**: Each phase can be independently disabled if issues arise, allowing gradual enablement of automation features.

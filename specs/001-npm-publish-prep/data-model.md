@@ -1,174 +1,193 @@
-# Data Model: NPM Package Publication Preparation
+# Data Model: NPM Package Publication Automation Pipeline
 
 ## Overview
 
-This document defines the data structures and entities involved in npm package publication preparation. The model focuses on configuration validation, build artifacts, and publication metadata required for successful npm publishing.
+This document defines the data structures and entities involved in automated npm package publication pipeline. The model focuses on CI/CD workflow configuration, semantic versioning automation, and GitHub Actions pipeline management required for hands-off publishing.
 
 ## Core Entities
 
-### Package Manifest
+### Release Configuration
 
-**Purpose**: Represents the complete npm package configuration including metadata, dependencies, and publishing settings.
+**Purpose**: Represents the semantic-release configuration that controls automated versioning and publishing behavior.
 
 **Fields**:
 
-- `name`: Package name (must be unique in npm registry)
-- `version`: Semantic version (major.minor.patch)
-- `description`: Human-readable package description
-- `main`: Entry point for CommonJS consumers
-- `module`: Entry point for ESM consumers
-- `types`: TypeScript declaration files entry point
-- `exports`: Modern export map for dual package support
-- `files`: Array of files/patterns to include in published package
-- `keywords`: Array of searchable terms for npm registry
-- `author`: Package author information
-- `license`: SPDX license identifier
-- `repository`: Git repository information
-- `homepage`: Package documentation URL
-- `dependencies`: Runtime dependencies map
-- `devDependencies`: Development-only dependencies map
-- `peerDependencies`: Consumer-provided dependencies map
-- `scripts`: npm script commands
-- `engines`: Node.js version requirements
+- `branches`: Array of branch configurations for release triggers
+- `plugins`: Ordered array of semantic-release plugins and their configuration
+- `repositoryUrl`: Git repository URL for release context
+- `tagFormat`: Template for git tag naming (e.g., "v${version}")
+- `dryRun`: Boolean flag for testing without actual publishing
+- `debug`: Boolean flag for verbose logging output
 
 **Validation Rules**:
 
-- name must be available in npm registry or match existing package owned by publisher
-- version must follow semantic versioning format
-- main, module, types paths must point to existing files
-- exports configuration must be valid and consistent with main/module/types
-- license must be valid SPDX identifier
-- dependencies must specify valid version ranges
+- branches array must include at least one branch configuration
+- plugins array must include commit-analyzer and release-notes-generator
+- repositoryUrl must match actual git remote URL
+- tagFormat must be valid template string
 
 **State Transitions**:
 
-- Draft → Validated (all required fields present and valid)
-- Validated → Published (successfully uploaded to npm registry)
+- Draft → Validated (configuration syntax valid)
+- Validated → Active (used by semantic-release)
 
-### Build Artifacts
+### Workflow Configuration
 
-**Purpose**: Represents the compiled output files that will be distributed to package consumers.
-
-**Fields**:
-
-- `sourceFiles`: Array of TypeScript source file paths
-- `outputFiles`: Array of generated JavaScript file paths
-- `declarationFiles`: Array of generated TypeScript declaration (.d.ts) file paths
-- `sourcemapFiles`: Array of generated sourcemap file paths
-- `buildConfig`: Build tool configuration (tsconfig.json, tsup.config.ts)
-- `buildMetadata`: Build timestamp, version, target information
-- `fileSizeMap`: Map of output file paths to file sizes in bytes
-- `compressionStats`: Gzip/Brotli compression statistics
-
-**Validation Rules**:
-
-- All outputFiles must exist and be valid JavaScript
-- All declarationFiles must exist and be valid TypeScript declarations
-- File sizes must meet optimization targets (<50KB total)
-- All sourceFiles must have corresponding outputs
-- Build metadata must include required version information
-
-**State Transitions**:
-
-- Source Changed → Stale (source files modified since last build)
-- Stale → Building (build process initiated)
-- Building → Built (successful compilation)
-- Building → Failed (compilation errors)
-
-### Publication Config
-
-**Purpose**: Represents file inclusion/exclusion patterns, export mappings, and npm publishing settings.
+**Purpose**: Represents GitHub Actions workflow definition for CI/CD pipeline execution.
 
 **Fields**:
 
-- `includedFiles`: Array of file patterns to include in published package
-- `excludedFiles`: Array of file patterns to exclude from published package
-- `exportMappings`: Map of export paths to file system paths
-- `publishConfig`: npm publish configuration (registry, access level, etc.)
-- `provenance`: Package provenance/signing configuration
-- `validationRules`: Array of validation checks to perform before publishing
-- `testConfig`: Local testing configuration (npm pack, yalc settings)
+- `name`: Human-readable workflow name
+- `triggers`: Event triggers (push, pull_request, workflow_dispatch)
+- `jobs`: Map of job definitions with dependencies
+- `environment`: Runtime environment configuration (Node.js version, OS)
+- `secrets`: Required secrets for authentication (NPM_TOKEN, GITHUB_TOKEN)
+- `permissions`: GitHub token permissions for repository actions
 
 **Validation Rules**:
 
-- includedFiles patterns must match existing files
-- excludedFiles must not overlap with includedFiles for same paths
-- exportMappings must reference valid build artifacts
-- publishConfig registry must be accessible
-- All validationRules must have corresponding validation implementations
+- triggers must include at least push events for main branch
+- jobs must include validation and release jobs
+- environment must specify supported Node.js versions (>=18)
+- secrets must include NPM_TOKEN for package publishing
+- permissions must allow content:write for releases
 
 **Relationships**:
 
-- References Build Artifacts through exportMappings
-- Validates Package Manifest through validationRules
-- Generates final publishable package structure
+- References Release Configuration through semantic-release step
+- Validates against Package Manifest for build/test commands
+- Generates Release Artifacts upon successful execution
+
+### Release Artifacts
+
+**Purpose**: Represents the outputs generated during successful release execution.
+
+**Fields**:
+
+- `version`: Semantic version string generated by semantic-release
+- `gitTag`: Git tag created for the release
+- `releaseNotes`: Markdown-formatted changelog content
+- `npmPackageUrl`: URL to published package on npm registry
+- `githubReleaseUrl`: URL to GitHub release page
+- `buildArtifacts`: Array of file paths included in release
+- `publishTimestamp`: ISO timestamp of successful publication
+- `commitSha`: Git commit SHA that triggered the release
+
+**Validation Rules**:
+
+- version must follow semantic versioning format (major.minor.patch)
+- gitTag must match configured tagFormat template
+- npmPackageUrl must be valid npm registry URL
+- githubReleaseUrl must be valid GitHub release URL
+- buildArtifacts must exist and match package files configuration
+
+**State Transitions**:
+
+- Pending → Building (CI/CD pipeline started)
+- Building → Ready (validation passed, artifacts built)
+- Ready → Published (npm package published successfully)
+- Published → Released (GitHub release created)
+
+### Pipeline Status
+
+**Purpose**: Represents the current state and execution context of the CI/CD pipeline.
+
+**Fields**:
+
+- `workflowRunId`: GitHub Actions workflow run identifier
+- `triggerCommit`: Git commit that initiated the pipeline
+- `pipelineStage`: Current stage of execution (setup, validate, build, release, publish)
+- `jobStatuses`: Map of job names to their execution status
+- `startTime`: Pipeline execution start timestamp
+- `endTime`: Pipeline completion timestamp (if finished)
+- `errorLogs`: Array of error messages if failures occurred
+- `artifactUrls`: Map of generated artifact names to download URLs
+
+**Validation Rules**:
+
+- workflowRunId must be valid GitHub Actions run ID
+- triggerCommit must be valid git commit SHA
+- pipelineStage must be valid stage enum value
+- jobStatuses must include all defined workflow jobs
+- startTime must be valid ISO timestamp
+
+**Relationships**:
+
+- References Release Artifacts upon successful completion
+- Links to Workflow Configuration that defined the execution
+- Connects to external GitHub Actions run for detailed logs
 
 ## Entity Relationships
 
 ```mermaid
 graph TD
-    PM[Package Manifest] --> BA[Build Artifacts]
-    PM --> PC[Publication Config]
-    BA --> PC
-    PC --> VP[Validation Pipeline]
-    VP --> PP[Published Package]
+    RC[Release Configuration] --> WC[Workflow Configuration]
+    WC --> PS[Pipeline Status]
+    PS --> RA[Release Artifacts]
 
-    PM --> |validates against| NR[NPM Registry]
-    BA --> |references| SF[Source Files]
-    PC --> |filters| PF[Published Files]
+    RC --> |configures| SR[Semantic Release]
+    WC --> |triggers| GA[GitHub Actions]
+    PS --> |monitors| GA
+    RA --> |publishes to| NPM[NPM Registry]
+    RA --> |creates| GHR[GitHub Release]
 ```
 
-### Package Manifest → Build Artifacts
+### Release Configuration → Workflow Configuration
 
-- Package Manifest provides build configuration through scripts and exports
-- Build Artifacts must align with Package Manifest entry points
-- Version information flows from manifest to build metadata
+- Release Configuration defines semantic-release behavior called by workflow
+- Workflow Configuration references release config in semantic-release job step
+- Version numbering strategy flows from release config to workflow triggers
 
-### Build Artifacts → Publication Config
+### Workflow Configuration → Pipeline Status
 
-- Publication Config export mappings reference Build Artifacts output files
-- File inclusion patterns must include all required Build Artifacts
-- Build artifact validation informs Publication Config validation rules
+- Workflow Configuration defines job structure monitored by Pipeline Status
+- Pipeline Status tracks execution of jobs defined in Workflow Configuration
+- Error handling strategies defined in workflow are reflected in status tracking
 
-### Publication Config → Validation Pipeline
+### Pipeline Status → Release Artifacts
 
-- Validation rules in Publication Config drive validation execution
-- File patterns determine which artifacts are validated
-- Test configuration enables pre-publish verification
+- Pipeline Status coordinates creation of Release Artifacts
+- Release Artifacts are only generated upon successful Pipeline Status completion
+- Artifact URLs and metadata flow from pipeline execution to artifact records
 
-## Validation Constraints
+## Configuration Constraints
 
 ### Cross-Entity Consistency
 
-- Package Manifest main/module/types must reference existing Build Artifacts
-- Publication Config export mappings must be consistent with Package Manifest exports
-- Build Artifacts must include all files referenced by Publication Config
+- Release Configuration branch settings must match Workflow Configuration triggers
+- Workflow Configuration job definitions must align with Pipeline Status tracking
+- Release Artifacts must include all files specified in Package Manifest
 
-### Size and Performance Constraints
+### Performance and Reliability Constraints
 
-- Total Build Artifacts size must be under 50KB
-- Build process must complete in under 30 seconds
-- Individual file sizes must be optimized for network transfer
+- Total pipeline execution must complete within 5 minutes
+- Individual jobs must include timeout settings to prevent hanging
+- Retry logic must be configured for transient npm registry failures
 
-### Quality Gates
+### Security Requirements
 
-- All Build Artifacts must pass TypeScript compilation
-- Package Manifest must pass npm package validation
-- Publication Config must pass file inclusion validation
-- Final package must pass local installation testing
+- All secrets must be properly configured in GitHub repository settings
+- npm authentication must use time-limited tokens or OIDC
+- Package provenance must be enabled for supply chain transparency
 
 ## Error Handling
 
-### Validation Errors
+### Configuration Errors
 
-- Missing required Package Manifest fields → ValidationError with specific field names
-- Invalid Build Artifacts (compilation failures) → BuildError with compiler output
-- Inconsistent Publication Config → ConfigurationError with conflict details
+- Invalid Release Configuration → ConfigurationError with specific validation failures
+- Missing Workflow Configuration secrets → AuthenticationError with setup instructions
+- Malformed Pipeline Status → ExecutionError with job-specific error details
 
 ### Runtime Errors
 
-- npm registry unavailable → RegistryError with retry strategy
-- File system errors during build → FileSystemError with affected paths
-- Network timeouts during validation → NetworkError with fallback options
+- GitHub Actions execution failures → WorkflowError with link to failed run
+- npm registry publishing failures → PublishError with retry instructions
+- semantic-release errors → VersioningError with commit message requirements
 
-This data model supports the full npm publishing workflow while maintaining type safety and comprehensive validation throughout the process.
+### Recovery Strategies
+
+- Failed releases can be retried by pushing new commits
+- Version conflicts resolved through semantic-release's built-in logic
+- Build failures addressed through clear error messaging and debugging info
+
+This data model supports the complete automation pipeline while maintaining clear separation of concerns and comprehensive error handling throughout the release process.

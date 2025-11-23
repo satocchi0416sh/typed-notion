@@ -85,6 +85,8 @@ NOTION_DATABASE_ID=<optional_database_id>
 
 ## Active Technologies
 
+- TypeScript 5.9.3, Node.js 18+ (ESNext target) + semantic-release, GitHub Actions, npm CLI, package validation tools (001-npm-publish-prep)
+
 - TypeScript 5.9+ (from tsconfig.json, required for advanced type inference) (001-mvp-properties)
 - N/A (library wraps external Notion databases) (001-mvp-properties)
 - TypeScript 5.9.3, Node.js 18+ (ESNext target) + TypeScript compiler, npm CLI, package validation tools (001-npm-publish-prep)
