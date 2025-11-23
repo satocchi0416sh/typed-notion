@@ -184,5 +184,30 @@ export {
   timed,
 } from './utils/performance.js';
 
+// Package validation and build pipeline (npm publishing support)
+export {
+  PackageValidator,
+  validator,
+  validatePackage,
+  validateManifest,
+  validateNameAvailability,
+  BuildPipeline,
+} from './validation/index.js';
+
+export type {
+  PackageValidationResult,
+  ValidationError,
+  ValidationWarning,
+  PackageManifest,
+  NameAvailabilityResult,
+  BuildArtifact,
+  BuildPerformance,
+  BuildResult,
+  BuildConfiguration,
+} from './validation/index.js';
+
+// Publishing module exports
+export * from './publishing/index.js';
+
 // Version export
 export const VERSION = '1.0.0';
