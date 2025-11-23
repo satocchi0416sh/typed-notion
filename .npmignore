@@ -1,0 +1,66 @@
+# Source files
+src/
+tests/
+test/
+
+# Development files
+*.md
+!README.md
+!CHANGELOG.md
+
+# Configuration files
+.env*
+*.log
+.vscode/
+.idea/
+.git/
+.github/
+.serena/
+.claude/
+.specify/
+
+# Build artifacts
+.tsbuildinfo
+coverage/
+.nyc_output
+
+# Package managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# ESLint and Prettier configs (users will have their own)
+.eslintrc*
+eslint.config.*
+.prettierrc*
+.prettierignore
+.eslintignore
+
+# TypeScript config (only ship compiled output)
+tsconfig.json
+tsup.config.ts
+
+# Test and development tools
+vitest.config.*
+husky
+.husky/
+lint-staged
+
+# Specification and documentation that doesn't ship
+specs/
+docs/dev/
