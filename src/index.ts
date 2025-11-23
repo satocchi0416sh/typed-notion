@@ -34,13 +34,13 @@
  * ## Quick Start
  *
  * ```typescript
- * import { createTypedSchema } from 'typed-notion';
+ * import { createTypedSchema, NotionClient } from 'typed-notion';
  *
- * // Define a schema with type-safe property definitions
+ * // ✅ CORRECT: Define a schema with proper structure
  * const taskSchema = createTypedSchema({
- *   databaseId: '12345678-1234-5678-9abc-123456789abc',
- *   properties: {
- *     Title: { type: 'title' },
+ *   databaseId: '12345678-1234-5678-9abc-123456789abc',  // Required!
+ *   properties: {                                        // Required wrapper!
+ *     Title: { type: 'title' },                         // ✅ Simple property definition
  *     Description: { type: 'rich_text' },
  *     Status: {
  *       type: 'select',
@@ -59,17 +59,29 @@
  *   }
  * } as const);
  *
- * // TypeScript automatically infers literal types for selections:
- * // Status: 'Todo' | 'In Progress' | 'Done' | null
- * // Tags: ('Bug' | 'Feature' | 'Enhancement')[] | null
+ * // ❌ WRONG: Common mistakes to avoid
+ * // const wrongSchema = createTypedSchema({
+ * //   Title: { type: 'title', title: {} },        // ❌ No extra 'title' property needed
+ * //   Status: { type: 'select' }                  // ❌ Missing required 'options'
+ * // });
  *
- * // Use the schema for type-safe property access
+ * // ✅ Type inference: TypeScript automatically infers literal types
+ * type TaskProperties = InferSchemaProperties<typeof taskSchema>;
+ * // Result: {
+ * //   Title: string | null;
+ * //   Status: 'Todo' | 'In Progress' | 'Done' | null;
+ * //   Tags: ('Bug' | 'Feature' | 'Enhancement')[] | null;
+ * //   // ... other properties
+ * // }
+ *
+ * // ✅ Runtime usage with type safety
  * const statusProperty = taskSchema.getProperty('Status');
  * const validator = taskSchema.createPropertyValidator();
- *
- * // Runtime validation with type safety
  * const isValid = validator('Status', 'Todo'); // true
- * const isInvalid = validator('Status', 'Invalid'); // false
+ *
+ * // ✅ Use with NotionClient (placeholder - full implementation pending)
+ * const client = new NotionClient({ auth: 'your-api-key' });
+ * // const pages = await client.queryDatabase(taskSchema);
  * ```
  *
  * ## Advanced Usage Examples
@@ -257,3 +269,6 @@ export function getNotionPropertyValue<T>(property: unknown, type: string): T | 
       return null;
   }
 }
+
+// Notion Client
+export { NotionClient } from './client/notion-client.js';
