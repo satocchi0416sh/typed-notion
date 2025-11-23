@@ -113,5 +113,10 @@
       "path": "./dist/*.js",
       "maxSize": "50kb"
     }
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  }
 }
