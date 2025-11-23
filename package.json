@@ -1,5 +1,5 @@
 {
-  "name": "@typed-notion/core",
+  "name": "typed-notion-core-ts",
   "version": "1.0.0",
   "description": "Type-safe Notion API library with compile-time validation and runtime type inference",
   "main": "./dist/index.cjs",
@@ -52,13 +52,13 @@
     "schema",
     "validation"
   ],
-  "author": "TypedNotion Team",
+  "author": "satocchi0416sh",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/typed-notion/core.git"
+    "url": "git+https://github.com/satocchi0416sh/typed-notion.git"
   },
-  "homepage": "https://typed-notion.dev",
+  "homepage": "https://github.com/satocchi0416sh/typed-notion#readme",
   "engines": {
     "node": ">=18.0.0"
   },
