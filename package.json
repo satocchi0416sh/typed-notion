@@ -111,7 +111,8 @@
   "bundlesize": [
     {
       "path": "./dist/*.js",
-      "maxSize": "50kb"
+      "maxSize": "50kb",
+      "github": false
     }
   ],
   "publishConfig": {
