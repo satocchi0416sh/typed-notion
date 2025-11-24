@@ -30,7 +30,10 @@
     "dev": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
     "test:coverage": "vitest run --coverage",
+    "test:bench": "vitest bench tests/performance",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepare": "husky",
@@ -106,7 +109,8 @@
     "@notionhq/client": "^5.4.0",
     "dotenv": "^17.2.3",
     "valibot": "^1.1.0",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.10",
+    "zod": "^3.25.76"
   },
   "bundlesize": [
     {
