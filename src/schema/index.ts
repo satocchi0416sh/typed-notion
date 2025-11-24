@@ -7,6 +7,32 @@
 export { TypedSchema, createTypedSchema } from './typed-schema.js';
 
 export {
+  ZodSchemaGenerator,
+  getZodSchemaGenerator,
+  resetZodSchemaGenerator,
+} from './zod-generator.js';
+
+export type {
+  PropertyFilterMap,
+  TextFilters,
+  NumberFilters,
+  CheckboxFilters,
+  DateFilters,
+  SelectFilters,
+  MultiSelectFilters,
+  PeopleFilters,
+  ValidOperators,
+  FilterValue,
+} from './property-types.js';
+
+export {
+  isValidOperator,
+  getValidOperators,
+  validateFilterValue,
+  getFilterValueDescription,
+} from './property-types.js';
+
+export {
   validatePropertyType,
   validatePropertyDefinition,
   validateSchemaDefinition,
