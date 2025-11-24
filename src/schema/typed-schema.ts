@@ -9,6 +9,8 @@ import type { SchemaDefinition, PropertyDefinition, PerformanceMetrics } from '.
 import type { InferSchemaProperties } from '../types/inference.js';
 import { validateSchemaDefinition, validatePropertyName } from './validation.js';
 import { SchemaValidationError, PropertyAccessError } from '../errors/index.js';
+import { z } from 'zod';
+import { getZodSchemaGenerator } from './zod-generator.js';
 
 /**
  * TypedSchema class provides type-safe schema management
@@ -290,6 +292,38 @@ export class TypedSchema<S extends SchemaDefinition> {
           return false;
       }
     };
+  }
+
+  /**
+   * Generate Zod validation schema from TypedSchema definition
+   * @returns Zod schema matching TypeScript type inference
+   */
+  toZod(): z.ZodType<InferSchemaProperties<S>> {
+    const zodSchemaGenerator = getZodSchemaGenerator();
+    return zodSchemaGenerator.generateSchema(this._definition);
+  }
+
+  /**
+   * Validate data against the schema using auto-generated Zod schema
+   * @param data - Data to validate
+   * @returns Zod safe parse result
+   */
+  validate(
+    data: unknown
+  ): z.SafeParseReturnType<Record<string, unknown>, InferSchemaProperties<S>> {
+    const zodSchema = this.toZod();
+    return zodSchema.safeParse(data);
+  }
+
+  /**
+   * Parse and transform data with automatic error handling
+   * @param data - Data to parse
+   * @returns Parsed data matching schema types
+   * @throws ZodError if validation fails
+   */
+  parse(data: unknown): InferSchemaProperties<S> {
+    const zodSchema = this.toZod();
+    return zodSchema.parse(data);
   }
 
   /**

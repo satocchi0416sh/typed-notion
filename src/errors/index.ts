@@ -110,3 +110,118 @@ export class SelectionValidationError extends TypedNotionError {
     this.context = { property, value, validOptions };
   }
 }
+
+/**
+ * Data conversion error for transformation failures between Notion API and TypeScript types
+ * Thrown when automatic data conversion fails during query/create/update operations
+ */
+export class ConversionError extends TypedNotionError {
+  readonly code = 'CONVERSION_ERROR';
+  readonly context: {
+    type: 'VALIDATION_ERROR' | 'CONVERSION_ERROR' | 'SCHEMA_MISMATCH' | 'MISSING_PROPERTY';
+    input?: unknown;
+    propertyName?: string;
+    expectedType?: string;
+    actualType?: string;
+    originalError?: Error;
+  };
+
+  constructor(
+    message: string,
+    type: 'VALIDATION_ERROR' | 'CONVERSION_ERROR' | 'SCHEMA_MISMATCH' | 'MISSING_PROPERTY',
+    input?: unknown,
+    propertyName?: string,
+    expectedType?: string,
+    actualType?: string,
+    originalError?: Error
+  ) {
+    super(message);
+    this.context = {
+      type,
+      ...(input !== undefined && { input }),
+      ...(propertyName !== undefined && { propertyName }),
+      ...(expectedType !== undefined && { expectedType }),
+      ...(actualType !== undefined && { actualType }),
+      ...(originalError !== undefined && { originalError }),
+    };
+  }
+}
+
+/**
+ * Configuration error for environment and database ID resolution issues
+ * Thrown when environment variables are missing or database configurations are invalid
+ */
+export class ConfigurationError extends TypedNotionError {
+  readonly code = 'CONFIGURATION_ERROR';
+  readonly context: {
+    type: 'MISSING_ENV' | 'INVALID_DATABASE_ID' | 'VALIDATION_FAILED' | 'API_ERROR';
+    schemaName?: string;
+    suggestion?: string;
+  };
+
+  constructor(
+    message: string,
+    type: 'MISSING_ENV' | 'INVALID_DATABASE_ID' | 'VALIDATION_FAILED' | 'API_ERROR',
+    schemaName?: string,
+    suggestion?: string
+  ) {
+    super(message);
+    this.context = {
+      type,
+      ...(schemaName !== undefined && { schemaName }),
+      ...(suggestion !== undefined && { suggestion }),
+    };
+  }
+}
+
+/**
+ * Schema registration error for configuration management issues
+ * Thrown when registering schemas with the configuration manager fails
+ */
+export class SchemaRegistrationError extends TypedNotionError {
+  readonly code = 'SCHEMA_REGISTRATION_ERROR';
+  readonly context: {
+    schemaName: string;
+    validationErrors?: Array<{
+      type: string;
+      message: string;
+      property?: string;
+    }>;
+  };
+
+  constructor(
+    message: string,
+    schemaName: string,
+    validationErrors?: Array<{
+      type: string;
+      message: string;
+      property?: string;
+    }>
+  ) {
+    super(message);
+    this.context = {
+      schemaName,
+      ...(validationErrors !== undefined && { validationErrors }),
+    };
+  }
+}
+
+// Result type for safe error handling in conversion operations
+export type Result<T, E = ConversionError> = { kind: 'ok'; value: T } | { kind: 'err'; error: E };
+
+// Helper functions for Result type
+export function createOk<T>(value: T): Result<T> {
+  return { kind: 'ok', value };
+}
+
+export function createErr<E>(error: E): Result<never, E> {
+  return { kind: 'err', error };
+}
+
+export function isOk<T, E>(result: Result<T, E>): result is { kind: 'ok'; value: T } {
+  return result.kind === 'ok';
+}
+
+export function isErr<T, E>(result: Result<T, E>): result is { kind: 'err'; error: E } {
+  return result.kind === 'err';
+}
