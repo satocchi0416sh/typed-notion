@@ -364,3 +364,27 @@ export {
 } from './config/environment.js';
 
 export type { EnvironmentConfig, ConfigurationValidationResult } from './config/environment.js';
+
+// Configuration Management System
+export {
+  DatabaseConfigurationManager,
+  getDatabaseConfigurationManager,
+  resetDatabaseConfigurationManager,
+} from './config/database-config-manager.js';
+
+export { createConfigurationMonitor } from './config/monitor.js';
+
+export type {
+  ConfigurationManager,
+  SchemaConfigStatus,
+  HealthCheckResult,
+} from './config/database-config-manager.js';
+
+export type {
+  ConfigurationMonitor,
+  MonitoringConfig,
+  ConfigurationIssue,
+  MonitoringStats,
+  HealthTrend,
+  IssueSeverity,
+} from './config/monitor.js';
