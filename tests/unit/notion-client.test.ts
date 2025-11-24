@@ -504,7 +504,16 @@ describe('NotionClient', () => {
       // With strict validation, should throw
       const strictClient = new NotionClient({
         auth: 'test-token',
-        conversionConfig: { strictTypeValidation: true },
+        conversionConfig: {
+          strictTypeValidation: true,
+          preserveRichTextFormatting: false,
+          missingPropertyStrategy: 'error',
+          performance: {
+            enableCaching: true,
+            cacheMaxSize: 100,
+            enableMetrics: true,
+          },
+        },
       });
 
       await expect(strictClient.query(mockSchema)).rejects.toThrow(ConversionError);
