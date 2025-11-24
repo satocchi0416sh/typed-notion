@@ -192,7 +192,7 @@ export class NotionClient {
 
       const transformedResults: Array<InferSchemaProperties<T> & { id: string }> = [];
 
-      for (const page of response.results) {
+      for (const page of response.results as unknown[]) {
         const transformResult = transformer.transform(
           page as import('../conversion/page-transformer.js').NotionAPIResponse
         );
@@ -215,10 +215,11 @@ export class NotionClient {
 
       return {
         results: transformedResults,
-        next_cursor: response.next_cursor,
-        has_more: response.has_more,
-        type: response.type as 'page_or_database',
-        page_or_database: response.page_or_database || {},
+        next_cursor: (response as { next_cursor: string | null }).next_cursor,
+        has_more: (response as { has_more: boolean }).has_more,
+        type: 'page_or_database',
+        page_or_database:
+          (response as { page_or_database?: Record<string, unknown> }).page_or_database || {},
         request_id: (response as { request_id?: string }).request_id || '',
       };
     } catch (error) {
@@ -259,7 +260,7 @@ export class NotionClient {
       const response = await this.executeWithRateLimit(async () => {
         return await this.client.pages.create({
           parent: { database_id: databaseId },
-          properties: notionProperties as Record<string, unknown>,
+          properties: notionProperties as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         });
       });
 
@@ -333,7 +334,7 @@ export class NotionClient {
       const response = await this.executeWithRateLimit(async () => {
         return await this.client.pages.update({
           page_id: pageId,
-          properties: notionProperties as Record<string, unknown>,
+          properties: notionProperties as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         });
       });
 
@@ -650,28 +651,31 @@ export class NotionClient {
    * @returns Promise with API response
    */
   private async executeWithRateLimit<T>(apiCall: () => Promise<T>): Promise<T> {
-    return (this.rateLimitQueue = this.rateLimitQueue.then(async () => {
-      this.metrics.apiRequestCount++;
+    return await new Promise<T>((resolve, reject) => {
+      this.rateLimitQueue = this.rateLimitQueue.then(async () => {
+        this.metrics.apiRequestCount++;
 
-      try {
-        const result = await apiCall();
+        try {
+          const result = await apiCall();
 
-        // Wait for rate limit delay
-        if (this.config.retryDelayMs && this.config.retryDelayMs > 0) {
-          await new Promise(resolve => globalThis.setTimeout(resolve, this.config.retryDelayMs));
+          // Wait for rate limit delay
+          if (this.config.retryDelayMs && this.config.retryDelayMs > 0) {
+            await new Promise(r => globalThis.setTimeout(r, this.config.retryDelayMs));
+          }
+
+          resolve(result);
+        } catch (error) {
+          if (this.isRateLimitError(error)) {
+            this.metrics.rateLimitHits++;
+            // Exponential backoff for rate limit errors
+            const delay =
+              (this.config.retryDelayMs || 334) * Math.pow(2, this.metrics.rateLimitHits);
+            await new Promise(r => globalThis.setTimeout(r, Math.min(delay, 5000)));
+          }
+          reject(error);
         }
-
-        return result;
-      } catch (error) {
-        if (this.isRateLimitError(error)) {
-          this.metrics.rateLimitHits++;
-          // Exponential backoff for rate limit errors
-          const delay = (this.config.retryDelayMs || 334) * Math.pow(2, this.metrics.rateLimitHits);
-          await new Promise(resolve => globalThis.setTimeout(resolve, Math.min(delay, 5000)));
-        }
-        throw error;
-      }
-    }));
+      });
+    });
   }
 
   /**

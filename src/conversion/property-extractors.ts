@@ -5,7 +5,8 @@
  * to typed TypeScript values with validation and error handling.
  */
 
-import { Result, createOk, createErr, ConversionError } from '../errors/index.js';
+import type { Result } from '../errors/index.js';
+import { createOk, createErr, ConversionError } from '../errors/index.js';
 
 /**
  * Notion API raw property value base structure
@@ -110,7 +111,7 @@ export class TitleExtractor implements PropertyExtractor<string | null> {
     }
 
     try {
-      const titleProperty = property as { title: RichTextObject[] };
+      const titleProperty = property as unknown as { title: RichTextObject[] };
       const richTextArray = titleProperty.title;
 
       if (!richTextArray || richTextArray.length === 0) {
@@ -164,7 +165,7 @@ export class RichTextExtractor implements PropertyExtractor<string | null> {
     }
 
     try {
-      const richTextProperty = property as { rich_text: RichTextObject[] };
+      const richTextProperty = property as unknown as { rich_text: RichTextObject[] };
       const richTextArray = richTextProperty.rich_text;
 
       if (!richTextArray || richTextArray.length === 0) {
@@ -220,7 +221,7 @@ export class NumberExtractor implements PropertyExtractor<number | null> {
     }
 
     try {
-      const numberProperty = property as { number: number | null };
+      const numberProperty = property as unknown as { number: number | null };
       const value = numberProperty.number;
 
       if (value === null || value === undefined) {
@@ -284,7 +285,7 @@ export class CheckboxExtractor implements PropertyExtractor<boolean | null> {
     }
 
     try {
-      const checkboxProperty = property as { checkbox: boolean };
+      const checkboxProperty = property as unknown as { checkbox: boolean };
       const value = checkboxProperty.checkbox;
 
       if (typeof value !== 'boolean') {
@@ -329,7 +330,10 @@ export class CheckboxExtractor implements PropertyExtractor<boolean | null> {
  * Date property extractor with timezone handling
  */
 export class DateExtractor implements PropertyExtractor<Date | null> {
-  constructor(private defaultTimezone?: string) {}
+  constructor(_defaultTimezone?: string) {
+    // Store timezone for future use if needed
+    void _defaultTimezone;
+  }
 
   extract(property: NotionPropertyValue): Result<Date | null> {
     if (!this.validate(property)) {
@@ -346,7 +350,7 @@ export class DateExtractor implements PropertyExtractor<Date | null> {
     }
 
     try {
-      const dateProperty = property as {
+      const dateProperty = property as unknown as {
         date: {
           start: string;
           end?: string | null;
@@ -444,7 +448,7 @@ export class SelectExtractor implements PropertyExtractor<string | null> {
     }
 
     try {
-      const selectProperty = property as {
+      const selectProperty = property as unknown as {
         select: { id: string; name: string; color: string } | null;
       };
 
@@ -497,7 +501,7 @@ export class MultiSelectExtractor implements PropertyExtractor<string[] | null> 
     }
 
     try {
-      const multiSelectProperty = property as {
+      const multiSelectProperty = property as unknown as {
         multi_select: Array<{ id: string; name: string; color: string }>;
       };
 
@@ -555,7 +559,7 @@ export class PeopleExtractor implements PropertyExtractor<NotionUser[] | null> {
     }
 
     try {
-      const peopleProperty = property as { people: NotionUser[] };
+      const peopleProperty = property as unknown as { people: NotionUser[] };
       const peopleArray = peopleProperty.people;
 
       if (!peopleArray || peopleArray.length === 0) {
@@ -606,7 +610,7 @@ export class CreatedTimeExtractor implements PropertyExtractor<Date | null> {
     }
 
     try {
-      const createdTimeProperty = property as { created_time: string };
+      const createdTimeProperty = property as unknown as { created_time: string };
       const dateString = createdTimeProperty.created_time;
 
       const date = new Date(dateString);
@@ -667,7 +671,7 @@ export class LastEditedTimeExtractor implements PropertyExtractor<Date | null> {
     }
 
     try {
-      const lastEditedTimeProperty = property as { last_edited_time: string };
+      const lastEditedTimeProperty = property as unknown as { last_edited_time: string };
       const dateString = lastEditedTimeProperty.last_edited_time;
 
       const date = new Date(dateString);
@@ -728,7 +732,7 @@ export class UrlExtractor implements PropertyExtractor<string | null> {
     }
 
     try {
-      const urlProperty = property as { url: string | null };
+      const urlProperty = property as unknown as { url: string | null };
       const value = urlProperty.url;
 
       return createOk(value);
@@ -775,7 +779,7 @@ export class EmailExtractor implements PropertyExtractor<string | null> {
     }
 
     try {
-      const emailProperty = property as { email: string | null };
+      const emailProperty = property as unknown as { email: string | null };
       const value = emailProperty.email;
 
       return createOk(value);

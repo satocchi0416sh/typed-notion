@@ -6,8 +6,8 @@
  */
 
 // Property Extractors
+export type { PropertyExtractor } from './property-extractors.js';
 export {
-  PropertyExtractor,
   TitleExtractor,
   RichTextExtractor,
   NumberExtractor,

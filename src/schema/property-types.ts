@@ -132,7 +132,7 @@ export type FilterValue<
 export function isValidOperator<T extends keyof PropertyFilterMap>(
   propertyType: T,
   operator: string
-): operator is ValidOperators<T> {
+): operator is string & ValidOperators<T> {
   const validOperators = getValidOperators(propertyType);
   return validOperators.includes(operator as ValidOperators<T>);
 }

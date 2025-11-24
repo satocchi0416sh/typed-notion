@@ -323,8 +323,8 @@ export type {
 } from './client/index.js';
 
 // Data Conversion System
+export type { PropertyExtractor } from './conversion/index.js';
 export {
-  PropertyExtractor,
   TitleExtractor,
   RichTextExtractor,
   NumberExtractor,
