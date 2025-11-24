@@ -9,13 +9,13 @@ import { expect } from 'vitest';
 import type { Result } from '../../src/errors/index.js';
 
 declare module 'vitest' {
-  interface Assertion<T = unknown> {
-    toBeOkResult(): T;
-    toBeErrResult(): T;
-    toBeValidNotionFilter(): T;
-    toBeValidSchema(): T;
-    toHaveValidTimezone(): T;
-    toMatchPropertyType(expectedType: string): T;
+  interface Assertion {
+    toBeOkResult(): unknown;
+    toBeErrResult(): unknown;
+    toBeValidNotionFilter(): unknown;
+    toBeValidSchema(): unknown;
+    toHaveValidTimezone(): unknown;
+    toMatchPropertyType(expectedType: string): unknown;
   }
 }
 
@@ -24,7 +24,7 @@ expect.extend({
   toBeOkResult(received: Result<unknown, unknown>) {
     const { isNot } = this;
 
-    const pass = received.ok === true;
+    const pass = received.kind === 'ok';
 
     return {
       pass,
@@ -40,7 +40,7 @@ expect.extend({
   toBeErrResult(received: Result<unknown, unknown>) {
     const { isNot } = this;
 
-    const pass = received.ok === false;
+    const pass = received.kind === 'err';
 
     return {
       pass,
@@ -278,13 +278,13 @@ expect.extend({
 // Helper functions for common test patterns
 export function expectOkResult<T>(
   result: Result<T, unknown>
-): asserts result is { ok: true; value: T } {
+): asserts result is { kind: 'ok'; value: T } {
   expect(result).toBeOkResult();
 }
 
 export function expectErrResult<E>(
   result: Result<unknown, E>
-): asserts result is { ok: false; error: E } {
+): asserts result is { kind: 'err'; error: E } {
   expect(result).toBeErrResult();
 }
 
