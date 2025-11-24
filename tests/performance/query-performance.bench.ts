@@ -8,7 +8,12 @@
 import { bench, describe } from 'vitest';
 import { NotionClient } from '../../src/client/notion-client.js';
 import { createTypedSchema } from '../../src/schema/typed-schema.js';
-import { FilterBuilder, FilterValidator, FilterConverter } from '../../src/client/filters.js';
+import {
+  FilterBuilder,
+  FilterValidator,
+  FilterConverter,
+  NotionFilter,
+} from '../../src/client/filters.js';
 import {
   TitleExtractor,
   RichTextExtractor,
@@ -27,18 +32,16 @@ import { measureAsyncPerformance, measureSyncPerformance } from '../utils/custom
 
 // Mock setup
 const mockClient = createMockNotionClient();
-const testSchema = createTypedSchema(
-  {
-    properties: {
-      title: { type: 'title' },
-      status: { type: 'select', options: ['Active', 'Inactive'] },
-      count: { type: 'number' },
-      tags: { type: 'multi_select', options: ['feature', 'bug', 'enhancement'] },
-      completed: { type: 'checkbox' },
-    },
+const testSchema = createTypedSchema({
+  databaseId: 'test-db',
+  properties: {
+    title: { type: 'title' },
+    status: { type: 'select', options: ['Active', 'Inactive'] as const },
+    count: { type: 'number' },
+    tags: { type: 'multi_select', options: ['feature', 'bug', 'enhancement'] as const },
+    completed: { type: 'checkbox' },
   },
-  'test-db'
-);
+} as const);
 
 describe('Query Performance Benchmarks', () => {
   describe('NotionClient Query Operations', () => {
@@ -57,7 +60,7 @@ describe('Query Performance Benchmarks', () => {
         filter: {
           property: 'status',
           select: { equals: 'Active' },
-        } satisfies Parameters<typeof client.query>[1],
+        },
       });
     });
 
@@ -75,16 +78,28 @@ describe('Query Performance Benchmarks', () => {
       await client.query(testSchema, {
         filter: {
           and: [
-            { property: 'status', select: { equals: 'Active' } },
-            { property: 'completed', checkbox: { equals: false } },
+            {
+              property: 'status',
+              select: { equals: 'Active' },
+            },
+            {
+              property: 'completed',
+              checkbox: { equals: false },
+            },
             {
               or: [
-                { property: 'tags', multi_select: { contains: 'feature' } },
-                { property: 'tags', multi_select: { contains: 'bug' } },
+                {
+                  property: 'tags',
+                  multi_select: { contains: 'feature' },
+                },
+                {
+                  property: 'tags',
+                  multi_select: { contains: 'bug' },
+                },
               ],
             },
           ],
-        } satisfies Parameters<typeof client.query>[1],
+        },
         sorts: [
           { property: 'count', direction: 'descending' },
           { property: 'title', direction: 'ascending' },
@@ -127,7 +142,10 @@ describe('Query Performance Benchmarks', () => {
         client.query(testSchema),
         client.create(testSchema, { title: 'Task 2', status: 'Inactive' }),
         client.query(testSchema, {
-          filter: { property: 'status', select: { equals: 'Active' } },
+          filter: {
+            property: 'status',
+            select: { equals: 'Active' },
+          },
         }),
       ]);
     });
@@ -152,14 +170,26 @@ describe('Query Performance Benchmarks', () => {
         .where('status', { equals: 'Active' })
         .and({
           or: [
-            { property: 'tags', multi_select: { contains: 'feature' } },
-            { property: 'tags', multi_select: { contains: 'bug' } },
+            {
+              property: 'tags',
+              multi_select: { contains: 'feature' },
+            },
+            {
+              property: 'tags',
+              multi_select: { contains: 'bug' },
+            },
           ],
         })
         .and({
           and: [
-            { property: 'count', number: { greater_than: 5 } },
-            { property: 'completed', checkbox: { equals: false } },
+            {
+              property: 'count',
+              number: { greater_than: 5 },
+            },
+            {
+              property: 'completed',
+              checkbox: { equals: false },
+            },
           ],
         })
         .build();
@@ -176,11 +206,16 @@ describe('Query Performance Benchmarks', () => {
         100
       );
 
-      filters.forEach(filter => validator.validate(filter));
+      filters.forEach(_filter =>
+        validator.validate({
+          property: 'status',
+          select: { equals: 'Active' },
+        })
+      );
     });
 
     bench('Filter conversion - 100 filters', () => {
-      const converter = new FilterConverter();
+      const converter = new FilterConverter<typeof testSchema.definition>();
 
       const filters = generateTestArray(
         () => ({
@@ -190,7 +225,12 @@ describe('Query Performance Benchmarks', () => {
         100
       );
 
-      filters.forEach(filter => converter.toNotionFilter(filter));
+      filters.forEach(_filter =>
+        converter.toNotionFilter({
+          property: 'status',
+          select: { equals: 'Active' },
+        } as NotionFilter<typeof testSchema.definition>)
+      );
     });
   });
 
@@ -203,27 +243,25 @@ describe('Query Performance Benchmarks', () => {
         1000
       );
 
-      properties.forEach(prop => extractor.extract(prop, 'title'));
+      properties.forEach(prop => extractor.extract(prop));
     });
 
     bench('Extract rich text with large content', () => {
-      const RichTextExtractor = RichTextExtractor;
       const extractor = new RichTextExtractor();
 
       const largeContent = 'x'.repeat(50000); // 50KB of text
       const property = mockPropertyValues.rich_text(largeContent);
 
-      extractor.extract(property, 'description');
+      extractor.extract(property);
     });
 
     bench('Extract multi-select with many options', () => {
-      const MultiSelectExtractor = MultiSelectExtractor;
       const extractor = new MultiSelectExtractor();
 
       const manyOptions = Array.from({ length: 1000 }, (_, i) => `option-${i}`);
       const property = mockPropertyValues.multi_select(manyOptions);
 
-      extractor.extract(property, 'tags');
+      extractor.extract(property);
     });
 
     bench('Mixed property extraction - realistic page', () => {
@@ -250,7 +288,7 @@ describe('Query Performance Benchmarks', () => {
       Object.entries(properties).forEach(([name, prop]) => {
         const extractor = extractors[name as keyof typeof extractors];
         if (extractor) {
-          extractor.extract(prop, name);
+          extractor.extract(prop);
         }
       });
     });
@@ -285,11 +323,12 @@ describe('Query Performance Benchmarks', () => {
       const schemas = generateTestArray(
         () =>
           createTypedSchema({
+            databaseId: `db-${Math.random()}`,
             properties: {
               [`prop_${Math.random()}`]: { type: 'title' },
-              [`select_${Math.random()}`]: { type: 'select', options: ['a', 'b', 'c'] },
+              [`select_${Math.random()}`]: { type: 'select', options: ['a', 'b', 'c'] as const },
             },
-          }),
+          } as const),
         100
       );
 
