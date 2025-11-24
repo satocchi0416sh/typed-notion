@@ -163,7 +163,7 @@ export class StreamingTransformer<T extends SchemaDefinition> {
    */
   async *transformStream(
     pages: Array<import('./page-transformer.js').NotionAPIResponse>,
-    batchSize = this.batchSize
+    batchSize: number = this.batchSize
   ): AsyncGenerator<
     import('../errors/index.js').Result<
       Array<import('../types/inference.js').InferSchemaProperties<T> & { id: string }>
