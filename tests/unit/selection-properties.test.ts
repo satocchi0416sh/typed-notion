@@ -64,9 +64,9 @@ describe('Unit Tests: Text and Selection Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(PropertyValidationError);
         const propError = error as PropertyValidationError;
-        expect(propError.context.property).toBe('Description');
-        expect(propError.context.value).toBe(123);
-        expect(propError.context.expectedType).toBe('string');
+        expect(propError.context?.property).toBe('Description');
+        expect(propError.context?.value).toBe(123);
+        expect(propError.context?.expectedType).toBe('string');
       }
     });
   });
@@ -130,9 +130,9 @@ describe('Unit Tests: Text and Selection Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(SelectionValidationError);
         const selectionError = error as SelectionValidationError;
-        expect(selectionError.context.property).toBe('Status');
-        expect(selectionError.context.value).toBe('Invalid Option');
-        expect(selectionError.context.validOptions).toEqual(['Todo', 'In Progress', 'Done']);
+        expect(selectionError.context?.property).toBe('Status');
+        expect(selectionError.context?.value).toBe('Invalid Option');
+        expect(selectionError.context?.validOptions).toEqual(['Todo', 'In Progress', 'Done']);
       }
     });
   });
@@ -201,7 +201,7 @@ describe('Unit Tests: Text and Selection Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(SelectionValidationError);
         const selectionError = error as SelectionValidationError;
-        expect(selectionError.context.value).toBe('InvalidTag');
+        expect(selectionError.context?.value).toBe('InvalidTag');
       }
     });
   });

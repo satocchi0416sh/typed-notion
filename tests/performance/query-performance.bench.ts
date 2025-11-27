@@ -12,7 +12,7 @@ import {
   FilterBuilder,
   FilterValidator,
   FilterConverter,
-  NotionFilter,
+  type NotionFilter,
 } from '../../src/client/filters.js';
 import {
   TitleExtractor,

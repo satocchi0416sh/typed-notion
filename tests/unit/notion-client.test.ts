@@ -5,7 +5,7 @@
  * and performance metrics of the core NotionClient functionality.
  */
 
-import { describe, it, expect, beforeEach, vi, MockedFunction } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotionClient } from '../../src/client/notion-client.js';
 import type { TypedSchema } from '../../src/schema/typed-schema.js';
 import type { SchemaDefinition } from '../../src/types/core.js';

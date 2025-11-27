@@ -15,13 +15,7 @@ import {
   validateSchemaDefinition,
   isValidSchemaDefinition,
 } from '../../src/schema/index.js';
-import {
-  SchemaValidationError,
-  PropertyAccessError,
-  PropertyValidationError,
-  SelectionValidationError,
-} from '../../src/errors/index.js';
-import type { SchemaDefinition } from '../../src/types/index.js';
+import { SchemaValidationError } from '../../src/errors/index.js';
 
 describe('Integration Test: Text and Selection Schema Workflow', () => {
   describe('Task Management Schema Workflow', () => {

@@ -24,7 +24,7 @@ expect.extend({
   toBeOkResult(received: Result<unknown, unknown>) {
     const { isNot } = this;
 
-    const pass = received.kind === 'ok';
+    const pass = received.ok === true;
 
     return {
       pass,
@@ -40,7 +40,7 @@ expect.extend({
   toBeErrResult(received: Result<unknown, unknown>) {
     const { isNot } = this;
 
-    const pass = received.kind === 'err';
+    const pass = received.ok === false;
 
     return {
       pass,
@@ -278,13 +278,13 @@ expect.extend({
 // Helper functions for common test patterns
 export function expectOkResult<T>(
   result: Result<T, unknown>
-): asserts result is { kind: 'ok'; value: T } {
+): asserts result is { ok: true; value: T } {
   expect(result).toBeOkResult();
 }
 
 export function expectErrResult<E>(
   result: Result<unknown, E>
-): asserts result is { kind: 'err'; error: E } {
+): asserts result is { ok: false; error: E } {
   expect(result).toBeErrResult();
 }
 
