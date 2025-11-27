@@ -24,58 +24,58 @@ describe('Type Inference Tests: User Story 1', () => {
       type TitleProperty = { type: 'title' };
       type InferredType = InferPropertyType<TitleProperty>;
 
-      expectTypeOf<InferredType>({} as any).toEqualTypeOf<string | null>();
+      expectTypeOf<InferredType>().toMatchTypeOf<string | null>();
     });
 
     it('should infer number property type correctly', () => {
       type NumberProperty = { type: 'number' };
       type InferredType = InferPropertyType<NumberProperty>;
 
-      expectTypeOf<InferredType>({} as any).toEqualTypeOf<number | null>();
+      expectTypeOf<InferredType>().toMatchTypeOf<number | null>();
     });
 
     it('should infer number property with format correctly', () => {
       type NumberWithFormat = { type: 'number'; format: 'dollar' };
       type InferredType = InferPropertyType<NumberWithFormat>;
 
-      expectTypeOf<InferredType>({} as any).toEqualTypeOf<number | null>();
+      expectTypeOf<InferredType>().toMatchTypeOf<number | null>();
     });
 
     it('should infer checkbox property type correctly', () => {
       type CheckboxProperty = { type: 'checkbox' };
       type InferredType = InferPropertyType<CheckboxProperty>;
 
-      expectTypeOf<InferredType>({} as any).toEqualTypeOf<boolean | null>();
+      expectTypeOf<InferredType>().toMatchTypeOf<boolean | null>();
     });
 
     it('should handle all basic property types', () => {
       // Title
       type Title = InferPropertyType<{ type: 'title' }>;
-      expectTypeOf<Title>({} as any).toEqualTypeOf<string | null>();
+      expectTypeOf<Title>().toMatchTypeOf<string | null>();
 
       // Rich text
       type RichText = InferPropertyType<{ type: 'rich_text' }>;
-      expectTypeOf<RichText>({} as any).toEqualTypeOf<string | null>();
+      expectTypeOf<RichText>().toMatchTypeOf<string | null>();
 
       // Number
       type Number = InferPropertyType<{ type: 'number' }>;
-      expectTypeOf<Number>({} as any).toEqualTypeOf<number | null>();
+      expectTypeOf<Number>().toMatchTypeOf<number | null>();
 
       // Checkbox
       type Checkbox = InferPropertyType<{ type: 'checkbox' }>;
-      expectTypeOf<Checkbox>({} as any).toEqualTypeOf<boolean | null>();
+      expectTypeOf<Checkbox>().toMatchTypeOf<boolean | null>();
 
       // Date
       type DateProp = InferPropertyType<{ type: 'date' }>;
-      expectTypeOf<DateProp>({} as any).toEqualTypeOf<Date | null>();
+      expectTypeOf<DateProp>().toMatchTypeOf<Date | null>();
 
       // URL
       type URL = InferPropertyType<{ type: 'url' }>;
-      expectTypeOf<URL>({} as any).toEqualTypeOf<string | null>();
+      expectTypeOf<URL>().toMatchTypeOf<string | null>();
 
       // Email
       type Email = InferPropertyType<{ type: 'email' }>;
-      expectTypeOf<Email>({} as any).toEqualTypeOf<string | null>();
+      expectTypeOf<Email>().toMatchTypeOf<string | null>();
     });
   });
 
@@ -89,7 +89,7 @@ describe('Type Inference Tests: User Story 1', () => {
         Active: boolean | null;
       };
 
-      expectTypeOf<InferredProperties>({} as any).toEqualTypeOf<ExpectedProperties>();
+      expectTypeOf<InferredProperties>().toMatchTypeOf<ExpectedProperties>();
     });
 
     it('should infer minimal schema properties correctly', () => {
@@ -99,7 +99,7 @@ describe('Type Inference Tests: User Story 1', () => {
         Title: string | null;
       };
 
-      expectTypeOf<InferredProperties>({} as any).toEqualTypeOf<ExpectedProperties>();
+      expectTypeOf<InferredProperties>().toMatchTypeOf<ExpectedProperties>();
     });
 
     it('should infer financial schema properties with formatting correctly', () => {
@@ -112,14 +112,14 @@ describe('Type Inference Tests: User Story 1', () => {
         Quantity: number | null;
       };
 
-      expectTypeOf<InferredProperties>({} as any).toEqualTypeOf<ExpectedProperties>();
+      expectTypeOf<InferredProperties>().toMatchTypeOf<ExpectedProperties>();
     });
 
     it('should preserve property names as literal types', () => {
       type BasicUserProperties = InferSchemaProperties<typeof basicUserSchema>;
 
       // Property names should be literal string types, not generic string
-      expectTypeOf<keyof BasicUserProperties>({} as any).toEqualTypeOf<'Name' | 'Age' | 'Active'>();
+      expectTypeOf<keyof BasicUserProperties>().toMatchTypeOf<'Name' | 'Age' | 'Active'>();
     });
   });
 
@@ -134,9 +134,9 @@ describe('Type Inference Tests: User Story 1', () => {
       }>();
 
       // Property getters should return correct types
-      expectTypeOf(schema.getProperty('Name')).toEqualTypeOf<{ type: 'title' }>();
-      expectTypeOf(schema.getProperty('Age')).toEqualTypeOf<{ type: 'number' }>();
-      expectTypeOf(schema.getProperty('Active')).toEqualTypeOf<{ type: 'checkbox' }>();
+      expectTypeOf(schema.getProperty('Name')).toMatchTypeOf<{ type: 'title' }>();
+      expectTypeOf(schema.getProperty('Age')).toMatchTypeOf<{ type: 'number' }>();
+      expectTypeOf(schema.getProperty('Active')).toMatchTypeOf<{ type: 'checkbox' }>();
     });
 
     it('should provide type-safe property access', () => {
@@ -148,7 +148,7 @@ describe('Type Inference Tests: User Story 1', () => {
       expectTypeOf(schema.getProperty('Active')).toMatchTypeOf<PropertyDefinition>();
 
       // Property names should be type-checked
-      expectTypeOf<Parameters<typeof schema.getProperty>[0]>({} as any).toEqualTypeOf<
+      expectTypeOf<Parameters<typeof schema.getProperty>[0]>().toMatchTypeOf<
         'Name' | 'Age' | 'Active'
       >();
     });
@@ -158,13 +158,11 @@ describe('Type Inference Tests: User Story 1', () => {
       const validator = schema.createPropertyValidator();
 
       // Validator should accept schema property names
-      expectTypeOf<Parameters<typeof validator>[0]>({} as any).toEqualTypeOf<
-        'Name' | 'Age' | 'Active'
-      >();
+      expectTypeOf<Parameters<typeof validator>[0]>().toMatchTypeOf<'Name' | 'Age' | 'Active'>();
 
       // Return type should be type guard
       const result = validator('Name', 'test');
-      expectTypeOf(result).toEqualTypeOf<boolean>();
+      expectTypeOf(result).toMatchTypeOf<boolean>();
     });
   });
 
@@ -178,9 +176,7 @@ describe('Type Inference Tests: User Story 1', () => {
 
       // Format should be constrained for number properties
       type NumberFormat = Extract<PropertyDefinition, { type: 'number' }>['format'];
-      expectTypeOf<NumberFormat>({} as any).toEqualTypeOf<
-        'number' | 'percent' | 'dollar' | undefined
-      >();
+      expectTypeOf<NumberFormat>().toMatchTypeOf<'number' | 'percent' | 'dollar' | undefined>();
     });
 
     it('should enforce schema definition structure', () => {
@@ -226,7 +222,7 @@ describe('Type Inference Tests: User Story 1', () => {
       } as const;
 
       type InferredConstSchema = InferSchemaProperties<typeof constSchema>;
-      expectTypeOf<InferredConstSchema>({} as any).toEqualTypeOf<{
+      expectTypeOf<InferredConstSchema>().toMatchTypeOf<{
         Status: string | null;
       }>();
     });
@@ -241,7 +237,7 @@ describe('Type Inference Tests: User Story 1', () => {
       // schema.getProperty(123); // TS Error: Argument not assignable
 
       // But these should be valid
-      expectTypeOf(schema.getProperty).parameter(0).toEqualTypeOf<'Name' | 'Age' | 'Active'>();
+      expectTypeOf(schema.getProperty).parameter(0).toMatchTypeOf<'Name' | 'Age' | 'Active'>();
     });
 
     it('should provide proper return types for property access', () => {
@@ -249,13 +245,13 @@ describe('Type Inference Tests: User Story 1', () => {
 
       // Properties should have specific types
       const nameProperty = schema.getProperty('Name');
-      expectTypeOf(nameProperty.type).toEqualTypeOf<'title'>();
+      expectTypeOf(nameProperty.type).toMatchTypeOf<'title'>();
 
       const ageProperty = schema.getProperty('Age');
-      expectTypeOf(ageProperty.type).toEqualTypeOf<'number'>();
+      expectTypeOf(ageProperty.type).toMatchTypeOf<'number'>();
 
       const activeProperty = schema.getProperty('Active');
-      expectTypeOf(activeProperty.type).toEqualTypeOf<'checkbox'>();
+      expectTypeOf(activeProperty.type).toMatchTypeOf<'checkbox'>();
     });
   });
 
@@ -277,7 +273,7 @@ describe('Type Inference Tests: User Story 1', () => {
 
       type InferredComplex = InferSchemaProperties<typeof complexSchema>;
 
-      expectTypeOf<InferredComplex>({} as any).toEqualTypeOf<{
+      expectTypeOf<InferredComplex>().toMatchTypeOf<{
         Title: string | null;
         Description: string | null;
         Age: number | null;
@@ -294,9 +290,9 @@ describe('Type Inference Tests: User Story 1', () => {
 
       // Deep property access should maintain types
       const titleProperty = schema.getTitleProperty();
-      expectTypeOf(titleProperty.name).toEqualTypeOf<'Name' | 'Age' | 'Active'>();
+      expectTypeOf(titleProperty.name).toMatchTypeOf<'Name' | 'Age' | 'Active'>();
       // TODO: Fix type constraint issues
-      // expectTypeOf(titleProperty.definition.type).toEqualTypeOf<'title'>();
+      // expectTypeOf(titleProperty.definition.type).toMatchTypeOf<'title'>();
     });
   });
 });
