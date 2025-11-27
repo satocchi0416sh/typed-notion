@@ -17,16 +17,19 @@
 ## User Story Mapping
 
 ### User Story 1 (P1): Basic Schema Definition
+
 **Goal**: Developer can define schemas with title, number, checkbox properties with type safety
 **Independent Test**: Create schema with basic types, verify autocompletion and type inference
 **Dependencies**: Foundational phase complete
 
-### User Story 2 (P2): Text and Selection Properties  
+### User Story 2 (P2): Text and Selection Properties
+
 **Goal**: Developer can use rich_text, select, multi_select with literal type preservation
 **Independent Test**: Create schema with selection properties, verify literal type restrictions
 **Dependencies**: User Story 1 complete
 
 ### User Story 3 (P3): Date and Contact Properties
+
 **Goal**: Developer can use date, email, url, people properties with proper type handling
 **Independent Test**: Create schema with contact properties, verify type handling
 **Dependencies**: User Story 2 complete
@@ -126,6 +129,7 @@
 ## Dependencies
 
 ### Story Completion Order
+
 1. **Setup Phase** → **Foundational Phase** (all must complete before user stories)
 2. **User Story 1** → **User Story 2** → **User Story 3** (sequential dependency)
 3. **Polish Phase** (requires all user stories complete)
@@ -133,42 +137,52 @@
 ### Parallel Execution Opportunities
 
 **Within Setup Phase**:
+
 - Tasks T002-T006 can run in parallel (different files)
 
 **Within Foundational Phase**:
+
 - Tasks T009-T011 can run in parallel (independent modules)
 
 **Within User Story 1**:
+
 - Tasks T015, T017, T018, T019 can run in parallel after T013-T014 complete
 
 **Within User Story 2**:
+
 - Tasks T023, T024, T026, T027 can run in parallel after T021-T022 complete
 
 **Within User Story 3**:
+
 - Tasks T031, T033 can run in parallel after T029-T030 complete
 
 **Polish Phase**:
+
 - Tasks T035-T036 can run in parallel
 
 ## Implementation Strategy
 
 ### MVP Scope (Recommended)
+
 - **Phases 1-3**: Setup + Foundational + User Story 1
 - **Deliverable**: Basic schema definition with title, number, checkbox properties
 - **Success Criteria**: Type-safe schema creation with autocompletion
 
 ### Incremental Delivery
+
 - **Phase 4**: Add text and selection properties with literal types
 - **Phase 5**: Add date and contact properties
 - **Phase 6**: Performance optimization and documentation
 
 ### Testing Strategy
+
 - **Unit Tests**: Each property type and validation rule
 - **Type Tests**: Verify compile-time type inference with expect-type
 - **Integration Tests**: End-to-end schema workflow per user story
 - **No Notion API**: Use MSW mocks for integration tests
 
 ### Success Metrics
+
 - ✅ Zero `any` types in public API
 - ✅ Schema processing <2s for 20 properties
 - ✅ All user stories independently testable
