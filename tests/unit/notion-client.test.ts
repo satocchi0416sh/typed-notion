@@ -71,6 +71,7 @@ describe('NotionClient', () => {
       propertyNames: ['title', 'status', 'count'],
       createdAt: new Date(),
       validate: vi.fn().mockReturnValue({ success: true }),
+      validatePartial: vi.fn().mockReturnValue({ success: true }),
       toZod: vi.fn(),
       parse: vi.fn(),
       getTitleProperty: vi.fn().mockReturnValue({ name: 'title', type: 'title' }),
@@ -273,7 +274,7 @@ describe('NotionClient', () => {
     });
 
     it('should validate partial update data', async () => {
-      mockSchema.validate = vi.fn().mockReturnValue({
+      mockSchema.validatePartial = vi.fn().mockReturnValue({
         success: false,
         error: { issues: [{ message: 'Invalid update data' }] },
       });

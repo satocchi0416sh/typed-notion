@@ -24,16 +24,16 @@ vi.mock('@notionhq/client', () => ({
 }));
 
 vi.mock('../../src/config/environment.js', () => ({
-  resolveDatabaseId: vi.fn().mockReturnValue('test-database-id'),
+  resolveDatabaseId: vi.fn().mockReturnValue('12345678-1234-5678-9abc-123456789abc'),
 }));
 
 vi.mock('../../src/conversion/transformer-factory.js', () => ({
   getTransformerFactory: vi.fn().mockReturnValue({
     getCachedTransformer: vi.fn().mockReturnValue({
-      transform: vi.fn().mockImplementation((data: any) => ({
+      transform: vi.fn().mockImplementation((_data: any) => ({
         ok: true,
         value: {
-          id: data.id || 'transformed-id',
+          id: 'transformed-id',
           title: 'Transformed Title',
           status: 'Active',
           count: 42,
@@ -54,9 +54,9 @@ describe('API Workflow Integration Tests', () => {
     mockClient = createMockNotionClient();
 
     // Mock the Client constructor to return our mock
-    vi.mocked(Client).mockImplementation(
-      () => mockClient as unknown as InstanceType<typeof Client>
-    );
+    vi.mocked(Client).mockImplementation(function () {
+      return mockClient as unknown as InstanceType<typeof Client>;
+    });
 
     client = new NotionClient({
       auth: 'test-token',
@@ -76,10 +76,32 @@ describe('API Workflow Integration Tests', () => {
         assignee: { type: 'people' },
         description: { type: 'rich_text' },
       },
-      databaseId: 'test-database-id',
+      databaseId: '12345678-1234-5678-9abc-123456789abc',
     });
 
     vi.clearAllMocks();
+  });
+
+  // Helper function to create complete test data
+  const createCompleteTestData = (overrides: Record<string, any> = {}) => ({
+    title: 'Test Task',
+    status: 'Active' as const,
+    priority: 'Medium' as const,
+    count: 1,
+    completed: false,
+    dueDate: new Date('2024-12-01'),
+    tags: ['feature'],
+    assignee: [
+      {
+        id: 'user-1',
+        type: 'person' as const,
+        name: 'Test User',
+        avatar_url: 'https://example.com/avatar.jpg',
+        person: { email: 'test@example.com' },
+      },
+    ],
+    description: 'Test description',
+    ...overrides,
   });
 
   describe('Complete CRUD Workflow', () => {
@@ -114,14 +136,27 @@ describe('API Workflow Integration Tests', () => {
       const createData = {
         title: 'New Task',
         status: 'Active' as const,
+        priority: 'High' as const,
         count: 1,
         completed: false,
+        dueDate: new Date('2024-12-01'),
+        tags: ['urgent', 'feature'],
+        assignee: [
+          {
+            id: 'user-1',
+            type: 'person' as const,
+            name: 'Test User',
+            avatar_url: 'https://example.com/avatar.jpg',
+            person: { email: 'test@example.com' },
+          },
+        ],
+        description: 'Test task description',
       };
 
       const createdResult = await client.create(testSchema, createData);
       expect(createdResult.id).toBe('transformed-id');
       expect(mockClient.pages.create).toHaveBeenCalledWith({
-        parent: { database_id: 'test-database-id' },
+        parent: { database_id: '12345678-1234-5678-9abc-123456789abc' },
         properties: expect.objectContaining({
           title: expect.any(Object),
           status: expect.any(Object),
@@ -140,7 +175,7 @@ describe('API Workflow Integration Tests', () => {
       // 3. Update the page
       const updateData = {
         title: 'Updated Task',
-        status: 'Completed' as const,
+        status: 'Inactive' as const,
         count: 2,
       };
 
@@ -165,7 +200,7 @@ describe('API Workflow Integration Tests', () => {
 
       expect(queryResult.results).toHaveLength(1);
       expect(mockClient.databases.query).toHaveBeenCalledWith({
-        database_id: 'test-database-id',
+        database_id: '12345678-1234-5678-9abc-123456789abc',
         filter: expect.any(Object),
         sorts: undefined,
         page_size: undefined,
@@ -227,9 +262,9 @@ describe('API Workflow Integration Tests', () => {
         page_size: 50,
       });
 
-      expect(result.results).toHaveLength(3); // From mockResponses.multiPageQuery(3)
+      expect(result.results).toHaveLength(2); // From mockResponses.multiPageQuery(mockPages.length)
       expect(mockClient.databases.query).toHaveBeenCalledWith({
-        database_id: 'test-database-id',
+        database_id: '12345678-1234-5678-9abc-123456789abc',
         filter: expect.objectContaining({
           and: expect.any(Array),
         }),
@@ -348,7 +383,7 @@ describe('API Workflow Integration Tests', () => {
 
       mockClient.databases.query.mockRejectedValueOnce(networkError);
 
-      await expect(client.query(testSchema)).rejects.toThrow('Network timeout');
+      await expect(client.query(testSchema)).rejects.toThrow('NETWORK_ERROR');
     });
 
     it('should handle transformation errors in strict mode', async () => {
@@ -392,7 +427,7 @@ describe('API Workflow Integration Tests', () => {
       mockClient.databases.query.mockResolvedValue(mockResponses.emptyQuery());
       mockClient.pages.retrieve.mockResolvedValue(createMockPage());
 
-      await client.create(testSchema, { title: 'Test' });
+      await client.create(testSchema, createCompleteTestData({ title: 'Test' }));
       await client.query(testSchema);
       await client.getPage('page-id', testSchema);
 
@@ -421,14 +456,14 @@ describe('API Workflow Integration Tests', () => {
       // Scenario: Create a task, assign it, update status, add comments, complete
 
       // 1. Create initial task
-      const taskData = {
+      const taskData = createCompleteTestData({
         title: 'Implement user authentication',
         status: 'Active' as const,
         priority: 'High' as const,
-        tags: ['feature', 'security'],
+        tags: ['feature', 'bug'],
         dueDate: new Date('2024-02-01'),
         completed: false,
-      };
+      });
 
       mockClient.pages.create.mockResolvedValueOnce(
         createMockPage({
@@ -452,8 +487,16 @@ describe('API Workflow Integration Tests', () => {
       );
 
       await client.update(task.id, testSchema, {
-        assignee: ['user-1'],
-        status: 'In Progress' as const,
+        assignee: [
+          {
+            id: 'user-1',
+            type: 'person' as const,
+            name: 'Test User',
+            avatar_url: 'https://example.com/avatar.jpg',
+            person: { email: 'test@example.com' },
+          },
+        ],
+        status: 'Pending' as const,
       });
 
       // 3. Query active high-priority tasks
@@ -462,7 +505,7 @@ describe('API Workflow Integration Tests', () => {
       const activeTasks = await client.query(testSchema, {
         filter: {
           and: [
-            { property: 'status', select: { equals: 'In Progress' } },
+            { property: 'status', select: { equals: 'Pending' } },
             { property: 'priority', select: { equals: 'High' } },
           ],
         } as any,
@@ -475,14 +518,14 @@ describe('API Workflow Integration Tests', () => {
       mockClient.pages.update.mockResolvedValueOnce(
         createMockPage({
           properties: {
-            status: mockPropertyValues.select('Completed'),
+            status: mockPropertyValues.select('Inactive'),
             completed: mockPropertyValues.checkbox(true),
           },
         })
       );
 
       await client.update(task.id, testSchema, {
-        status: 'Completed' as const,
+        status: 'Inactive' as const,
         completed: true,
       });
 
@@ -493,12 +536,14 @@ describe('API Workflow Integration Tests', () => {
 
     it('should handle bulk operations efficiently', async () => {
       // Create multiple pages
-      const tasks = Array.from({ length: 10 }, (_, i) => ({
-        title: `Task ${i + 1}`,
-        status: 'Active' as const,
-        priority: i % 2 === 0 ? ('High' as const) : ('Medium' as const),
-        count: i + 1,
-      }));
+      const tasks = Array.from({ length: 10 }, (_, i) =>
+        createCompleteTestData({
+          title: `Task ${i + 1}`,
+          status: 'Active' as const,
+          priority: i % 2 === 0 ? ('High' as const) : ('Medium' as const),
+          count: i + 1,
+        })
+      );
 
       // Mock successful creation for all tasks
       mockClient.pages.create.mockImplementation(() => Promise.resolve(createMockPage()));
@@ -533,10 +578,10 @@ describe('API Workflow Integration Tests', () => {
     it('should handle large property values', async () => {
       const largeContent = 'x'.repeat(100000); // 100KB string
 
-      const largePageData = {
+      const largePageData = createCompleteTestData({
         title: 'Large Content Test',
         description: largeContent,
-      };
+      });
 
       mockClient.pages.create.mockResolvedValueOnce(
         createMockPage({
@@ -551,11 +596,11 @@ describe('API Workflow Integration Tests', () => {
     });
 
     it('should handle special characters in property values', async () => {
-      const specialCharsData = {
+      const specialCharsData = createCompleteTestData({
         title: 'Test with 🎉 emojis & special chars: <>[]{}()!@#$%^&*',
         description: 'Line 1\nLine 2\tTabbed\rCarriage Return"Quoted"',
         status: 'Active' as const,
-      };
+      });
 
       mockClient.pages.create.mockResolvedValueOnce(createMockPage());
 

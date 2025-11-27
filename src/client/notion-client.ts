@@ -322,7 +322,7 @@ export class NotionClient {
 
     try {
       // Validate partial data
-      const validationResult = schema.validate(data);
+      const validationResult = schema.validatePartial(data);
       if (!validationResult.success) {
         throw new SchemaValidationError('data', 'valid data matching schema', data);
       }
