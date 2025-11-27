@@ -10,7 +10,7 @@ import type {
   NotionPropertyValue,
   NotionUser,
   RichTextObject,
-} from '../../src/types/properties.js';
+} from '../../src/conversion/index.js';
 
 // Mock Notion Client
 export function createMockNotionClient() {
@@ -319,7 +319,11 @@ export function generateRandomDate(start?: Date, end?: Date): string {
 
 // Error Generators for testing error handling
 export function createNotionError(status: number, code: string, message: string) {
-  const error = new Error(message) as Error & { status?: number; code?: string };
+  const error = new Error(message) as Error & {
+    status?: number;
+    code?: string;
+    headers?: Record<string, unknown>;
+  };
   error.status = status;
   error.code = code;
   error.headers = {};

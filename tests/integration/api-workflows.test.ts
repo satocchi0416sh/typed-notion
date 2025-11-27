@@ -9,7 +9,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Client } from '@notionhq/client';
 import { NotionClient } from '../../src/client/notion-client.js';
 import { createTypedSchema } from '../../src/schema/typed-schema.js';
-import type { SchemaDefinition } from '../../src/types/core.js';
 import {
   createMockNotionClient,
   createMockPage,
@@ -49,7 +48,7 @@ vi.mock('../../src/conversion/transformer-factory.js', () => ({
 describe('API Workflow Integration Tests', () => {
   let client: NotionClient;
   let mockClient: ReturnType<typeof createMockNotionClient>;
-  let testSchema: ReturnType<typeof createTypedSchema<SchemaDefinition>>;
+  let testSchema: any;
 
   beforeEach(() => {
     mockClient = createMockNotionClient();
@@ -65,22 +64,20 @@ describe('API Workflow Integration Tests', () => {
       maxRetries: 1,
     });
 
-    testSchema = createTypedSchema(
-      {
-        properties: {
-          title: { type: 'title' },
-          status: { type: 'select', options: ['Active', 'Inactive', 'Pending'] },
-          priority: { type: 'select', options: ['High', 'Medium', 'Low'] },
-          count: { type: 'number' },
-          completed: { type: 'checkbox' },
-          dueDate: { type: 'date' },
-          tags: { type: 'multi_select', options: ['urgent', 'feature', 'bug'] },
-          assignee: { type: 'people' },
-          description: { type: 'rich_text' },
-        },
+    testSchema = createTypedSchema({
+      properties: {
+        title: { type: 'title' },
+        status: { type: 'select', options: ['Active', 'Inactive', 'Pending'] },
+        priority: { type: 'select', options: ['High', 'Medium', 'Low'] },
+        count: { type: 'number' },
+        completed: { type: 'checkbox' },
+        dueDate: { type: 'date' },
+        tags: { type: 'multi_select', options: ['urgent', 'feature', 'bug'] },
+        assignee: { type: 'people' },
+        description: { type: 'rich_text' },
       },
-      'test-database-id'
-    );
+      databaseId: 'test-database-id',
+    });
 
     vi.clearAllMocks();
   });
@@ -193,7 +190,7 @@ describe('API Workflow Integration Tests', () => {
 
   describe('Complex Query Scenarios', () => {
     it('should handle complex filtering with multiple conditions', async () => {
-      const pages = [
+      const mockPages = [
         createMockPage({
           properties: {
             title: mockPropertyValues.title('High Priority Task'),
@@ -212,7 +209,9 @@ describe('API Workflow Integration Tests', () => {
         }),
       ];
 
-      mockClient.databases.query.mockResolvedValueOnce(mockResponses.multiPageQuery(2));
+      mockClient.databases.query.mockResolvedValueOnce(
+        mockResponses.multiPageQuery(mockPages.length)
+      );
 
       const result = await client.query(testSchema, {
         filter: {
@@ -374,7 +373,7 @@ describe('API Workflow Integration Tests', () => {
           missingPropertyStrategy: 'error',
           performance: {
             enableCaching: true,
-            cacheSize: 100,
+            cacheMaxSize: 100,
             enableMetrics: true,
           },
         },
@@ -427,7 +426,7 @@ describe('API Workflow Integration Tests', () => {
         status: 'Active' as const,
         priority: 'High' as const,
         tags: ['feature', 'security'],
-        dueDate: { start: new Date('2024-02-01'), end: null, timezone: null },
+        dueDate: new Date('2024-02-01'),
         completed: false,
       };
 

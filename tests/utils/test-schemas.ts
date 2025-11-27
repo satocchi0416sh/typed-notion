@@ -8,6 +8,7 @@
 import type { SchemaDefinition } from '../../src/types/core.js';
 
 export const basicSchema: SchemaDefinition = {
+  databaseId: '12345678-1234-5678-9abc-123456789abc',
   properties: {
     title: { type: 'title' },
     status: { type: 'select', options: ['Active', 'Inactive', 'Pending'] },
@@ -22,6 +23,7 @@ export const basicSchema: SchemaDefinition = {
 };
 
 export const complexSchema: SchemaDefinition = {
+  databaseId: '12345678-1234-5678-9abc-123456789def',
   properties: {
     title: { type: 'title' },
     tags: { type: 'multi_select', options: ['urgent', 'feature', 'bug', 'enhancement'] },
@@ -41,6 +43,7 @@ export const complexSchema: SchemaDefinition = {
 };
 
 export const minimalSchema: SchemaDefinition = {
+  databaseId: '12345678-1234-5678-9abc-123456789ghi',
   properties: {
     title: { type: 'title' },
     status: { type: 'checkbox' },
@@ -48,6 +51,7 @@ export const minimalSchema: SchemaDefinition = {
 };
 
 export const allPropertiesSchema: SchemaDefinition = {
+  databaseId: '12345678-1234-5678-9abc-123456789jkl',
   properties: {
     // Text properties
     title: { type: 'title' },

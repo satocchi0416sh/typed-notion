@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
     "outDir": "./dist",
 
     // Environment Settings
@@ -34,6 +33,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

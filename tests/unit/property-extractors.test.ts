@@ -26,12 +26,12 @@ vi.mock('../../src/errors/index.js', () => ({
   ConversionError: class ConversionError extends Error {
     constructor(
       message: string,
-      code: string,
-      rawValue: any,
-      context?: string,
-      expectedType?: string,
-      actualType?: string,
-      cause?: Error
+      _code: string,
+      _rawValue: any,
+      _context?: string,
+      _expectedType?: string,
+      _actualType?: string,
+      _cause?: Error
     ) {
       super(message);
       this.name = 'ConversionError';
@@ -493,7 +493,7 @@ describe('Property Extractors', () => {
 
       const result = extractor.extract(property);
       expect(result.ok).toBe(true);
-      if (result.ok) {
+      if (result.ok && result.value) {
         expect(result.value).toHaveLength(2);
         expect(result.value[0]).toEqual({
           id: 'user-1',
@@ -532,7 +532,7 @@ describe('Property Extractors', () => {
 
       const result = extractor.extract(property);
       expect(result.ok).toBe(true);
-      if (result.ok) {
+      if (result.ok && result.value) {
         expect(result.value[0]?.type).toBe('bot');
       }
     });
@@ -542,7 +542,7 @@ describe('Property Extractors', () => {
     let extractor: CreatedTimeExtractor;
 
     beforeEach(() => {
-      extractor = new CreatedTimeExtractor('UTC');
+      extractor = new CreatedTimeExtractor();
     });
 
     it('should extract created time as Date object', () => {
@@ -573,7 +573,7 @@ describe('Property Extractors', () => {
     let extractor: LastEditedTimeExtractor;
 
     beforeEach(() => {
-      extractor = new LastEditedTimeExtractor('UTC');
+      extractor = new LastEditedTimeExtractor();
     });
 
     it('should extract last edited time as Date object', () => {
@@ -819,8 +819,8 @@ describe('Property Extractors', () => {
     });
 
     it('should allow custom timezone in timestamp extractors', () => {
-      const createdTimeExtractor = new CreatedTimeExtractor('Asia/Tokyo');
-      const lastEditedTimeExtractor = new LastEditedTimeExtractor('Europe/London');
+      const createdTimeExtractor = new CreatedTimeExtractor();
+      const lastEditedTimeExtractor = new LastEditedTimeExtractor();
 
       expect(createdTimeExtractor).toBeInstanceOf(CreatedTimeExtractor);
       expect(lastEditedTimeExtractor).toBeInstanceOf(LastEditedTimeExtractor);

@@ -5,9 +5,8 @@
  * for proper error handling and type safety.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
-  TypedNotionError,
   ConversionError,
   SchemaValidationError,
   NotionAPIError,
@@ -25,24 +24,32 @@ import {
 describe('Error Classes', () => {
   describe('TypedNotionError (Base Class)', () => {
     it('should create error with message and code', () => {
-      const error = new TypedNotionError('Test error', 'TEST_ERROR');
+      const error = new ConversionError('Test error', 'TEST_ERROR');
 
       expect(error.message).toBe('Test error');
       expect(error.code).toBe('TEST_ERROR');
-      expect(error.name).toBe('TypedNotionError');
+      expect(error.name).toBe('ConversionError');
       expect(error).toBeInstanceOf(Error);
     });
 
     it('should include cause when provided', () => {
       const cause = new Error('Original error');
-      const error = new TypedNotionError('Wrapper error', 'WRAPPER_ERROR', cause);
+      const error = new ConversionError(
+        'Wrapper error',
+        'WRAPPER_ERROR',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        cause
+      );
 
       expect(error.cause).toBe(cause);
     });
 
     it('should format error message consistently', () => {
-      const error = new TypedNotionError('Something went wrong', 'GENERIC_ERROR');
-      expect(error.toString()).toContain('TypedNotionError');
+      const error = new ConversionError('Something went wrong', 'GENERIC_ERROR');
+      expect(error.toString()).toContain('ConversionError');
       expect(error.toString()).toContain('Something went wrong');
     });
   });
@@ -244,7 +251,9 @@ describe('Result Pattern', () => {
       const result = createOk('success value');
 
       expect(result.ok).toBe(true);
-      expect(result.value).toBe('success value');
+      if (result.ok) {
+        expect(result.value).toBe('success value');
+      }
       expect(result).not.toHaveProperty('error');
     });
 
@@ -253,9 +262,13 @@ describe('Result Pattern', () => {
       const undefinedResult = createOk(undefined);
 
       expect(nullResult.ok).toBe(true);
-      expect(nullResult.value).toBeNull();
+      if (nullResult.ok) {
+        expect(nullResult.value).toBeNull();
+      }
       expect(undefinedResult.ok).toBe(true);
-      expect(undefinedResult.value).toBeUndefined();
+      if (undefinedResult.ok) {
+        expect(undefinedResult.value).toBeUndefined();
+      }
     });
 
     it('should handle complex objects', () => {
@@ -263,7 +276,9 @@ describe('Result Pattern', () => {
       const result = createOk(complexObject);
 
       expect(result.ok).toBe(true);
-      expect(result.value).toEqual(complexObject);
+      if (result.ok) {
+        expect(result.value).toEqual(complexObject);
+      }
     });
   });
 
@@ -273,7 +288,9 @@ describe('Result Pattern', () => {
       const result = createErr(error);
 
       expect(result.ok).toBe(false);
-      expect(result.error).toBe(error);
+      if (!result.ok) {
+        expect(result.error).toBe(error);
+      }
       expect(result).not.toHaveProperty('value');
     });
 
@@ -282,15 +299,19 @@ describe('Result Pattern', () => {
       const result = createErr(customError);
 
       expect(result.ok).toBe(false);
-      expect(result.error).toBe(customError);
-      expect(result.error).toBeInstanceOf(ConversionError);
+      if (!result.ok) {
+        expect(result.error).toBe(customError);
+        expect(result.error).toBeInstanceOf(ConversionError);
+      }
     });
 
     it('should handle string errors', () => {
       const result = createErr('string error');
 
       expect(result.ok).toBe(false);
-      expect(result.error).toBe('string error');
+      if (!result.ok) {
+        expect(result.error).toBe('string error');
+      }
     });
   });
 
