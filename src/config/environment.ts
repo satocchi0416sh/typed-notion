@@ -58,20 +58,18 @@ export class DefaultEnvironmentConfig implements EnvironmentConfig {
 
     if (!databaseId) {
       throw new ConfigurationError(
-        `Database ID not found for schema '${schemaName}'`,
+        `Database ID not found for schema '${schemaName}'. Set environment variable ${envVarName}=your_database_id`,
         'MISSING_ENV',
-        schemaName,
-        `Set environment variable ${envVarName}=your_database_id`
+        schemaName
       );
     }
 
     // Basic validation of database ID format
     if (!this.isValidDatabaseId(databaseId)) {
       throw new ConfigurationError(
-        `Invalid database ID format for schema '${schemaName}': ${databaseId}`,
+        `Invalid database ID format for schema '${schemaName}': ${databaseId}. Database ID should be a UUID-like string`,
         'INVALID_DATABASE_ID',
-        schemaName,
-        'Database ID should be a UUID-like string'
+        schemaName
       );
     }
 
@@ -141,7 +139,7 @@ export class DefaultEnvironmentConfig implements EnvironmentConfig {
             invalidDatabaseIds.push(schemaName);
           }
         } catch (error) {
-          if (error instanceof ConfigurationError && error.context.type === 'INVALID_DATABASE_ID') {
+          if (error instanceof ConfigurationError && error.code === 'INVALID_DATABASE_ID') {
             invalidDatabaseIds.push(schemaName);
           }
         }
@@ -166,10 +164,9 @@ export class DefaultEnvironmentConfig implements EnvironmentConfig {
   setDatabaseId(schemaName: string, databaseId: string): void {
     if (!this.isValidDatabaseId(databaseId)) {
       throw new ConfigurationError(
-        `Invalid database ID format: ${databaseId}`,
+        `Invalid database ID format: ${databaseId}. Database ID should be a UUID-like string`,
         'INVALID_DATABASE_ID',
-        schemaName,
-        'Database ID should be a UUID-like string'
+        schemaName
       );
     }
 

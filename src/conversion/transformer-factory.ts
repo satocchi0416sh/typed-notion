@@ -180,7 +180,7 @@ export class StreamingTransformer<T extends SchemaDefinition> {
       const errors: Array<import('../errors/index.js').ConversionError> = [];
 
       for (const result of results) {
-        if (result.kind === 'ok') {
+        if (result.ok) {
           successfulResults.push(result.value);
         } else {
           errors.push(result.error);
@@ -189,11 +189,11 @@ export class StreamingTransformer<T extends SchemaDefinition> {
 
       // Yield batch result
       if (errors.length === 0) {
-        yield { kind: 'ok', value: successfulResults };
+        yield { ok: true, value: successfulResults };
       } else {
         const firstError = errors[0];
         if (firstError) {
-          yield { kind: 'err', error: firstError };
+          yield { ok: false, error: firstError };
         }
       }
     }

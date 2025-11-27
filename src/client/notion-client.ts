@@ -654,25 +654,37 @@ export class NotionClient {
     return await new Promise<T>((resolve, reject) => {
       this.rateLimitQueue = this.rateLimitQueue.then(async () => {
         this.metrics.apiRequestCount++;
+        let retryCount = 0;
+        const maxRetries = this.config.maxRetries || 3;
 
-        try {
-          const result = await apiCall();
+        while (retryCount <= maxRetries) {
+          try {
+            const result = await apiCall();
 
-          // Wait for rate limit delay
-          if (this.config.retryDelayMs && this.config.retryDelayMs > 0) {
-            await new Promise(r => globalThis.setTimeout(r, this.config.retryDelayMs));
+            // Wait for rate limit delay only for successful calls
+            if (this.config.retryDelayMs && this.config.retryDelayMs > 0) {
+              await new Promise(r => globalThis.setTimeout(r, this.config.retryDelayMs));
+            }
+
+            resolve(result);
+            return;
+          } catch (error) {
+            if (this.isRateLimitError(error)) {
+              this.metrics.rateLimitHits++;
+
+              if (retryCount < maxRetries) {
+                // Exponential backoff for rate limit errors
+                const delay =
+                  (this.config.retryDelayMs || 334) * Math.pow(2, this.metrics.rateLimitHits);
+                await new Promise(r => globalThis.setTimeout(r, Math.min(delay, 5000)));
+                retryCount++;
+                continue; // Retry the API call
+              }
+            }
+            // If not a rate limit error or max retries exceeded, reject
+            reject(error);
+            return;
           }
-
-          resolve(result);
-        } catch (error) {
-          if (this.isRateLimitError(error)) {
-            this.metrics.rateLimitHits++;
-            // Exponential backoff for rate limit errors
-            const delay =
-              (this.config.retryDelayMs || 334) * Math.pow(2, this.metrics.rateLimitHits);
-            await new Promise(r => globalThis.setTimeout(r, Math.min(delay, 5000)));
-          }
-          reject(error);
         }
       });
     });

@@ -516,12 +516,16 @@ describe('NotionClient', () => {
         },
       });
 
+      // Setup mock for the new client too
+      const strictMockClient = (strictClient as any).client;
+      strictMockClient.databases.query.mockResolvedValueOnce(mockResponse);
+
       await expect(strictClient.query(mockSchema)).rejects.toThrow(ConversionError);
     });
   });
 
   describe('Property Conversion', () => {
-    it('should convert TypeScript data to Notion API format', () => {
+    it('should convert TypeScript data to Notion API format', async () => {
       const data = {
         title: 'Test Title',
         count: 42,
@@ -544,6 +548,7 @@ describe('NotionClient', () => {
             email: { type: 'email' },
           },
         },
+        databaseId: 'test-database-id',
         validate: vi.fn().mockReturnValue({ success: true }),
       } as any;
 
@@ -554,7 +559,7 @@ describe('NotionClient', () => {
         properties: {},
       });
 
-      client.create(schema, data);
+      await client.create(schema, data);
 
       expect(mockNotionClient.pages.create).toHaveBeenCalledWith({
         parent: expect.any(Object),
@@ -570,7 +575,7 @@ describe('NotionClient', () => {
       });
     });
 
-    it('should handle null and undefined values', () => {
+    it('should handle null and undefined values', async () => {
       const data = {
         title: null,
         count: undefined,
@@ -585,6 +590,7 @@ describe('NotionClient', () => {
             status: { type: 'select' },
           },
         },
+        databaseId: 'test-database-id',
         validate: vi.fn().mockReturnValue({ success: true }),
       } as any;
 
@@ -594,7 +600,7 @@ describe('NotionClient', () => {
         properties: {},
       });
 
-      client.create(schema, data);
+      await client.create(schema, data);
 
       expect(mockNotionClient.pages.create).toHaveBeenCalledWith({
         parent: expect.any(Object),
