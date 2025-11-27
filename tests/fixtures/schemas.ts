@@ -15,7 +15,7 @@ import type { SchemaDefinition, PropertyDefinition, NotionUser } from '../../src
  * Basic schema with title, number, and checkbox properties
  * Used for User Story 1 testing: Basic Schema Definition
  */
-export const basicUserSchema = {
+export const basicUserSchema: SchemaDefinition = {
   databaseId: '12345678-1234-5678-9abc-123456789abc',
   properties: {
     Name: { type: 'title' },
@@ -27,7 +27,7 @@ export const basicUserSchema = {
 /**
  * Minimal valid schema (just title property)
  */
-export const minimalSchema = {
+export const minimalSchema: SchemaDefinition = {
   databaseId: '87654321-4321-8765-cba9-987654321cba',
   properties: {
     Title: { type: 'title' },
@@ -37,7 +37,7 @@ export const minimalSchema = {
 /**
  * Schema with number formatting options
  */
-export const financialSchema = {
+export const financialSchema: SchemaDefinition = {
   databaseId: '11111111-2222-3333-4444-555555555555',
   properties: {
     Name: { type: 'title' },
@@ -55,7 +55,7 @@ export const financialSchema = {
  * Schema with text and selection properties
  * Used for User Story 2 testing: Text and Selection Properties
  */
-export const taskSchema = {
+export const taskSchema: SchemaDefinition = {
   databaseId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
   properties: {
     Title: { type: 'title' },
@@ -74,7 +74,7 @@ export const taskSchema = {
 /**
  * Schema with comprehensive selection options
  */
-export const projectSchema = {
+export const projectSchema: SchemaDefinition = {
   databaseId: 'ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb',
   properties: {
     Name: { type: 'title' },
@@ -98,7 +98,7 @@ export const projectSchema = {
  * Schema with date and contact properties
  * Used for User Story 3 testing: Date and Contact Properties
  */
-export const contactSchema = {
+export const contactSchema: SchemaDefinition = {
   databaseId: '99999999-8888-7777-6666-555555555555',
   properties: {
     Name: { type: 'title' },
@@ -112,7 +112,7 @@ export const contactSchema = {
 /**
  * Event schema with comprehensive date and contact properties
  */
-export const eventSchema = {
+export const eventSchema: SchemaDefinition = {
   databaseId: '00000000-1111-2222-3333-444444444444',
   properties: {
     EventName: { type: 'title' },
@@ -160,7 +160,7 @@ export const schemaWithEmptySelect = {
   databaseId: 'invalid3-3333-3333-3333-333333333333',
   properties: {
     Name: { type: 'title' },
-    Status: { type: 'select', options: [] },
+    Status: { type: 'select', options: [] as const },
   },
 };
 
@@ -216,7 +216,16 @@ export const minimalUser: NotionUser = {
 /**
  * Sample query results for basic schema
  */
-export const basicUserResults = [
+export const basicUserResults: readonly {
+  id: string;
+  props: {
+    Name: string;
+    Age: number | null;
+    Active: boolean;
+  };
+  createdTime: Date;
+  lastEditedTime: Date;
+}[] = [
   {
     id: 'page-1111-1111-1111-111111111111',
     props: {
@@ -242,7 +251,17 @@ export const basicUserResults = [
 /**
  * Sample query results for task schema
  */
-export const taskResults = [
+export const taskResults: readonly {
+  id: string;
+  props: {
+    Title: string;
+    Description: string | null;
+    Status: 'In Progress' | 'Done';
+    Tags: readonly string[];
+  };
+  createdTime: Date;
+  lastEditedTime: Date;
+}[] = [
   {
     id: 'task-1111-1111-1111-111111111111',
     props: {

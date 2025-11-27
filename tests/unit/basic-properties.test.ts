@@ -12,11 +12,9 @@ import {
   validatePropertyStructure,
   validatePropertyValue,
   validatePropertyName,
-  validateSelectionOptions,
   validateSchemaStructure,
-  DEFAULT_VALIDATION_CONFIG,
 } from '../../src/schema/validator.js';
-import { PropertyValidationError, SelectionValidationError } from '../../src/errors/index.js';
+import { PropertyValidationError } from '../../src/errors/index.js';
 import type { PropertyDefinition } from '../../src/types/core.js';
 
 describe('Unit Tests: Basic Property Types', () => {
@@ -56,9 +54,9 @@ describe('Unit Tests: Basic Property Types', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(PropertyValidationError);
         const propError = error as PropertyValidationError;
-        expect(propError.context.property).toBe('Name');
-        expect(propError.context.value).toBe(123);
-        expect(propError.context.expectedType).toBe('string');
+        expect(propError.context?.property).toBe('Name');
+        expect(propError.context?.value).toBe(123);
+        expect(propError.context?.expectedType).toBe('string');
       }
     });
   });
@@ -195,7 +193,7 @@ describe('Unit Tests: Basic Property Types', () => {
         { name: 'a'.repeat(101), reason: 'too long' },
       ];
 
-      invalidCases.forEach(({ name, reason }) => {
+      invalidCases.forEach(({ name }) => {
         const errors = validatePropertyName(name);
         expect(errors.length).toBeGreaterThan(0);
       });

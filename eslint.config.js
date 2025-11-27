@@ -78,6 +78,7 @@ export default [
       '.serena/**',
       '.claude/**',
       '.specify/**',
+      'specs/**',
       '*.config.js',
       '*.config.ts',
     ],
