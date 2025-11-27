@@ -8,7 +8,7 @@ export default defineConfig({
     exclude: ['node_modules', 'dist', 'build', 'specs/**'],
     setupFiles: ['tests/utils/custom-matchers.ts'],
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html', 'lcov'],
       reportOnFailure: true,
       include: ['src/**/*.ts'],
