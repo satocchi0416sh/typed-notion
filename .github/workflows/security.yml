@@ -38,7 +38,9 @@ jobs:
         continue-on-error: true
 
       - name: Check for known vulnerabilities
-        uses: sonatypecommunity/nancy-github-action@main
+        run: |
+          # Check for vulnerabilities in dependencies using npm audit
+          npm audit --audit-level high || true
         continue-on-error: true
 
       - name: SARIF Audit
