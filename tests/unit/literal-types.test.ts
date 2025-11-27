@@ -8,7 +8,7 @@
  * - Compile-time type checking of literal values
  */
 
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { expectTypeOf } from 'expect-type';
 import type { InferPropertyType, InferSchemaProperties } from '../../src/types/index.js';
 import { createTypedSchema } from '../../src/schema/index.js';
@@ -414,14 +414,18 @@ describe('Literal Type Preservation Tests: User Story 2', () => {
 
       // Filtered properties should maintain their literal types
       const selectProperties = schema.getPropertiesByType('select');
-      // TODO: Fix type constraint issues
-      // expectTypeOf(selectProperties[0]?.definition.type).toEqualTypeOf<'select'>();
-      // expectTypeOf(selectProperties[0]?.definition).toHaveProperty('options');
+      // Type assertions for select properties - ensuring array has elements and types are preserved
+      expect(selectProperties.length).toBeGreaterThan(0);
+      const firstSelectProperty = selectProperties[0]!;
+      expectTypeOf(firstSelectProperty.definition.type).toEqualTypeOf<'select'>();
+      expectTypeOf(firstSelectProperty.definition).toHaveProperty('options');
 
       const multiSelectProperties = schema.getPropertiesByType('multi_select');
-      // TODO: Fix type constraint issues
-      // expectTypeOf(multiSelectProperties[0]?.definition.type).toEqualTypeOf<'multi_select'>();
-      // expectTypeOf(multiSelectProperties[0]?.definition).toHaveProperty('options');
+      // Type assertions for multi_select properties - ensuring array has elements and types are preserved
+      expect(multiSelectProperties.length).toBeGreaterThan(0);
+      const firstMultiSelectProperty = multiSelectProperties[0]!;
+      expectTypeOf(firstMultiSelectProperty.definition.type).toEqualTypeOf<'multi_select'>();
+      expectTypeOf(firstMultiSelectProperty.definition).toHaveProperty('options');
 
       // Basic checks to use the variables
       void selectProperties;
