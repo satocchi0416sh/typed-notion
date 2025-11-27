@@ -13,7 +13,21 @@ import type {
 } from '../../src/conversion/index.js';
 
 // Mock Notion Client
-export function createMockNotionClient() {
+export function createMockNotionClient(): {
+  databases: {
+    query: typeof vi.fn;
+    retrieve: typeof vi.fn;
+  };
+  pages: {
+    create: typeof vi.fn;
+    update: typeof vi.fn;
+    retrieve: typeof vi.fn;
+  };
+  users: {
+    retrieve: typeof vi.fn;
+    list: typeof vi.fn;
+  };
+} {
   return {
     databases: {
       query: vi.fn(),
@@ -32,7 +46,7 @@ export function createMockNotionClient() {
 }
 
 // Mock Page Generator
-export function createMockPage(overrides: Record<string, unknown> = {}) {
+export function createMockPage(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: `page_${Math.random().toString(36).substr(2, 9)}`,
     created_time: new Date().toISOString(),
@@ -230,6 +244,7 @@ export const mockPropertyValues = {
 // Mock User Generator
 export function createMockUser(overrides: Partial<NotionUser> = {}): NotionUser {
   return {
+    object: 'user',
     id: `user_${Math.random().toString(36).substr(2, 9)}`,
     type: 'person',
     person: {
@@ -267,7 +282,9 @@ export function createRichText(
 }
 
 // Database Mock Generator
-export function createMockDatabase(properties: Record<string, unknown> = {}) {
+export function createMockDatabase(
+  properties: Record<string, unknown> = {}
+): Record<string, unknown> {
   return {
     id: `db_${Math.random().toString(36).substr(2, 9)}`,
     created_time: new Date().toISOString(),
@@ -318,7 +335,11 @@ export function generateRandomDate(start?: Date, end?: Date): string {
 }
 
 // Error Generators for testing error handling
-export function createNotionError(status: number, code: string, message: string) {
+export function createNotionError(
+  status: number,
+  code: string,
+  message: string
+): Error & { status?: number; code?: string; headers?: Record<string, unknown> } {
   const error = new Error(message) as Error & {
     status?: number;
     code?: string;
@@ -330,24 +351,28 @@ export function createNotionError(status: number, code: string, message: string)
   return error;
 }
 
-export function createRateLimitError() {
+export function createRateLimitError(): Error & { status?: number; code?: string } {
   return createNotionError(429, 'rate_limited', 'Request was rate limited.');
 }
 
-export function createValidationError() {
+export function createValidationError(): Error & { status?: number; code?: string } {
   return createNotionError(400, 'validation_error', 'The request body does not match the schema.');
 }
 
-export function createNotFoundError() {
+export function createNotFoundError(): Error & { status?: number; code?: string } {
   return createNotionError(404, 'object_not_found', 'Could not find database with ID.');
 }
 
-export function createUnauthorizedError() {
+export function createUnauthorizedError(): Error & { status?: number; code?: string } {
   return createNotionError(401, 'unauthorized', 'Unauthorized access.');
 }
 
 // Performance Testing Helpers
-export function createLargeDataset(size: number) {
+export function createLargeDataset(size: number): Array<{
+  id: string;
+  data: string;
+  nested: { array: string[]; object: Record<string, string> };
+}> {
   return generateTestArray(
     () => ({
       id: generateRandomString(),
@@ -368,7 +393,13 @@ export function createQueryResponse(
   pages: unknown[] = [],
   hasMore: boolean = false,
   nextCursor?: string
-) {
+): {
+  results: unknown[];
+  next_cursor: string | null;
+  has_more: boolean;
+  type: 'page_or_database';
+  page_or_database: {};
+} {
   return {
     results: pages,
     next_cursor: hasMore ? nextCursor || 'next_cursor' : null,
@@ -378,14 +409,20 @@ export function createQueryResponse(
   };
 }
 
-export function createCreateResponse(pageData: Record<string, unknown> = {}) {
+export function createCreateResponse(
+  pageData: Record<string, unknown> = {}
+): Record<string, unknown> {
   return createMockPage(pageData);
 }
 
-export function createUpdateResponse(pageData: Record<string, unknown> = {}) {
+export function createUpdateResponse(
+  pageData: Record<string, unknown> = {}
+): Record<string, unknown> {
   return createMockPage(pageData);
 }
 
-export function createRetrieveResponse(pageData: Record<string, unknown> = {}) {
+export function createRetrieveResponse(
+  pageData: Record<string, unknown> = {}
+): Record<string, unknown> {
   return createMockPage(pageData);
 }
