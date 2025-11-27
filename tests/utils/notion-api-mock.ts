@@ -5,7 +5,8 @@
  * for comprehensive testing without actual API calls.
  */
 
-import { vi } from 'vitest';
+import type { Procedure } from '@vitest/spy';
+import { vi, type Mock } from 'vitest';
 
 export interface MockNotionUser {
   id: string;
@@ -181,7 +182,26 @@ export function createMockDatabase(
 
 // Property value generators
 export const mockPropertyValues = {
-  title: (content: string = 'Default Title') => ({
+  title: (
+    content: string = 'Default Title'
+  ): {
+    title: readonly [
+      {
+        readonly type: 'text';
+        readonly text: {
+          readonly content: string;
+        };
+        readonly annotations: {
+          readonly bold: false;
+          readonly italic: false;
+          readonly strikethrough: false;
+          readonly underline: false;
+          readonly code: false;
+          readonly color: 'default';
+        };
+      },
+    ];
+  } => ({
     title: [
       {
         type: 'text',
@@ -195,10 +215,29 @@ export const mockPropertyValues = {
           color: 'default',
         },
       },
-    ],
+    ] as const,
   }),
 
-  rich_text: (content: string = 'Default rich text') => ({
+  rich_text: (
+    content: string = 'Default rich text'
+  ): {
+    rich_text: readonly [
+      {
+        readonly type: 'text';
+        readonly text: {
+          readonly content: string;
+        };
+        readonly annotations: {
+          readonly bold: false;
+          readonly italic: false;
+          readonly strikethrough: false;
+          readonly underline: false;
+          readonly code: false;
+          readonly color: 'default';
+        };
+      },
+    ];
+  } => ({
     rich_text: [
       {
         type: 'text',
@@ -212,18 +251,36 @@ export const mockPropertyValues = {
           color: 'default',
         },
       },
-    ],
+    ] as const,
   }),
 
-  number: (value: number | null = 42) => ({
+  number: (
+    value: number | null = 42
+  ): {
+    number: number | null;
+  } => ({
     number: value,
   }),
 
-  checkbox: (checked: boolean = false) => ({
+  checkbox: (
+    checked: boolean = false
+  ): {
+    checkbox: boolean;
+  } => ({
     checkbox: checked,
   }),
 
-  date: (start: string = '2024-01-15', end?: string, timezone?: string) => ({
+  date: (
+    start: string = '2024-01-15',
+    end?: string,
+    timezone?: string
+  ): {
+    date: {
+      start: string;
+      end: string | null;
+      time_zone: string | null;
+    };
+  } => ({
     date: {
       start,
       end: end || null,
@@ -231,7 +288,16 @@ export const mockPropertyValues = {
     },
   }),
 
-  select: (name: string = 'Active', color: string = 'green') => ({
+  select: (
+    name: string = 'Active',
+    color: string = 'green'
+  ): {
+    select: {
+      id: string;
+      name: string;
+      color: string;
+    };
+  } => ({
     select: {
       id: `opt-${Math.random().toString(36).substring(7)}`,
       name,
@@ -239,7 +305,15 @@ export const mockPropertyValues = {
     },
   }),
 
-  multi_select: (names: string[] = ['feature', 'urgent']) => ({
+  multi_select: (
+    names: string[] = ['feature', 'urgent']
+  ): {
+    multi_select: {
+      id: string;
+      name: string;
+      color: string;
+    }[];
+  } => ({
     multi_select: names.map((name, index) => ({
       id: `opt-${index}`,
       name,
@@ -247,37 +321,76 @@ export const mockPropertyValues = {
     })),
   }),
 
-  people: (userIds: string[] = ['user-1']) => ({
+  people: (
+    userIds: string[] = ['user-1']
+  ): {
+    people: (MockNotionUser | undefined)[];
+  } => ({
     people: userIds.map(id => mockUsers[id]).filter(Boolean),
   }),
 
-  created_time: (time: string = '2024-01-15T10:00:00.000Z') => ({
+  created_time: (
+    time: string = '2024-01-15T10:00:00.000Z'
+  ): {
+    created_time: string;
+  } => ({
     created_time: time,
   }),
 
-  last_edited_time: (time: string = '2024-01-15T15:30:00.000Z') => ({
+  last_edited_time: (
+    time: string = '2024-01-15T15:30:00.000Z'
+  ): {
+    last_edited_time: string;
+  } => ({
     last_edited_time: time,
   }),
 
-  created_by: (userId: string = 'user-1') => ({
+  created_by: (
+    userId: string = 'user-1'
+  ): {
+    created_by: MockNotionUser | undefined;
+  } => ({
     created_by: mockUsers[userId],
   }),
 
-  last_edited_by: (userId: string = 'user-1') => ({
+  last_edited_by: (
+    userId: string = 'user-1'
+  ): {
+    last_edited_by: MockNotionUser | undefined;
+  } => ({
     last_edited_by: mockUsers[userId],
   }),
 
-  url: (url: string | null = 'https://example.com') => ({
+  url: (
+    url: string | null = 'https://example.com'
+  ): {
+    url: string | null;
+  } => ({
     url,
   }),
 
-  email: (email: string | null = 'test@example.com') => ({
+  email: (
+    email: string | null = 'test@example.com'
+  ): {
+    email: string | null;
+  } => ({
     email,
   }),
 };
 
 // Query response generators
-export function createMockQueryResponse(pages: MockNotionPage[] = [], hasMore: boolean = false) {
+export function createMockQueryResponse(
+  pages: MockNotionPage[] = [],
+  hasMore: boolean = false
+): {
+  object: string;
+  results: MockNotionPage[];
+  next_cursor: string | null;
+  has_more: boolean;
+  type: 'page_or_database';
+  page_or_database: {};
+  request_id: string;
+} {
   return {
     object: 'list',
     results: pages,
@@ -290,31 +403,74 @@ export function createMockQueryResponse(pages: MockNotionPage[] = [], hasMore: b
 }
 
 // Error response generators
-export function createMockNotionError(status: number, code: string, message: string) {
+export function createMockNotionError(
+  status: number,
+  code: string,
+  message: string
+): Error & {
+  status?: number;
+  code?: string;
+} {
   const error = new Error(message) as Error & { status?: number; code?: string };
   error.status = status;
   error.code = code;
   return error;
 }
 
-export function createMockRateLimitError() {
+export function createMockRateLimitError(): Error & {
+  status?: number;
+  code?: string;
+} {
   return createMockNotionError(429, 'rate_limited', 'Rate limit exceeded');
 }
 
-export function createMockValidationError() {
+export function createMockValidationError(): Error & {
+  status?: number;
+  code?: string;
+} {
   return createMockNotionError(400, 'validation_error', 'Invalid request data');
 }
 
-export function createMockUnauthorizedError() {
+export function createMockUnauthorizedError(): Error & {
+  status?: number;
+  code?: string;
+} {
   return createMockNotionError(401, 'unauthorized', 'Unauthorized access');
 }
 
-export function createMockNotFoundError() {
+export function createMockNotFoundError(): Error & {
+  status?: number;
+  code?: string;
+} {
   return createMockNotionError(404, 'object_not_found', 'Object not found');
 }
 
 // Mock client factory
-export function createMockNotionClient() {
+export function createMockNotionClient(): {
+  databases: {
+    query: Mock<Procedure>;
+    retrieve: Mock<Procedure>;
+    create: Mock<Procedure>;
+    update: Mock<Procedure>;
+  };
+  pages: {
+    create: Mock<Procedure>;
+    retrieve: Mock<Procedure>;
+    update: Mock<Procedure>;
+    archive: Mock<Procedure>;
+  };
+  blocks: {
+    children: {
+      list: Mock<Procedure>;
+      append: Mock<Procedure>;
+    };
+  };
+  users: {
+    list: Mock<Procedure>;
+    retrieve: Mock<Procedure>;
+    me: Mock<Procedure>;
+  };
+} {
   return {
     databases: {
       query: vi.fn(),
@@ -344,9 +500,27 @@ export function createMockNotionClient() {
 
 // Response builders for common scenarios
 export const mockResponses = {
-  emptyQuery: () => createMockQueryResponse([]),
+  emptyQuery: (): {
+    object: string;
+    results: MockNotionPage[];
+    next_cursor: string | null;
+    has_more: boolean;
+    type: 'page_or_database';
+    page_or_database: {};
+    request_id: string;
+  } => createMockQueryResponse([]),
 
-  singlePageQuery: (title: string = 'Test Page') =>
+  singlePageQuery: (
+    title: string = 'Test Page'
+  ): {
+    object: string;
+    results: MockNotionPage[];
+    next_cursor: string | null;
+    has_more: boolean;
+    type: 'page_or_database';
+    page_or_database: {};
+    request_id: string;
+  } =>
     createMockQueryResponse([
       createMockPage({
         properties: {
@@ -356,7 +530,17 @@ export const mockResponses = {
       }),
     ]),
 
-  multiPageQuery: (count: number = 3) =>
+  multiPageQuery: (
+    count: number = 3
+  ): {
+    object: string;
+    results: MockNotionPage[];
+    next_cursor: string | null;
+    has_more: boolean;
+    type: 'page_or_database';
+    page_or_database: {};
+    request_id: string;
+  } =>
     createMockQueryResponse(
       Array.from({ length: count }, (_, i) =>
         createMockPage({
@@ -368,15 +552,23 @@ export const mockResponses = {
       )
     ),
 
-  paginatedQuery: () =>
+  paginatedQuery: (): {
+    object: string;
+    results: MockNotionPage[];
+    next_cursor: string | null;
+    has_more: boolean;
+    type: 'page_or_database';
+    page_or_database: {};
+    request_id: string;
+  } =>
     createMockQueryResponse(
       [createMockPage()],
       true // has_more = true
     ),
 
-  basicDatabase: () => createMockDatabase(),
+  basicDatabase: (): MockNotionDatabase => createMockDatabase(),
 
-  complexDatabase: () =>
+  complexDatabase: (): MockNotionDatabase =>
     createMockDatabase({
       properties: {
         title: { type: 'title', title: {} },
