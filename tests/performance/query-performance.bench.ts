@@ -5,7 +5,7 @@
  * and related components under various load scenarios.
  */
 
-import { bench, describe } from 'vitest';
+import { bench, describe, vi } from 'vitest';
 import { NotionClient } from '../../src/client/notion-client.js';
 import { createTypedSchema } from '../../src/schema/typed-schema.js';
 import {
@@ -32,6 +32,8 @@ import { measureAsyncPerformance, measureSyncPerformance } from '../utils/custom
 
 // Mock setup
 const mockClient = createMockNotionClient();
+const mockQuery = mockClient.databases.query as ReturnType<typeof vi.fn>;
+const mockPageCreate = mockClient.pages.create as ReturnType<typeof vi.fn>;
 const testSchema = createTypedSchema({
   databaseId: 'test-db',
   properties: {
@@ -47,7 +49,7 @@ describe('Query Performance Benchmarks', () => {
   describe('NotionClient Query Operations', () => {
     bench('Query with simple filter - 100 results', async () => {
       const pages = generateTestArray(() => createMockPage(), 100);
-      mockClient.databases.query.mockResolvedValueOnce({
+      mockQuery.mockResolvedValueOnce({
         results: pages,
         next_cursor: null,
         has_more: false,
@@ -66,7 +68,7 @@ describe('Query Performance Benchmarks', () => {
 
     bench('Query with complex filter - 1000 results', async () => {
       const pages = generateTestArray(() => createMockPage(), 1000);
-      mockClient.databases.query.mockResolvedValueOnce({
+      mockQuery.mockResolvedValueOnce({
         results: pages,
         next_cursor: null,
         has_more: false,
@@ -108,7 +110,7 @@ describe('Query Performance Benchmarks', () => {
     });
 
     bench('Bulk create operations - 50 pages', async () => {
-      mockClient.pages.create.mockImplementation(() => Promise.resolve(createMockPage()));
+      mockPageCreate.mockImplementation(() => Promise.resolve(createMockPage()));
 
       const client = new NotionClient({ auth: 'test' });
       const createPromises = Array.from({ length: 50 }, (_, i) =>
@@ -123,8 +125,8 @@ describe('Query Performance Benchmarks', () => {
     });
 
     bench('Sequential vs Parallel operations', async () => {
-      mockClient.pages.create.mockImplementation(() => Promise.resolve(createMockPage()));
-      mockClient.databases.query.mockImplementation(() =>
+      mockPageCreate.mockImplementation(() => Promise.resolve(createMockPage()));
+      mockQuery.mockImplementation(() =>
         Promise.resolve({
           results: generateTestArray(() => createMockPage(), 10),
           next_cursor: null,
@@ -348,7 +350,7 @@ describe('Query Performance Benchmarks', () => {
         retryDelayMs: 1, // Minimal delay for benchmarking
       });
 
-      mockClient.databases.query.mockImplementation(() =>
+      mockQuery.mockImplementation(() =>
         Promise.resolve({
           results: [],
           next_cursor: null,
@@ -371,7 +373,7 @@ describe('Query Performance Benchmarks', () => {
       });
 
       let callCount = 0;
-      mockClient.databases.query.mockImplementation(() => {
+      mockQuery.mockImplementation(() => {
         callCount++;
         if (callCount <= 5) {
           // Simulate rate limit errors for first few calls
@@ -409,7 +411,7 @@ describe('Performance Regression Tests', () => {
 
   bench('Regression: Simple query performance', async () => {
     const client = new NotionClient({ auth: 'test' });
-    mockClient.databases.query.mockResolvedValueOnce({
+    mockQuery.mockResolvedValueOnce({
       results: generateTestArray(() => createMockPage(), 10),
       next_cursor: null,
       has_more: false,
