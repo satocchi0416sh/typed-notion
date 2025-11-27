@@ -316,6 +316,23 @@ export class TypedSchema<S extends SchemaDefinition> {
   }
 
   /**
+   * Validate partial data against the schema (useful for updates)
+   * @param data - Partial data to validate
+   * @returns Zod safe parse result
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validatePartial(data: unknown): { success: boolean; error?: any } {
+    const zodSchema = this.toZod();
+    if ('partial' in zodSchema && typeof zodSchema.partial === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const partialSchema = (zodSchema as any).partial();
+      return partialSchema.safeParse(data);
+    }
+    // Fallback to regular validation if partial is not available
+    return zodSchema.safeParse(data);
+  }
+
+  /**
    * Parse and transform data with automatic error handling
    * @param data - Data to parse
    * @returns Parsed data matching schema types
