@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Client } from '@notionhq/client';
 import { NotionClient } from '../../src/client/notion-client.js';
 import { createTypedSchema } from '../../src/schema/typed-schema.js';
 import type { SchemaDefinition } from '../../src/types/core.js';
@@ -54,9 +55,9 @@ describe('API Workflow Integration Tests', () => {
     mockClient = createMockNotionClient();
 
     // Mock the Client constructor to return our mock
-    const { Client } = await import('@notionhq/client');
-    const MockClient = vi.mocked(Client);
-    MockClient.mockImplementation(() => mockClient as unknown as InstanceType<typeof Client>);
+    vi.mocked(Client).mockImplementation(
+      () => mockClient as unknown as InstanceType<typeof Client>
+    );
 
     client = new NotionClient({
       auth: 'test-token',

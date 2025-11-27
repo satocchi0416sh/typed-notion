@@ -10,12 +10,14 @@
  * Provides common structure for all library errors
  */
 export abstract class TypedNotionError extends Error {
-  abstract readonly code: string;
-  abstract readonly context: Record<string, unknown>;
+  readonly code: string;
+  readonly cause?: unknown;
 
-  constructor(message: string) {
+  constructor(message: string, code: string, cause?: unknown) {
     super(message);
     this.name = this.constructor.name;
+    this.code = code;
+    this.cause = cause;
 
     // Ensure proper prototype chain for instanceof checks
     Object.setPrototypeOf(this, new.target.prototype);
@@ -29,199 +31,285 @@ export abstract class TypedNotionError extends Error {
       name: this.name,
       code: this.code,
       message: this.message,
-      context: this.context,
+      cause: this.cause,
       stack: this.stack,
     };
   }
 }
 
 /**
- * Schema validation error for creation-time validation failures
- * Thrown when schema definitions are invalid (FR-008)
+ * Conversion error when transforming data between TypeScript and Notion formats
+ */
+export class ConversionError extends TypedNotionError {
+  readonly rawValue?: unknown;
+  readonly context?: string;
+  readonly expectedType?: string;
+  readonly actualType?: string;
+
+  constructor(
+    message: string,
+    code: string,
+    rawValue?: unknown,
+    context?: string,
+    expectedType?: string,
+    actualType?: string,
+    cause?: Error
+  ) {
+    super(message, code, cause);
+    if (rawValue !== undefined) this.rawValue = rawValue;
+    if (context !== undefined) this.context = context;
+    if (expectedType !== undefined) this.expectedType = expectedType;
+    if (actualType !== undefined) this.actualType = actualType;
+  }
+}
+
+/**
+ * Schema validation error when data doesn't match the expected schema
  */
 export class SchemaValidationError extends TypedNotionError {
-  readonly code = 'SCHEMA_VALIDATION_ERROR';
-  readonly context: { property: string; expected: string; received: unknown };
+  readonly property: string;
+  readonly expected: string;
+  readonly actual: unknown;
+  readonly context?: { property: string; expected: string; received: unknown };
 
-  constructor(property: string, expected: string, received: unknown) {
-    super(
-      `Invalid property type for '${property}': expected ${expected}, received ${typeof received}`
-    );
-    this.context = { property, expected, received };
+  constructor(property: string, expected: string, actual: unknown) {
+    const message = `Schema validation failed for property '${property}'. Expected: ${expected}. Actual: ${JSON.stringify(
+      actual
+    )}`;
+    super(message, 'SCHEMA_VALIDATION_ERROR');
+    this.property = property;
+    this.expected = expected;
+    this.actual = actual;
+    // Add context for backward compatibility
+    this.context = { property, expected, received: actual };
+  }
+}
+
+/**
+ * Notion API error wrapper for better error handling
+ */
+export class NotionAPIError extends TypedNotionError {
+  readonly status: number;
+  readonly notionCode?: string;
+
+  constructor(status: number, message: string, notionCode?: string) {
+    super(message, 'NOTION_API_ERROR');
+    this.status = status;
+    if (notionCode !== undefined) this.notionCode = notionCode;
   }
 }
 
 /**
  * Property access error for undefined properties
- * Thrown when accessing properties not defined in schema
  */
 export class PropertyAccessError extends TypedNotionError {
-  readonly code = 'PROPERTY_ACCESS_ERROR';
-  readonly context: { property: string; schema: string };
+  readonly property: string;
+  readonly schema: string;
+  readonly propertyName?: string;
+  readonly availableProperties?: readonly string[];
+  readonly context?: { property: string; schema: string };
 
-  constructor(property: string, schema: string) {
-    super(`Property '${property}' not defined in schema`);
+  // Support multiple constructor signatures
+  constructor(property: string, schemaOrAvailableProperties: string | readonly string[]) {
+    let message: string;
+    let schema: string = '';
+    let availableProperties: readonly string[] | undefined;
+
+    if (typeof schemaOrAvailableProperties === 'string') {
+      // Original signature: (property: string, schema: string)
+      schema = schemaOrAvailableProperties;
+      message = `Property '${property}' not defined in schema`;
+    } else {
+      // New signature: (property: string, availableProperties: readonly string[])
+      availableProperties = schemaOrAvailableProperties;
+      if (availableProperties.length === 0) {
+        message = `Property '${property}' not found. No properties available`;
+      } else {
+        message = `Property '${property}' not found. Available: ${availableProperties.join(', ')}`;
+      }
+    }
+
+    super(message, 'PROPERTY_ACCESS_ERROR');
+    this.property = property;
+    this.schema = schema;
+    this.propertyName = property; // For test compatibility
+    if (availableProperties !== undefined) {
+      this.availableProperties = availableProperties;
+    }
+    // Add context for backward compatibility
     this.context = { property, schema };
   }
 }
 
 /**
- * Notion API interaction errors
- * Thrown when Notion API calls fail
- */
-export class NotionAPIError extends TypedNotionError {
-  readonly code = 'NOTION_API_ERROR';
-  readonly context: { status: number; message: string; request_id?: string };
-
-  constructor(status: number, message: string, request_id?: string) {
-    super(`Notion API error (${status}): ${message}`);
-    this.context = request_id ? { status, message, request_id } : { status, message };
-  }
-}
-
-/**
  * Property validation error for runtime value validation
- * Thrown when property values don't match their schema types
  */
 export class PropertyValidationError extends TypedNotionError {
-  readonly code = 'PROPERTY_VALIDATION_ERROR';
-  readonly context: { property: string; value: unknown; expectedType: string };
+  readonly property: string;
+  readonly value: unknown;
+  readonly expectedType: string;
+  readonly propertyName?: string;
+  readonly reason?: string;
+  readonly context?: { property: string; value: unknown; expectedType: string };
 
-  constructor(property: string, value: unknown, expectedType: string) {
-    super(
-      `Invalid value for property '${property}': expected ${expectedType}, received ${typeof value}`
-    );
+  constructor(propertyOrPropertyName: string, value: unknown, expectedTypeOrReason: string) {
+    const property = propertyOrPropertyName;
+    const expectedType = expectedTypeOrReason;
+    const message = `Invalid value for property '${property}': expected ${expectedType}, received ${typeof value}`;
+
+    super(message, 'PROPERTY_VALIDATION_ERROR');
+    this.property = property;
+    this.value = value;
+    this.expectedType = expectedType;
+    // Add alternative names for test compatibility
+    this.propertyName = property;
+    this.reason = expectedType;
+    // Add context for backward compatibility
     this.context = { property, value, expectedType };
   }
 }
 
 /**
- * Selection option validation error for invalid select/multi-select values
- * Thrown when selection properties receive values not in their options array
+ * Selection validation error for select/multi-select properties
  */
 export class SelectionValidationError extends TypedNotionError {
-  readonly code = 'SELECTION_VALIDATION_ERROR';
-  readonly context: { property: string; value: unknown; validOptions: readonly string[] };
-
-  constructor(property: string, value: unknown, validOptions: readonly string[]) {
-    super(
-      `Invalid selection value for property '${property}': '${value}' is not one of [${validOptions.join(', ')}]`
-    );
-    this.context = { property, value, validOptions };
-  }
-}
-
-/**
- * Data conversion error for transformation failures between Notion API and TypeScript types
- * Thrown when automatic data conversion fails during query/create/update operations
- */
-export class ConversionError extends TypedNotionError {
-  readonly code = 'CONVERSION_ERROR';
-  readonly context: {
-    type: 'VALIDATION_ERROR' | 'CONVERSION_ERROR' | 'SCHEMA_MISMATCH' | 'MISSING_PROPERTY';
-    input?: unknown;
-    propertyName?: string;
-    expectedType?: string;
-    actualType?: string;
-    originalError?: Error;
-  };
+  readonly property?: string;
+  readonly invalidValue?: unknown;
+  readonly validOptions?: readonly string[];
+  readonly value?: unknown;
+  readonly context?: { property: string; value: unknown; validOptions: readonly string[] };
 
   constructor(
-    message: string,
-    type: 'VALIDATION_ERROR' | 'CONVERSION_ERROR' | 'SCHEMA_MISMATCH' | 'MISSING_PROPERTY',
-    input?: unknown,
-    propertyName?: string,
-    expectedType?: string,
-    actualType?: string,
-    originalError?: Error
+    propertyOrMessage: string,
+    invalidValueOrProperty?: unknown | string,
+    validOptions?: readonly string[]
   ) {
-    super(message);
-    this.context = {
-      type,
-      ...(input !== undefined && { input }),
-      ...(propertyName !== undefined && { propertyName }),
-      ...(expectedType !== undefined && { expectedType }),
-      ...(actualType !== undefined && { actualType }),
-      ...(originalError !== undefined && { originalError }),
-    };
+    let message: string;
+    let property: string | undefined;
+    let invalidValue: unknown;
+
+    if (validOptions !== undefined) {
+      // New signature: (property, value, validOptions)
+      property = propertyOrMessage;
+      invalidValue = invalidValueOrProperty;
+      if (validOptions.length === 0) {
+        message = `Invalid value '${invalidValue}' for property '${property}'. No valid options available`;
+      } else {
+        message = `Invalid value '${invalidValue}' for property '${property}'. Valid options: ${validOptions.join(
+          ', '
+        )}`;
+      }
+    } else {
+      // Original signature: (message, property?, invalidValue?, validOptions?)
+      message = propertyOrMessage;
+      property = invalidValueOrProperty as string | undefined;
+      invalidValue = undefined;
+    }
+
+    super(message, 'SELECTION_VALIDATION_ERROR');
+    if (property !== undefined) this.property = property;
+    if (invalidValue !== undefined) {
+      this.invalidValue = invalidValue;
+      this.value = invalidValue; // For test compatibility
+    }
+    if (validOptions !== undefined) this.validOptions = validOptions;
+
+    // Add context for backward compatibility
+    if (property !== undefined && invalidValue !== undefined && validOptions !== undefined) {
+      this.context = { property, value: invalidValue, validOptions };
+    }
   }
 }
 
 /**
- * Configuration error for environment and database ID resolution issues
- * Thrown when environment variables are missing or database configurations are invalid
- */
-export class ConfigurationError extends TypedNotionError {
-  readonly code = 'CONFIGURATION_ERROR';
-  readonly context: {
-    type: 'MISSING_ENV' | 'INVALID_DATABASE_ID' | 'VALIDATION_FAILED' | 'API_ERROR';
-    schemaName?: string;
-    suggestion?: string;
-  };
-
-  constructor(
-    message: string,
-    type: 'MISSING_ENV' | 'INVALID_DATABASE_ID' | 'VALIDATION_FAILED' | 'API_ERROR',
-    schemaName?: string,
-    suggestion?: string
-  ) {
-    super(message);
-    this.context = {
-      type,
-      ...(schemaName !== undefined && { schemaName }),
-      ...(suggestion !== undefined && { suggestion }),
-    };
-  }
-}
-
-/**
- * Schema registration error for configuration management issues
- * Thrown when registering schemas with the configuration manager fails
+ * Schema registration error when a schema is registered incorrectly
  */
 export class SchemaRegistrationError extends TypedNotionError {
-  readonly code = 'SCHEMA_REGISTRATION_ERROR';
-  readonly context: {
-    schemaName: string;
-    validationErrors?: Array<{
-      type: string;
-      message: string;
-      property?: string;
-    }>;
-  };
+  readonly schemaName?: string;
+  readonly details?: string;
+
+  constructor(schemaNameOrMessage: string, detailsOrSchemaName?: string) {
+    let message: string;
+    let schemaName: string | undefined;
+
+    if (detailsOrSchemaName !== undefined) {
+      // New signature: (schemaName, details)
+      schemaName = schemaNameOrMessage;
+      const details = detailsOrSchemaName;
+      message = `Schema '${schemaName}': ${details}`;
+    } else {
+      // Original signature: (message, schemaName?, details?)
+      message = schemaNameOrMessage;
+      schemaName = undefined;
+    }
+
+    super(message, 'SCHEMA_REGISTRATION_ERROR');
+    if (schemaName !== undefined) this.schemaName = schemaName;
+    if (detailsOrSchemaName !== undefined && schemaName === schemaNameOrMessage) {
+      this.details = detailsOrSchemaName;
+    }
+  }
+}
+
+/**
+ * Configuration error for invalid configuration
+ */
+export class ConfigurationError extends TypedNotionError {
+  readonly configKey?: string;
+  readonly environmentVariable?: string;
+  readonly envVariable?: string;
 
   constructor(
-    message: string,
-    schemaName: string,
-    validationErrors?: Array<{
-      type: string;
-      message: string;
-      property?: string;
-    }>
+    configKeyOrMessage: string,
+    environmentVariableOrConfigKey?: string,
+    messageOrEnvironmentVariable?: string
   ) {
-    super(message);
-    this.context = {
-      schemaName,
-      ...(validationErrors !== undefined && { validationErrors }),
-    };
+    let message: string;
+    let configKey: string | undefined;
+    let environmentVariable: string | undefined;
+
+    if (messageOrEnvironmentVariable !== undefined) {
+      // New signature: (configKey, envVariable, message)
+      configKey = configKeyOrMessage;
+      environmentVariable = environmentVariableOrConfigKey;
+      message = messageOrEnvironmentVariable;
+      if (!message.includes(configKey) || !message.includes(environmentVariable!)) {
+        message = `Configuration error for '${configKey}' (env: ${environmentVariable}): ${message}`;
+      }
+    } else if (environmentVariableOrConfigKey !== undefined) {
+      // Simplified signature: (message, configKey?, envVariable?)
+      message = configKeyOrMessage;
+      configKey = environmentVariableOrConfigKey;
+    } else {
+      // Message only
+      message = configKeyOrMessage;
+    }
+
+    super(message, 'CONFIGURATION_ERROR');
+    if (configKey !== undefined) this.configKey = configKey;
+    if (environmentVariable !== undefined) {
+      this.environmentVariable = environmentVariable;
+      this.envVariable = environmentVariable; // For test compatibility
+    }
   }
 }
 
 // Result type for safe error handling in conversion operations
-export type Result<T, E = ConversionError> = { kind: 'ok'; value: T } | { kind: 'err'; error: E };
+export type Result<T, E = ConversionError> = { ok: true; value: T } | { ok: false; error: E };
 
 // Helper functions for Result type
 export function createOk<T>(value: T): Result<T> {
-  return { kind: 'ok', value };
+  return { ok: true, value };
 }
 
 export function createErr<E>(error: E): Result<never, E> {
-  return { kind: 'err', error };
+  return { ok: false, error };
 }
 
-export function isOk<T, E>(result: Result<T, E>): result is { kind: 'ok'; value: T } {
-  return result.kind === 'ok';
+export function isOk<T, E>(result: Result<T, E>): result is { ok: true; value: T } {
+  return result.ok === true;
 }
 
-export function isErr<T, E>(result: Result<T, E>): result is { kind: 'err'; error: E } {
-  return result.kind === 'err';
+export function isErr<T, E>(result: Result<T, E>): result is { ok: false; error: E } {
+  return result.ok === false;
 }

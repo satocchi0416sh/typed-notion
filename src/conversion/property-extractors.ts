@@ -138,7 +138,12 @@ export class TitleExtractor implements PropertyExtractor<string | null> {
   }
 
   validate(property: NotionPropertyValue): boolean {
-    return property.type === 'title' && 'title' in property && Array.isArray(property.title);
+    return (
+      property &&
+      property.type === 'title' &&
+      'title' in property &&
+      (Array.isArray(property.title) || property.title === null)
+    );
   }
 
   getDefaultValue(): string | null {
@@ -193,7 +198,9 @@ export class RichTextExtractor implements PropertyExtractor<string | null> {
 
   validate(property: NotionPropertyValue): boolean {
     return (
-      property.type === 'rich_text' && 'rich_text' in property && Array.isArray(property.rich_text)
+      property.type === 'rich_text' &&
+      'rich_text' in property &&
+      (Array.isArray(property.rich_text) || property.rich_text === null)
     );
   }
 
@@ -285,8 +292,12 @@ export class CheckboxExtractor implements PropertyExtractor<boolean | null> {
     }
 
     try {
-      const checkboxProperty = property as unknown as { checkbox: boolean };
+      const checkboxProperty = property as unknown as { checkbox: boolean | null };
       const value = checkboxProperty.checkbox;
+
+      if (value === null || value === undefined) {
+        return createOk(false);
+      }
 
       if (typeof value !== 'boolean') {
         return createErr(
@@ -502,12 +513,12 @@ export class MultiSelectExtractor implements PropertyExtractor<string[] | null> 
 
     try {
       const multiSelectProperty = property as unknown as {
-        multi_select: Array<{ id: string; name: string; color: string }>;
+        multi_select: Array<{ id: string; name: string; color: string }> | null;
       };
 
       const multiSelectArray = multiSelectProperty.multi_select;
       if (!multiSelectArray || multiSelectArray.length === 0) {
-        return createOk(null);
+        return createOk([]);
       }
 
       const names = multiSelectArray.map(option => option.name);
@@ -531,7 +542,7 @@ export class MultiSelectExtractor implements PropertyExtractor<string[] | null> 
     return (
       property.type === 'multi_select' &&
       'multi_select' in property &&
-      Array.isArray(property.multi_select)
+      (Array.isArray(property.multi_select) || property.multi_select === null)
     );
   }
 
@@ -563,7 +574,7 @@ export class PeopleExtractor implements PropertyExtractor<NotionUser[] | null> {
       const peopleArray = peopleProperty.people;
 
       if (!peopleArray || peopleArray.length === 0) {
-        return createOk(null);
+        return createOk([]);
       }
 
       return createOk(peopleArray);

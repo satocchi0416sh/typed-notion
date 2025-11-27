@@ -79,16 +79,7 @@ export class DatabaseConfigurationManager implements ConfigurationManager {
     try {
       // Validate schema structure
       if (!schema.databaseId || !schema.properties) {
-        throw new SchemaRegistrationError(
-          `Invalid schema structure for '${schemaName}'`,
-          schemaName,
-          [
-            {
-              type: 'INVALID_STRUCTURE',
-              message: 'Schema must have databaseId and properties',
-            },
-          ]
-        );
+        throw new SchemaRegistrationError(schemaName, 'Schema must have databaseId and properties');
       }
 
       // Check if database ID can be resolved
@@ -210,10 +201,8 @@ export class DatabaseConfigurationManager implements ConfigurationManager {
   async validateAllSchemas(): Promise<void> {
     if (!this.notionClient) {
       throw new ConfigurationError(
-        'NotionClient not set for validation',
-        'VALIDATION_FAILED',
-        undefined,
-        'Call setNotionClient() before validation'
+        'NotionClient not set for validation. Call setNotionClient() before validation',
+        'VALIDATION_FAILED'
       );
     }
 
