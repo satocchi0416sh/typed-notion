@@ -62,9 +62,9 @@ describe('Unit Tests: Contact Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(PropertyValidationError);
         const propError = error as PropertyValidationError;
-        expect(propError.context.property).toBe('DueDate');
-        expect(propError.context.value).toBe('2024-01-01');
-        expect(propError.context.expectedType).toBe('Date');
+        expect(propError.context?.property).toBe('DueDate');
+        expect(propError.context?.value).toBe('2024-01-01');
+        expect(propError.context?.expectedType).toBe('Date');
       }
     });
   });
@@ -131,9 +131,9 @@ describe('Unit Tests: Contact Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(PropertyValidationError);
         const propError = error as PropertyValidationError;
-        expect(propError.context.property).toBe('ContactEmail');
-        expect(propError.context.value).toBe('invalid-email');
-        expect(propError.context.expectedType).toBe('valid email address');
+        expect(propError.context?.property).toBe('ContactEmail');
+        expect(propError.context?.value).toBe('invalid-email');
+        expect(propError.context?.expectedType).toBe('valid email address');
       }
     });
 
@@ -218,9 +218,9 @@ describe('Unit Tests: Contact Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(PropertyValidationError);
         const propError = error as PropertyValidationError;
-        expect(propError.context.property).toBe('WebsiteURL');
-        expect(propError.context.value).toBe('not-a-url');
-        expect(propError.context.expectedType).toBe('valid URL');
+        expect(propError.context?.property).toBe('WebsiteURL');
+        expect(propError.context?.value).toBe('not-a-url');
+        expect(propError.context?.expectedType).toBe('valid URL');
       }
     });
 
@@ -330,9 +330,9 @@ describe('Unit Tests: Contact Properties', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(PropertyValidationError);
         const propError = error as PropertyValidationError;
-        expect(propError.context.property).toBe('Assignees');
-        expect(propError.context.value).toBe('not-an-array');
-        expect(propError.context.expectedType).toBe('NotionUser[]');
+        expect(propError.context?.property).toBe('Assignees');
+        expect(propError.context?.value).toBe('not-an-array');
+        expect(propError.context?.expectedType).toBe('NotionUser[]');
       }
     });
 

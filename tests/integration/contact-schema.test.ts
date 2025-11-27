@@ -16,12 +16,7 @@ import {
   validateSchemaDefinition,
   isValidSchemaDefinition,
 } from '../../src/schema/index.js';
-import {
-  SchemaValidationError,
-  PropertyAccessError,
-  PropertyValidationError,
-} from '../../src/errors/index.js';
-import type { SchemaDefinition, NotionUser } from '../../src/types/index.js';
+import type { NotionUser } from '../../src/types/index.js';
 
 describe('Integration Test: Contact Schema Workflow', () => {
   describe('CRM Contact Schema Workflow', () => {

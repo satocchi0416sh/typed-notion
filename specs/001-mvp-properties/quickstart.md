@@ -44,20 +44,20 @@ const UserSchema = defineSchema({
     Name: { type: 'title' },
     Email: { type: 'email' },
     Age: { type: 'number' },
-    Role: { 
-      type: 'select', 
-      options: ['Admin', 'Editor', 'Viewer'] as const 
+    Role: {
+      type: 'select',
+      options: ['Admin', 'Editor', 'Viewer'] as const,
     },
-    Tags: { 
+    Tags: {
       type: 'multi_select',
-      options: ['Active', 'Premium', 'Beta'] as const
+      options: ['Active', 'Premium', 'Beta'] as const,
     },
     IsActive: { type: 'checkbox' },
     JoinedAt: { type: 'date' },
     Website: { type: 'url' },
     Bio: { type: 'rich_text' },
-    Manager: { type: 'people' }
-  }
+    Manager: { type: 'people' },
+  },
 } as const); // Important: 'as const' preserves literal types
 ```
 
@@ -71,11 +71,11 @@ const users = await query(UserSchema);
 
 // TypeScript knows the exact shape of each user
 users.forEach(user => {
-  console.log(user.props.Name);        // string | null
-  console.log(user.props.Role);        // "Admin" | "Editor" | "Viewer" | null
-  console.log(user.props.Age);         // number | null
-  console.log(user.props.IsActive);    // boolean | null
-  console.log(user.props.Tags);        // ("Active" | "Premium" | "Beta")[] | null
+  console.log(user.props.Name); // string | null
+  console.log(user.props.Role); // "Admin" | "Editor" | "Viewer" | null
+  console.log(user.props.Age); // number | null
+  console.log(user.props.IsActive); // boolean | null
+  console.log(user.props.Tags); // ("Active" | "Premium" | "Beta")[] | null
 });
 ```
 
@@ -86,12 +86,10 @@ users.forEach(user => {
 const activeAdmins = await query(UserSchema, {
   filter: {
     Role: { equals: 'Admin' },
-    IsActive: { equals: true }
+    IsActive: { equals: true },
   },
-  sorts: [
-    { property: 'JoinedAt', direction: 'descending' }
-  ],
-  page_size: 10
+  sorts: [{ property: 'JoinedAt', direction: 'descending' }],
+  page_size: 10,
 });
 ```
 
@@ -111,12 +109,12 @@ if (user) {
 
 ```typescript
 // ✅ Valid - Role is a defined option
-if (user.props.Role === 'Admin') { 
+if (user.props.Role === 'Admin') {
   // Admin-specific logic
 }
 
 // ❌ TypeScript Error - 'SuperAdmin' is not a valid option
-if (user.props.Role === 'SuperAdmin') { 
+if (user.props.Role === 'SuperAdmin') {
   // This won't compile
 }
 
@@ -149,12 +147,12 @@ try {
   const InvalidSchema = defineSchema({
     databaseId: 'xxx',
     properties: {
-      Description: { type: 'rich_text' } // No title!
-    }
+      Description: { type: 'rich_text' }, // No title!
+    },
   });
 } catch (error) {
   if (error instanceof SchemaValidationError) {
-    console.error(error.message); 
+    console.error(error.message);
     // "Schema must have exactly one title property"
     console.error(error.context);
     // { property: 'title', expected: 1, received: 0 }
@@ -187,17 +185,17 @@ const TaskSchema = defineSchema({
   databaseId: 'task-db-id',
   properties: {
     Title: { type: 'title' },
-    Status: { 
-      type: 'select', 
-      options: ['Todo', 'In Progress', 'Done'] as const 
+    Status: {
+      type: 'select',
+      options: ['Todo', 'In Progress', 'Done'] as const,
     },
-    Priority: { 
-      type: 'number', 
-      format: 'number' 
+    Priority: {
+      type: 'number',
+      format: 'number',
     },
     DueDate: { type: 'date' },
-    Assignee: { type: 'people' }
-  }
+    Assignee: { type: 'people' },
+  },
 } as const);
 
 // Each schema maintains its own type safety
@@ -206,7 +204,7 @@ const users = await query(UserSchema);
 
 // TypeScript knows these are different types
 tasks[0]?.props.Status; // "Todo" | "In Progress" | "Done" | null
-users[0]?.props.Role;   // "Admin" | "Editor" | "Viewer" | null
+users[0]?.props.Role; // "Admin" | "Editor" | "Viewer" | null
 ```
 
 ### Schema Composition
@@ -216,7 +214,7 @@ users[0]?.props.Role;   // "Admin" | "Editor" | "Viewer" | null
 const commonProperties = {
   CreatedBy: { type: 'people' as const },
   UpdatedAt: { type: 'date' as const },
-  IsArchived: { type: 'checkbox' as const }
+  IsArchived: { type: 'checkbox' as const },
 };
 
 // Compose schemas with spread operator
@@ -226,8 +224,8 @@ const ProjectSchema = defineSchema({
     Name: { type: 'title' },
     Description: { type: 'rich_text' },
     Budget: { type: 'number', format: 'dollar' },
-    ...commonProperties // Reuse common properties
-  }
+    ...commonProperties, // Reuse common properties
+  },
 } as const);
 ```
 
@@ -249,7 +247,9 @@ console.log(`Last query: ${metrics.lastQueryDuration}ms`);
 ```typescript
 // Schemas are validated once at creation time
 const startTime = performance.now();
-const MySchema = defineSchema({ /* ... */ });
+const MySchema = defineSchema({
+  /* ... */
+});
 const processingTime = performance.now() - startTime;
 
 // Should be < 2000ms for 20 properties
@@ -271,22 +271,22 @@ describe('UserSchema', () => {
       properties: {
         Name: { type: 'title' },
         Email: { type: 'email' },
-        Role: { type: 'select', options: ['Admin', 'User'] as const }
-      }
+        Role: { type: 'select', options: ['Admin', 'User'] as const },
+      },
     } as const);
-    
+
     expect(schema.getDatabaseId()).toBe('test-db');
     expect(schema.hasProperty('Name')).toBe(true);
     expect(schema.hasProperty('InvalidProp')).toBe(false);
   });
-  
+
   it('should reject schema without title property', () => {
     expect(() => {
       defineSchema({
         databaseId: 'test-db',
         properties: {
-          Description: { type: 'rich_text' }
-        }
+          Description: { type: 'rich_text' },
+        },
       });
     }).toThrow(SchemaValidationError);
   });
@@ -302,11 +302,9 @@ import { InferSchemaProperties } from 'typed-notion';
 // Test type inference
 type UserProps = InferSchemaProperties<typeof UserSchema>;
 
-expectTypeOf<UserProps['Role']>()
-  .toEqualTypeOf<'Admin' | 'Editor' | 'Viewer' | null>();
+expectTypeOf<UserProps['Role']>().toEqualTypeOf<'Admin' | 'Editor' | 'Viewer' | null>();
 
-expectTypeOf<UserProps['Tags']>()
-  .toEqualTypeOf<('Active' | 'Premium' | 'Beta')[] | null>();
+expectTypeOf<UserProps['Tags']>().toEqualTypeOf<('Active' | 'Premium' | 'Beta')[] | null>();
 ```
 
 ## Migration from Untyped Notion Client
@@ -316,7 +314,7 @@ expectTypeOf<UserProps['Tags']>()
 ```typescript
 // No type safety, prone to runtime errors
 const response = await notion.databases.query({
-  database_id: databaseId
+  database_id: databaseId,
 });
 
 response.results.forEach(page => {

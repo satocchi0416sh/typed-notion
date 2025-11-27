@@ -175,6 +175,26 @@ export {
   validateSchemaDefinition,
   validatePropertyDefinition,
   isValidSchemaDefinition,
+  ZodSchemaGenerator,
+  getZodSchemaGenerator,
+  resetZodSchemaGenerator,
+  isValidOperator,
+  getValidOperators,
+  validateFilterValue,
+  getFilterValueDescription,
+} from './schema/index.js';
+
+export type {
+  PropertyFilterMap,
+  TextFilters,
+  NumberFilters,
+  CheckboxFilters,
+  DateFilters,
+  SelectFilters,
+  MultiSelectFilters,
+  PeopleFilters,
+  ValidOperators,
+  FilterValue,
 } from './schema/index.js';
 
 // Error classes
@@ -183,7 +203,16 @@ export {
   SchemaValidationError,
   PropertyAccessError,
   NotionAPIError,
+  ConversionError,
+  ConfigurationError,
+  SchemaRegistrationError,
+  createOk,
+  createErr,
+  isOk,
+  isErr,
 } from './errors/index.js';
+
+export type { Result } from './errors/index.js';
 
 // Performance monitoring
 export {
@@ -270,5 +299,92 @@ export function getNotionPropertyValue<T>(property: unknown, type: string): T | 
   }
 }
 
-// Notion Client
-export { NotionClient } from './client/notion-client.js';
+// Enhanced NotionClient and Filter System
+export {
+  NotionClient,
+  FilterBuilder,
+  FilterValidator,
+  FilterConverter,
+  createFilterBuilder,
+  createFilterValidator,
+  createFilterConverter,
+} from './client/index.js';
+
+export type {
+  NotionClientConfig,
+  QueryResponse,
+  SchemaValidationResult,
+  PerformanceMetrics as ClientPerformanceMetrics,
+  NotionFilter,
+  CompoundFilter,
+  QueryOptions as ClientQueryOptions,
+  NotionAPIFilter,
+  FilterValidationResult,
+} from './client/index.js';
+
+// Data Conversion System
+export type { PropertyExtractor } from './conversion/index.js';
+export {
+  TitleExtractor,
+  RichTextExtractor,
+  NumberExtractor,
+  CheckboxExtractor,
+  DateExtractor,
+  SelectExtractor,
+  MultiSelectExtractor,
+  PeopleExtractor,
+  CreatedTimeExtractor,
+  LastEditedTimeExtractor,
+  UrlExtractor,
+  EmailExtractor,
+  NotionPageTransformer,
+  DEFAULT_CONVERSION_CONFIG,
+  TransformerFactory,
+  StreamingTransformer,
+  getTransformerFactory,
+  resetTransformerFactory,
+} from './conversion/index.js';
+
+export type {
+  NotionPropertyValue,
+  RichTextObject,
+  NotionUser as ConversionNotionUser,
+  NotionAPIResponse,
+  ConversionConfig,
+  TransformationMetrics,
+  EnhancedTypedSchema,
+} from './conversion/index.js';
+
+// Environment Configuration
+export {
+  DefaultEnvironmentConfig,
+  getEnvironmentConfig,
+  resetEnvironmentConfig,
+  resolveDatabaseId,
+} from './config/environment.js';
+
+export type { EnvironmentConfig, ConfigurationValidationResult } from './config/environment.js';
+
+// Configuration Management System
+export {
+  DatabaseConfigurationManager,
+  getDatabaseConfigurationManager,
+  resetDatabaseConfigurationManager,
+} from './config/database-config-manager.js';
+
+export { createConfigurationMonitor } from './config/monitor.js';
+
+export type {
+  ConfigurationManager,
+  SchemaConfigStatus,
+  HealthCheckResult,
+} from './config/database-config-manager.js';
+
+export type {
+  ConfigurationMonitor,
+  MonitoringConfig,
+  ConfigurationIssue,
+  MonitoringStats,
+  HealthTrend,
+  IssueSeverity,
+} from './config/monitor.js';

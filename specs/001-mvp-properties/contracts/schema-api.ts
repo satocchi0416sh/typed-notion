@@ -1,7 +1,7 @@
 /**
  * API Contracts: MVP Property Types Schema System
  * Generated from functional requirements in spec.md
- * 
+ *
  * This defines the public API surface for the schema definition system
  */
 
@@ -12,7 +12,7 @@
 /**
  * Supported property types for MVP implementation
  */
-export type PropertyType = 
+export type PropertyType =
   | 'title'
   | 'rich_text'
   | 'number'
@@ -27,7 +27,7 @@ export type PropertyType =
 /**
  * Property definition configurations
  */
-export type PropertyDefinition = 
+export type PropertyDefinition =
   | { type: 'title' }
   | { type: 'rich_text' }
   | { type: 'number'; format?: 'number' | 'percent' | 'dollar' }
@@ -73,29 +73,31 @@ interface PropertyTypeMap {
   url: string | null;
   email: string | null;
   select: string | null; // Overridden by literal unions
-  multi_select: string[] | null; // Overridden by literal unions  
+  multi_select: string[] | null; // Overridden by literal unions
   people: NotionUser[] | null;
 }
 
 /**
  * Infers the TypeScript type for a property definition
  */
-export type InferPropertyType<T extends PropertyDefinition> = 
-  T extends { type: 'select'; options: readonly (infer U)[] } 
-    ? U | null
-    : T extends { type: 'multi_select'; options: readonly (infer U)[] }
-    ? (U[] | null)
+export type InferPropertyType<T extends PropertyDefinition> = T extends {
+  type: 'select';
+  options: readonly (infer U)[];
+}
+  ? U | null
+  : T extends { type: 'multi_select'; options: readonly (infer U)[] }
+    ? U[] | null
     : T extends { type: infer K }
-    ? K extends keyof PropertyTypeMap 
-      ? PropertyTypeMap[K]
-      : never
-    : never;
+      ? K extends keyof PropertyTypeMap
+        ? PropertyTypeMap[K]
+        : never
+      : never;
 
 /**
  * Infers property types for an entire schema
  */
 export type InferSchemaProperties<S extends SchemaDefinition> = {
-  [K in keyof S['properties']]: InferPropertyType<S['properties'][K]>
+  [K in keyof S['properties']]: InferPropertyType<S['properties'][K]>;
 };
 
 // ============================================================================
@@ -108,13 +110,13 @@ export type InferSchemaProperties<S extends SchemaDefinition> = {
 export interface TypedSchema<TDefinition extends SchemaDefinition> {
   readonly definition: TDefinition;
   readonly createdAt: Date;
-  
+
   // Method contracts from FR-001, FR-008
   getDatabaseId(): string;
   getPropertyDefinition<K extends keyof TDefinition['properties']>(
     propertyName: K
   ): TDefinition['properties'][K];
-  
+
   // FR-007: Provide property name validation
   hasProperty(propertyName: string): propertyName is keyof TDefinition['properties'];
 }
@@ -137,17 +139,17 @@ export interface QueryResult<TSchema extends SchemaDefinition> {
  * Schema definition function - FR-001
  * Validates schema at creation time - FR-008
  */
-export declare function defineSchema<TProperties extends Record<string, PropertyDefinition>>(
-  config: {
-    databaseId: string;
-    properties: TProperties;
-  }
-): TypedSchema<{ databaseId: string; properties: TProperties }>;
+export declare function defineSchema<
+  TProperties extends Record<string, PropertyDefinition>,
+>(config: {
+  databaseId: string;
+  properties: TProperties;
+}): TypedSchema<{ databaseId: string; properties: TProperties }>;
 
 /**
  * Query database with schema validation
  * @throws {SchemaValidationError} When schema is invalid
- * @throws {PropertyAccessError} When accessing undefined properties  
+ * @throws {PropertyAccessError} When accessing undefined properties
  * @throws {NotionAPIError} When Notion API calls fail
  */
 export declare function query<TSchema extends SchemaDefinition>(
@@ -183,9 +185,11 @@ export abstract class TypedNotionError extends Error {
 export class SchemaValidationError extends TypedNotionError {
   readonly code = 'SCHEMA_VALIDATION_ERROR';
   readonly context: { property: string; expected: string; received: unknown };
-  
+
   constructor(property: string, expected: string, received: unknown) {
-    super(`Invalid property type for '${property}': expected ${expected}, received ${typeof received}`);
+    super(
+      `Invalid property type for '${property}': expected ${expected}, received ${typeof received}`
+    );
     this.context = { property, expected, received };
   }
 }
@@ -196,7 +200,7 @@ export class SchemaValidationError extends TypedNotionError {
 export class PropertyAccessError extends TypedNotionError {
   readonly code = 'PROPERTY_ACCESS_ERROR';
   readonly context: { property: string; schema: string };
-  
+
   constructor(property: string, schema: string) {
     super(`Property '${property}' not defined in schema`);
     this.context = { property, schema };
@@ -209,7 +213,7 @@ export class PropertyAccessError extends TypedNotionError {
 export class NotionAPIError extends TypedNotionError {
   readonly code = 'NOTION_API_ERROR';
   readonly context: { status: number; message: string; request_id?: string };
-  
+
   constructor(status: number, message: string, request_id?: string) {
     super(`Notion API error (${status}): ${message}`);
     this.context = { status, message, request_id };
@@ -248,5 +252,5 @@ export type {
   TypedSchema,
   QueryResult,
   QueryOptions,
-  PerformanceMetrics
+  PerformanceMetrics,
 };

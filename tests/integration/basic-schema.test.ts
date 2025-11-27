@@ -15,12 +15,7 @@ import {
   validateSchemaDefinition,
   isValidSchemaDefinition,
 } from '../../src/schema/index.js';
-import {
-  SchemaValidationError,
-  PropertyAccessError,
-  PropertyValidationError,
-} from '../../src/errors/index.js';
-import type { SchemaDefinition } from '../../src/types/index.js';
+import { SchemaValidationError, PropertyAccessError } from '../../src/errors/index.js';
 
 describe('Integration Test: Basic Schema Workflow', () => {
   describe('Complete User Schema Workflow', () => {
@@ -178,7 +173,7 @@ describe('Integration Test: Basic Schema Workflow', () => {
         expect(error).toBeInstanceOf(SchemaValidationError);
         const schemaError = error as SchemaValidationError;
         expect(schemaError.code).toBe('SCHEMA_VALIDATION_ERROR');
-        expect(schemaError.context.property).toBe('schema');
+        expect(schemaError.context?.property).toBe('schema');
       }
     });
 
@@ -204,8 +199,8 @@ describe('Integration Test: Basic Schema Workflow', () => {
         expect(error).toBeInstanceOf(PropertyAccessError);
         const accessError = error as PropertyAccessError;
         expect(accessError.code).toBe('PROPERTY_ACCESS_ERROR');
-        expect(accessError.context.property).toBe('NonExistent');
-        expect(accessError.context.schema).toBe(validSchema.databaseId);
+        expect(accessError.context?.property).toBe('NonExistent');
+        expect(accessError.context?.schema).toBe(validSchema.databaseId);
       }
     });
 

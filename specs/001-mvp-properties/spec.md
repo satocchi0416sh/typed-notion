@@ -8,13 +8,14 @@
 ## Clarifications
 
 ### Session 2024-11-18
+
 - Q: Error handling strategy for invalid operations and validation failures → A: Exception-based - Throw typed exceptions with detailed error information
 - Q: Property access pattern for query results → A: Object property access - user.props.name or user.name directly
 - Q: Schema validation timing → A: Creation-time validation - Validate when schema is first defined/created
 - Q: Property nullability rules → A: All properties optional by default - any property can be null/undefined
 - Q: Performance constraints for concurrent schema limits → A: Maximum 100 concurrent schemas
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Basic Schema Definition (Priority: P1)
 
@@ -71,41 +72,41 @@ A developer wants to use date, email, url, and people properties in their schema
 - What happens when the backend returns null/undefined for a property that's expected to have a value?
 - How does the system handle invalid option values in selections at runtime?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
 - **FR-001**: System MUST provide a schema definition interface that accepts database configuration with property definitions
-  - *Acceptance*: Developer can define schemas for databases with any combination of supported property types
+  - _Acceptance_: Developer can define schemas for databases with any combination of supported property types
 - **FR-002**: System MUST support basic property types: title, text, number, checkbox, date, url, email
-  - *Acceptance*: All listed property types can be defined and used in schemas
+  - _Acceptance_: All listed property types can be defined and used in schemas
 - **FR-003**: System MUST support selection property types: single-select and multi-select with predefined options
-  - *Acceptance*: Selection properties enforce only predefined option values
+  - _Acceptance_: Selection properties enforce only predefined option values
 - **FR-004**: System MUST support people property type for user references
-  - *Acceptance*: People properties can reference and display user information
+  - _Acceptance_: People properties can reference and display user information
 - **FR-005**: System MUST enforce that every schema has exactly one title property
-  - *Acceptance*: Schema validation throws exception when zero or multiple title properties are defined
+  - _Acceptance_: Schema validation throws exception when zero or multiple title properties are defined
 - **FR-006**: System MUST preserve exact option values for selection properties
-  - *Acceptance*: Selection properties only allow values from their predefined option list
+  - _Acceptance_: Selection properties only allow values from their predefined option list
 - **FR-007**: System MUST provide autocompletion for property names and values based on schema definition
-  - *Acceptance*: IDE/editor shows available property names and valid values during development
+  - _Acceptance_: IDE/editor shows available property names and valid values during development
 - **FR-008**: System MUST validate schema definitions at creation time and prevent invalid configurations
-  - *Acceptance*: Invalid schemas throw typed exceptions with detailed error information immediately upon creation
+  - _Acceptance_: Invalid schemas throw typed exceptions with detailed error information immediately upon creation
 - **FR-009**: System MUST treat all properties as optional by default and handle null/undefined values gracefully
-  - *Acceptance*: All property types include null in their type definition and handle missing data without errors
+  - _Acceptance_: All property types include null in their type definition and handle missing data without errors
 - **FR-010**: Property type mapping MUST be consistent with external database specifications
-  - *Acceptance*: Property types behave identically to their database counterparts
+  - _Acceptance_: Property types behave identically to their database counterparts
 - **FR-011**: System MUST provide typed exceptions for all error conditions
-  - *Acceptance*: All validation failures, invalid operations, and data mismatches throw specific exception types with detailed error messages
+  - _Acceptance_: All validation failures, invalid operations, and data mismatches throw specific exception types with detailed error messages
 - **FR-012**: System MUST support object property access pattern for query results
-  - *Acceptance*: Developers can access properties using dot notation (e.g., user.props.name) with full type safety
+  - _Acceptance_: Developers can access properties using dot notation (e.g., user.props.name) with full type safety
 
 ### Non-Functional Requirements
 
 - **NFR-001**: System MUST support maximum 100 concurrent schema instances without performance degradation
-  - *Acceptance*: Performance tests demonstrate stable operation with 100 active schemas
+  - _Acceptance_: Performance tests demonstrate stable operation with 100 active schemas
 
-### Key Entities *(include if feature involves data)*
+### Key Entities _(include if feature involves data)_
 
 - **Schema Definition**: Configuration object containing database identifier and property definitions with their types and constraints
 - **Property Definition**: Type-specific configuration specifying property type and additional constraints (like selection options)
@@ -120,7 +121,7 @@ A developer wants to use date, email, url, and people properties in their schema
 - **Assumption**: Database schema changes are infrequent relative to data operations
 - **Constraint**: Initial implementation focuses on read operations, write operations come later
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

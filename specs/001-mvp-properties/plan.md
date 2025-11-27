@@ -23,7 +23,7 @@ Primary requirement: Implement type-safe schema definition system for 10 MVP Not
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 **✅ Type Safety First**: Feature requires strict TypeScript with full type inference for Notion API responses. No `any` types in public schema definition interface.
 
@@ -41,7 +41,7 @@ Primary requirement: Implement type-safe schema definition system for 10 MVP Not
 
 **✅ Code Quality Gates**: TypeScript strict mode, no `any` exports, comprehensive error handling.
 
-*GATE STATUS: ✅ PASSED - No violations, all constitution principles aligned with feature requirements.*
+_GATE STATUS: ✅ PASSED - No violations, all constitution principles aligned with feature requirements._
 
 ## Project Structure
 
@@ -71,7 +71,7 @@ src/
 
 tests/
 ├── unit/                # Unit tests for individual modules
-├── integration/         # Tests with real Notion databases  
+├── integration/         # Tests with real Notion databases
 └── fixtures/            # Test data and mock schemas
 ```
 
@@ -82,6 +82,7 @@ tests/
 ### ✅ Phase 0: Research (COMPLETED)
 
 **Resolved Technical Decisions**:
+
 - **Runtime Validation**: Valibot chosen for 90% smaller bundle size and 2x performance vs Zod
 - **Testing Framework**: Vitest chosen for zero-config TypeScript/ESM support and 3x faster execution
 - **Error Handling**: Custom typed exception hierarchy with Valibot integration
@@ -92,16 +93,15 @@ See [research.md](./research.md) for detailed analysis and alternatives consider
 ### ✅ Phase 1: Design & Contracts (COMPLETED)
 
 **Generated Artifacts**:
+
 1. **[data-model.md](./data-model.md)**: Complete entity definitions with validation rules
    - SchemaDefinition, PropertyDefinition, TypedSchema entities
    - Type inference system specifications
    - Exception type hierarchy
-   
 2. **[contracts/schema-api.ts](./contracts/schema-api.ts)**: TypeScript API contracts
    - Core type definitions and interfaces
    - Public API function signatures
    - Error contracts and performance interfaces
-   
 3. **[quickstart.md](./quickstart.md)**: Developer guide with examples
    - Installation and setup instructions
    - Code examples for all 10 property types
@@ -113,11 +113,13 @@ See [research.md](./research.md) for detailed analysis and alternatives consider
 ### ⏳ Phase 2: Implementation Tasks (PENDING)
 
 To generate detailed implementation tasks, run:
+
 ```bash
 /speckit.tasks
 ```
 
 This will create `tasks.md` with:
+
 - Granular development tasks broken down by component
 - Task dependencies and sequencing
 - Effort estimates and complexity ratings
@@ -126,21 +128,25 @@ This will create `tasks.md` with:
 ## Implementation Roadmap
 
 ### Priority 1: Core Type System
+
 - Implement PropertyDefinition types for all 10 MVP properties
 - Create InferPropertyType conditional type system
 - Build TypedSchema class with validation
 
 ### Priority 2: Runtime Validation
+
 - Integrate Valibot for schema validation
 - Implement creation-time validation logic
 - Create typed exception classes
 
 ### Priority 3: Notion Integration
+
 - Wrap @notionhq/client with typed interfaces
 - Implement property value parsers
 - Build query result mappers
 
 ### Priority 4: Testing & Documentation
+
 - Unit tests with Vitest
 - Type tests with expect-type
 - Integration tests with MSW mocks

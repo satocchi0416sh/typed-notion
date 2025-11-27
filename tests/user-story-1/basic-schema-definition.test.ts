@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  TypedSchema,
-  createTypedSchema,
-  validateSchemaDefinition,
-} from '../../src/schema/index.js';
+import { createTypedSchema, validateSchemaDefinition } from '../../src/schema/index.js';
 import { SchemaValidationError, PropertyAccessError } from '../../src/errors/index.js';
 import {
   basicUserSchema,
