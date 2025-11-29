@@ -35,14 +35,14 @@ const mockClient = createMockNotionClient();
 const mockQuery = mockClient.databases.query as ReturnType<typeof vi.fn>;
 const mockPageCreate = mockClient.pages.create as ReturnType<typeof vi.fn>;
 const testSchema = createTypedSchema({
-  databaseId: 'test-db',
   properties: {
-    title: { type: 'title' },
-    status: { type: 'select', options: ['Active', 'Inactive'] as const },
-    count: { type: 'number' },
-    tags: { type: 'multi_select', options: ['feature', 'bug', 'enhancement'] as const },
-    completed: { type: 'checkbox' },
+    Title: { type: 'title' },
+    Status: { type: 'select', options: ['Active', 'Inactive'] as const },
+    Count: { type: 'number' },
+    Tags: { type: 'multi_select', options: ['feature', 'bug', 'enhancement'] as const },
+    Completed: { type: 'checkbox' },
   },
+  databaseId: '12345678-1234-5678-9abc-123456789abc',
 } as const);
 
 describe('Query Performance Benchmarks', () => {
@@ -325,7 +325,7 @@ describe('Query Performance Benchmarks', () => {
       const schemas = generateTestArray(
         () =>
           createTypedSchema({
-            databaseId: `db-${Math.random()}`,
+            databaseId: '12345678-1234-5678-9abc-123456789abc',
             properties: {
               [`prop_${Math.random()}`]: { type: 'title' },
               [`select_${Math.random()}`]: { type: 'select', options: ['a', 'b', 'c'] as const },

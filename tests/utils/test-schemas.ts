@@ -80,3 +80,64 @@ export const allPropertiesSchema: SchemaDefinition = {
     lastEditedBy: { type: 'last_edited_by' },
   },
 };
+
+export const complexPropertiesSchema: SchemaDefinition = {
+  databaseId: '12345678-1234-5678-9abc-123456789fed',
+  properties: {
+    title: { type: 'title' },
+
+    // Rollup properties
+    taskCount: {
+      type: 'rollup',
+      relation: 'tasks',
+      property: 'title',
+      function: 'count',
+    },
+    totalBudget: {
+      type: 'rollup',
+      relation: 'expenses',
+      property: 'amount',
+      function: 'sum',
+    },
+    averageRating: {
+      type: 'rollup',
+      relation: 'reviews',
+      property: 'rating',
+      function: 'average',
+    },
+    earliestDue: {
+      type: 'rollup',
+      relation: 'tasks',
+      property: 'due_date',
+      function: 'earliest',
+    },
+
+    // Formula properties
+    fullName: {
+      type: 'formula',
+      returnType: 'string',
+      expression: 'prop("First Name") + " " + prop("Last Name")',
+    },
+    isOverdue: {
+      type: 'formula',
+      returnType: 'boolean',
+      expression: 'prop("Due Date") < now()',
+    },
+    daysUntilDue: {
+      type: 'formula',
+      returnType: 'number',
+      expression: 'dateBetween(prop("Due Date"), now(), "days")',
+    },
+    completionDate: {
+      type: 'formula',
+      returnType: 'date',
+    },
+    statusOrProgress: {
+      type: 'formula',
+      returnType: {
+        kind: 'union',
+        types: ['string', 'number'],
+      },
+    },
+  },
+};

@@ -1,5 +1,6 @@
 /**
  * Valibot validation schemas for runtime validation
+ * Extended with Complex Property Type validation
  *
  * Based on research decisions (Valibot chosen for performance and bundle size)
  * Implements creation-time validation as per clarifications
@@ -7,6 +8,30 @@
 
 import * as v from 'valibot';
 import type { PropertyDefinition, SchemaDefinition, PropertyType } from '../types/core.js';
+
+/**
+ * Validation schema for rollup functions
+ */
+const rollupFunctionSchema = v.picklist([
+  'count',
+  'sum',
+  'average',
+  'min',
+  'max',
+  'earliest',
+  'latest',
+] as const);
+
+/**
+ * Validation schema for formula return types
+ */
+const formulaReturnTypeSchema = v.union([
+  v.picklist(['string', 'number', 'boolean', 'date'] as const),
+  v.object({
+    kind: v.literal('union'),
+    types: v.array(v.picklist(['string', 'number', 'boolean', 'date'] as const)),
+  }),
+]);
 
 /**
  * Validation schema for property types
@@ -22,6 +47,12 @@ const propertyTypeSchema = v.picklist([
   'select',
   'multi_select',
   'people',
+  'created_time',
+  'created_by',
+  'last_edited_time',
+  'last_edited_by',
+  'rollup',
+  'formula',
 ] as const);
 
 /**
@@ -72,6 +103,29 @@ const propertyDefinitionSchema = v.variant('type', [
   }),
   v.object({
     type: v.literal('people'),
+  }),
+  v.object({
+    type: v.literal('created_time'),
+  }),
+  v.object({
+    type: v.literal('created_by'),
+  }),
+  v.object({
+    type: v.literal('last_edited_time'),
+  }),
+  v.object({
+    type: v.literal('last_edited_by'),
+  }),
+  v.object({
+    type: v.literal('rollup'),
+    relation: v.pipe(v.string(), v.minLength(1, 'Relation name cannot be empty')),
+    property: v.pipe(v.string(), v.minLength(1, 'Property name cannot be empty')),
+    function: rollupFunctionSchema,
+  }),
+  v.object({
+    type: v.literal('formula'),
+    returnType: formulaReturnTypeSchema,
+    expression: v.optional(v.string()),
   }),
 ]);
 

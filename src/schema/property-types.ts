@@ -92,6 +92,7 @@ export interface PeopleFilters {
 
 /**
  * Complete mapping of property types to their valid filter operators
+ * Note: rollup and formula properties inherit filters based on their computed types
  */
 export type PropertyFilterMap = {
   title: TextFilters;
@@ -108,6 +109,8 @@ export type PropertyFilterMap = {
   people: PeopleFilters;
   created_by: PeopleFilters;
   last_edited_by: PeopleFilters;
+  rollup: NumberFilters | DateFilters; // Rollups can return numbers or dates
+  formula: TextFilters | NumberFilters | CheckboxFilters | DateFilters; // Formulas can return various types
 };
 
 /**
@@ -248,6 +251,38 @@ export function getValidOperators<T extends keyof PropertyFilterMap>(
     people: ['contains', 'does_not_contain', 'is_empty', 'is_not_empty'],
     created_by: ['contains', 'does_not_contain', 'is_empty', 'is_not_empty'],
     last_edited_by: ['contains', 'does_not_contain', 'is_empty', 'is_not_empty'],
+    rollup: [
+      'equals',
+      'does_not_equal',
+      'greater_than',
+      'less_than',
+      'greater_than_or_equal_to',
+      'less_than_or_equal_to',
+      'before',
+      'after',
+      'on_or_before',
+      'on_or_after',
+      'is_empty',
+      'is_not_empty',
+    ],
+    formula: [
+      'equals',
+      'does_not_equal',
+      'contains',
+      'does_not_contain',
+      'starts_with',
+      'ends_with',
+      'greater_than',
+      'less_than',
+      'greater_than_or_equal_to',
+      'less_than_or_equal_to',
+      'before',
+      'after',
+      'on_or_before',
+      'on_or_after',
+      'is_empty',
+      'is_not_empty',
+    ],
   };
 
   return operatorMap[propertyType] as ValidOperators<T>[];
@@ -320,6 +355,39 @@ export function validateFilterValue<T extends keyof PropertyFilterMap>(
       }
       return typeof value === 'string'; // User ID
 
+    case 'rollup':
+      if (operator === 'is_empty' || operator === 'is_not_empty') {
+        return value === true;
+      }
+      // Rollups can be numbers or dates
+      if (['before', 'after', 'on_or_before', 'on_or_after'].includes(operator as string)) {
+        return typeof value === 'string' && isValidISODate(value);
+      }
+      return typeof value === 'number' && !isNaN(value);
+
+    case 'formula':
+      if (operator === 'is_empty' || operator === 'is_not_empty') {
+        return value === true;
+      }
+      // Formulas can return various types - accept string, number, boolean
+      if (['before', 'after', 'on_or_before', 'on_or_after'].includes(operator as string)) {
+        return typeof value === 'string' && isValidISODate(value);
+      }
+      if (
+        ['greater_than', 'less_than', 'greater_than_or_equal_to', 'less_than_or_equal_to'].includes(
+          operator as string
+        )
+      ) {
+        return typeof value === 'number' && !isNaN(value);
+      }
+      if (
+        ['contains', 'does_not_contain', 'starts_with', 'ends_with'].includes(operator as string)
+      ) {
+        return typeof value === 'string';
+      }
+      // For equals/does_not_equal, accept string, number, or boolean
+      return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+
     default:
       return false;
   }
@@ -387,6 +455,30 @@ export function getFilterValueDescription<T extends keyof PropertyFilterMap>(
     case 'created_by':
     case 'last_edited_by':
       return 'user ID string';
+
+    case 'rollup':
+      if (['before', 'after', 'on_or_before', 'on_or_after'].includes(operator as string)) {
+        return 'ISO 8601 date string (e.g., "2023-12-25" or "2023-12-25T10:30:00Z")';
+      }
+      return 'number';
+
+    case 'formula':
+      if (['before', 'after', 'on_or_before', 'on_or_after'].includes(operator as string)) {
+        return 'ISO 8601 date string (e.g., "2023-12-25" or "2023-12-25T10:30:00Z")';
+      }
+      if (
+        ['greater_than', 'less_than', 'greater_than_or_equal_to', 'less_than_or_equal_to'].includes(
+          operator as string
+        )
+      ) {
+        return 'number';
+      }
+      if (
+        ['contains', 'does_not_contain', 'starts_with', 'ends_with'].includes(operator as string)
+      ) {
+        return 'string';
+      }
+      return 'string, number, or boolean';
 
     default:
       return 'unknown';

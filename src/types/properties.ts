@@ -91,6 +91,45 @@ export interface PeopleProperty {
 }
 
 /**
+ * Rollup property definition
+ * Aggregates data from related database properties
+ */
+export interface RollupProperty {
+  readonly type: 'rollup';
+  readonly relation: string; // Name of relation property
+  readonly property: string; // Name of property in related database
+  readonly function: RollupFunction; // Aggregation function
+}
+
+/**
+ * Supported rollup aggregation functions
+ */
+export type RollupFunction = 'count' | 'sum' | 'average' | 'min' | 'max' | 'earliest' | 'latest';
+
+/**
+ * Formula property definition
+ * Computed values with developer-provided type hints
+ */
+export interface FormulaProperty<T extends FormulaReturnType = FormulaReturnType> {
+  readonly type: 'formula';
+  readonly returnType: T; // Developer-provided type hint
+  readonly expression?: string; // Optional formula expression for documentation
+}
+
+/**
+ * Valid formula return types
+ */
+export type FormulaReturnType = 'string' | 'number' | 'boolean' | 'date' | FormulaUnionType;
+
+/**
+ * Union type for complex conditional formulas
+ */
+export interface FormulaUnionType {
+  readonly kind: 'union';
+  readonly types: readonly FormulaReturnType[];
+}
+
+/**
  * Union of all property types for type narrowing
  * Matches the PropertyDefinition from core types
  */
@@ -104,7 +143,9 @@ export type SpecificPropertyDefinition =
   | EmailProperty
   | SelectProperty
   | MultiSelectProperty
-  | PeopleProperty;
+  | PeopleProperty
+  | RollupProperty
+  | FormulaProperty;
 
 /**
  * Type guard to check if a property is a basic property (User Story 1)
@@ -154,16 +195,40 @@ export function isDateProperty(property: PropertyDefinition): property is DatePr
 }
 
 /**
+ * Type guard to check if a property is a rollup property
+ */
+export function isRollupProperty(property: PropertyDefinition): property is RollupProperty {
+  return property.type === 'rollup';
+}
+
+/**
+ * Type guard to check if a property is a formula property
+ */
+export function isFormulaProperty(property: PropertyDefinition): property is FormulaProperty {
+  return property.type === 'formula';
+}
+
+/**
+ * Type guard to check if a property is a complex property (rollup or formula)
+ */
+export function isComplexProperty(
+  property: PropertyDefinition
+): property is RollupProperty | FormulaProperty {
+  return isRollupProperty(property) || isFormulaProperty(property);
+}
+
+/**
  * Get the category of a property for organization
  */
 export function getPropertyCategory(
   property: PropertyDefinition
-): 'basic' | 'text' | 'selection' | 'contact' | 'date' {
+): 'basic' | 'text' | 'selection' | 'contact' | 'date' | 'complex' {
   if (isBasicProperty(property)) return 'basic';
   if (isTextProperty(property)) return 'text';
   if (isSelectionProperty(property)) return 'selection';
   if (isContactProperty(property)) return 'contact';
   if (isDateProperty(property)) return 'date';
+  if (isComplexProperty(property)) return 'complex';
 
   // This should never happen with proper typing, but provides fallback
   return 'basic';

@@ -1,11 +1,13 @@
 /**
  * Type inference system for MVP Property Types
+ * Extended with Complex Property Type Inference
  *
  * Based on contracts/schema-api.ts and research decisions
  * Implements advanced TypeScript type inference with literal type preservation
  */
 
 import type { PropertyDefinition, NotionUser, SchemaDefinition } from './core.js';
+import type { RollupFunction, FormulaReturnType, FormulaUnionType } from './properties.js';
 
 /**
  * Maps property types to their TypeScript equivalents
@@ -26,13 +28,70 @@ interface PropertyTypeMap {
   created_by: NotionUser | null;
   last_edited_time: Date | null;
   last_edited_by: NotionUser | null;
+  rollup: number | Date | null; // Inferred by function
+  formula: unknown | null; // Inferred by returnType hint
 }
+
+/**
+ * Maps rollup functions to their result types
+ */
+type InferRollupType<F extends RollupFunction> = F extends 'count'
+  ? number | null
+  : F extends 'sum' | 'average' | 'min' | 'max'
+    ? number | null
+    : F extends 'earliest' | 'latest'
+      ? Date | null
+      : never;
+
+/**
+ * Resolves formula return types to TypeScript types
+ */
+type ResolveFormulaType<T extends FormulaReturnType> = T extends 'string'
+  ? string | null
+  : T extends 'number'
+    ? number | null
+    : T extends 'boolean'
+      ? boolean | null
+      : T extends 'date'
+        ? Date | null
+        : T extends FormulaUnionType
+          ? ResolveUnionType<T['types']> | null
+          : never;
+
+/**
+ * Resolves union types recursively
+ */
+type ResolveUnionType<T extends readonly FormulaReturnType[]> = T extends readonly []
+  ? never
+  : T extends readonly [infer Head, ...infer Tail]
+    ? Head extends FormulaReturnType
+      ? Tail extends readonly FormulaReturnType[]
+        ? ResolveFormulaTypeBase<Head> | ResolveUnionType<Tail>
+        : never
+      : never
+    : never;
+
+/**
+ * Helper to resolve individual formula types without null
+ */
+type ResolveFormulaTypeBase<T extends FormulaReturnType> = T extends 'string'
+  ? string
+  : T extends 'number'
+    ? number
+    : T extends 'boolean'
+      ? boolean
+      : T extends 'date'
+        ? Date
+        : T extends FormulaUnionType
+          ? ResolveUnionType<T['types']>
+          : never;
 
 /**
  * Infers the TypeScript type for a property definition
  *
  * This is the core type transformation that enables literal type preservation
  * for select and multi_select properties while maintaining null safety
+ * Extended with rollup and formula type inference
  */
 export type InferPropertyType<T extends PropertyDefinition> = T extends {
   type: 'select';
@@ -41,11 +100,19 @@ export type InferPropertyType<T extends PropertyDefinition> = T extends {
   ? U | null
   : T extends { type: 'multi_select'; options: readonly (infer U)[] }
     ? U[] | null
-    : T extends { type: infer K }
-      ? K extends keyof PropertyTypeMap
-        ? PropertyTypeMap[K]
+    : T extends { type: 'rollup'; function: infer F }
+      ? F extends RollupFunction
+        ? InferRollupType<F>
         : never
-      : never;
+      : T extends { type: 'formula'; returnType: infer R }
+        ? R extends FormulaReturnType
+          ? ResolveFormulaType<R>
+          : never
+        : T extends { type: infer K }
+          ? K extends keyof PropertyTypeMap
+            ? PropertyTypeMap[K]
+            : never
+          : never;
 
 /**
  * Infers property types for an entire schema
@@ -72,6 +139,12 @@ export function isValidPropertyType(type: string): type is keyof PropertyTypeMap
     'select',
     'multi_select',
     'people',
+    'created_time',
+    'created_by',
+    'last_edited_time',
+    'last_edited_by',
+    'rollup',
+    'formula',
   ];
   return validTypes.includes(type as keyof PropertyTypeMap);
 }
