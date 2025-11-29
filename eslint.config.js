@@ -70,6 +70,27 @@ export default [
     },
   },
   {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        global: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off', // Allow console in scripts
+      'no-debugger': 'error',
+      'prefer-const': 'error',
+      'no-var': 'error',
+    },
+  },
+  {
     ignores: [
       'dist/**',
       'node_modules/**',
