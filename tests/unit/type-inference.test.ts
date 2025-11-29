@@ -11,6 +11,11 @@ import {
   hasSelectionOptions,
   isTitleProperty,
 } from '../../src/types/inference.js';
+import {
+  isRollupProperty,
+  isFormulaProperty,
+  isComplexProperty,
+} from '../../src/types/properties.js';
 
 describe('Type Inference Runtime Functions', () => {
   describe('isValidPropertyType', () => {
@@ -25,6 +30,12 @@ describe('Type Inference Runtime Functions', () => {
       expect(isValidPropertyType('select')).toBe(true);
       expect(isValidPropertyType('multi_select')).toBe(true);
       expect(isValidPropertyType('people')).toBe(true);
+      expect(isValidPropertyType('created_time')).toBe(true);
+      expect(isValidPropertyType('created_by')).toBe(true);
+      expect(isValidPropertyType('last_edited_time')).toBe(true);
+      expect(isValidPropertyType('last_edited_by')).toBe(true);
+      expect(isValidPropertyType('rollup')).toBe(true);
+      expect(isValidPropertyType('formula')).toBe(true);
     });
 
     it('should return false for invalid property types', () => {
@@ -76,6 +87,97 @@ describe('Type Inference Runtime Functions', () => {
 
       expect(isTitleProperty(numberProperty)).toBe(false);
       expect(isTitleProperty(selectProperty)).toBe(false);
+    });
+  });
+
+  describe('isRollupProperty', () => {
+    it('should return true for rollup properties', () => {
+      const rollupProperty = {
+        type: 'rollup' as const,
+        relation: 'tasks',
+        property: 'priority',
+        function: 'count' as const,
+      };
+      expect(isRollupProperty(rollupProperty)).toBe(true);
+    });
+
+    it('should return false for non-rollup properties', () => {
+      const titleProperty = { type: 'title' as const };
+      const numberProperty = { type: 'number' as const };
+      const formulaProperty = {
+        type: 'formula' as const,
+        returnType: 'number' as const,
+      };
+
+      expect(isRollupProperty(titleProperty)).toBe(false);
+      expect(isRollupProperty(numberProperty)).toBe(false);
+      expect(isRollupProperty(formulaProperty)).toBe(false);
+    });
+  });
+
+  describe('isFormulaProperty', () => {
+    it('should return true for formula properties', () => {
+      const formulaProperty = {
+        type: 'formula' as const,
+        returnType: 'number' as const,
+      };
+      expect(isFormulaProperty(formulaProperty)).toBe(true);
+    });
+
+    it('should return true for formula properties with expression', () => {
+      const formulaProperty = {
+        type: 'formula' as const,
+        returnType: 'string' as const,
+        expression: 'prop("First Name") + " " + prop("Last Name")',
+      };
+      expect(isFormulaProperty(formulaProperty)).toBe(true);
+    });
+
+    it('should return false for non-formula properties', () => {
+      const titleProperty = { type: 'title' as const };
+      const rollupProperty = {
+        type: 'rollup' as const,
+        relation: 'tasks',
+        property: 'priority',
+        function: 'count' as const,
+      };
+
+      expect(isFormulaProperty(titleProperty)).toBe(false);
+      expect(isFormulaProperty(rollupProperty)).toBe(false);
+    });
+  });
+
+  describe('isComplexProperty', () => {
+    it('should return true for rollup properties', () => {
+      const rollupProperty = {
+        type: 'rollup' as const,
+        relation: 'tasks',
+        property: 'priority',
+        function: 'sum' as const,
+      };
+      expect(isComplexProperty(rollupProperty)).toBe(true);
+    });
+
+    it('should return true for formula properties', () => {
+      const formulaProperty = {
+        type: 'formula' as const,
+        returnType: 'boolean' as const,
+        expression: 'prop("Due Date") < now()',
+      };
+      expect(isComplexProperty(formulaProperty)).toBe(true);
+    });
+
+    it('should return false for basic properties', () => {
+      const titleProperty = { type: 'title' as const };
+      const numberProperty = { type: 'number' as const };
+      const selectProperty = {
+        type: 'select' as const,
+        options: ['Option 1'] as const,
+      };
+
+      expect(isComplexProperty(titleProperty)).toBe(false);
+      expect(isComplexProperty(numberProperty)).toBe(false);
+      expect(isComplexProperty(selectProperty)).toBe(false);
     });
   });
 });

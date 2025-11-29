@@ -84,6 +84,49 @@
  * // const pages = await client.queryDatabase(taskSchema);
  * ```
  *
+ * ## Complex Properties (Rollup & Formula)
+ *
+ * ### Using Helper Functions
+ * ```typescript
+ * import { createTypedSchema, rollup, formula, union } from 'typed-notion';
+ *
+ * const projectSchema = createTypedSchema({
+ *   databaseId: '12345678-1234-5678-9abc-123456789abc',
+ *   properties: {
+ *     Title: { type: 'title' },
+ *
+ *     // ✅ Rollup properties with automatic type inference
+ *     TaskCount: rollup('tasks', 'title', 'count'),        // number | null
+ *     TotalBudget: rollup('expenses', 'amount', 'sum'),     // number | null
+ *     AverageRating: rollup('reviews', 'rating', 'average'), // number | null
+ *     EarliestDue: rollup('tasks', 'due_date', 'earliest'),  // Date | null
+ *
+ *     // ✅ Formula properties with type hints
+ *     DisplayName: formula('string', 'concat("Project: ", Title)'),          // string | null
+ *     IsOverdue: formula('boolean', 'prop("Due Date") < now()'),             // boolean | null
+ *     Priority: formula('number'),                                            // number | null (no expression)
+ *
+ *     // ✅ Union types for conditional formulas
+ *     Status: formula(
+ *       union('string', 'number'),
+ *       'if(completed, "Done", daysRemaining)'
+ *     ),  // string | number | null
+ *   }
+ * } as const);
+ *
+ * // ✅ TypeScript automatically infers all complex types
+ * type ProjectData = InferSchemaProperties<typeof projectSchema>;
+ * // Result: {
+ * //   Title: string | null;
+ * //   TaskCount: number | null;
+ * //   TotalBudget: number | null;
+ * //   DisplayName: string | null;
+ * //   IsOverdue: boolean | null;
+ * //   Status: string | number | null;
+ * //   // ... other properties
+ * // }
+ * ```
+ *
  * ## Advanced Usage Examples
  *
  * ### CRM Contact Schema
@@ -166,6 +209,12 @@ export type {
   InferSchemaProperties,
   QueryOptions,
   PerformanceMetrics,
+  // Complex property types
+  RollupProperty,
+  FormulaProperty,
+  RollupFunction,
+  FormulaReturnType,
+  FormulaUnionType,
 } from './types/index.js';
 
 // Schema classes and functions
@@ -183,6 +232,9 @@ export {
   validateFilterValue,
   getFilterValueDescription,
 } from './schema/index.js';
+
+// Helper functions for complex properties
+export { rollup, formula, union } from './types/helpers.js';
 
 export type {
   PropertyFilterMap,

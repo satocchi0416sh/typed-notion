@@ -1,9 +1,12 @@
 /**
  * Core type system interfaces for the MVP Property Types system
+ * Extended with Complex Property Type support
  *
  * Based on contracts/schema-api.ts and data-model.md
  * Defines the foundational types used throughout the library
  */
+
+import type { RollupFunction, FormulaReturnType } from './properties.js';
 
 /**
  * Supported property types for MVP implementation
@@ -23,7 +26,9 @@ export type PropertyType =
   | 'created_time'
   | 'created_by'
   | 'last_edited_time'
-  | 'last_edited_by';
+  | 'last_edited_by'
+  | 'rollup'
+  | 'formula';
 
 /**
  * Property definition configurations
@@ -43,7 +48,9 @@ export type PropertyDefinition =
   | { type: 'created_time' }
   | { type: 'created_by' }
   | { type: 'last_edited_time' }
-  | { type: 'last_edited_by' };
+  | { type: 'last_edited_by' }
+  | { type: 'rollup'; relation: string; property: string; function: RollupFunction }
+  | { type: 'formula'; returnType: FormulaReturnType; expression?: string | undefined };
 
 /**
  * Schema definition structure

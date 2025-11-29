@@ -32,6 +32,11 @@ export type {
   SelectProperty,
   MultiSelectProperty,
   PeopleProperty,
+  RollupProperty,
+  FormulaProperty,
+  RollupFunction,
+  FormulaReturnType,
+  FormulaUnionType,
   SpecificPropertyDefinition,
 } from './properties.js';
 
@@ -41,5 +46,11 @@ export {
   isSelectionProperty,
   isContactProperty,
   isDateProperty,
+  isRollupProperty,
+  isFormulaProperty,
+  isComplexProperty,
   getPropertyCategory,
 } from './properties.js';
+
+// Helper functions for creating complex properties
+export { rollup, formula, union } from './helpers.js';
