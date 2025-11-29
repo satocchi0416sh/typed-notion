@@ -44,11 +44,8 @@ jobs:
         run: npx tsc --noEmit
         continue-on-error: true
 
-      - name: Run unit tests
-        run: npx vitest run tests/unit --coverage
-
-      - name: Run integration tests
-        run: npx vitest run tests/integration
+      - name: Run tests
+        run: npm run test:run
         env:
           NODE_ENV: test
 
