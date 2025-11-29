@@ -1,8 +1,8 @@
 /**
- * Tests for rollup and formula property support
+ * Tests for schema validation (src/schema/validation.ts)
  *
- * Tests both runtime validation and type inference for complex property types.
- * Covers rollup functions, formula return types, and type safety.
+ * Tests runtime validation using Valibot schemas for all property types
+ * including rollup and formula properties.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -11,16 +11,10 @@ import {
   validateSchemaDefinition,
   isValidPropertyDefinition,
 } from '../../src/schema/validation.js';
-import {
-  isRollupProperty,
-  isFormulaProperty,
-  isComplexProperty,
-} from '../../src/types/properties.js';
 import { complexPropertiesSchema } from '../utils/test-schemas.js';
-import type { RollupProperty, FormulaProperty } from '../../src/types/properties.js';
 
-describe('Complex Properties', () => {
-  describe('Rollup Properties', () => {
+describe('Schema Validation', () => {
+  describe('Rollup Property Validation', () => {
     it('should validate rollup properties with all function types', () => {
       const rollupFunctions = [
         'count',
@@ -42,8 +36,6 @@ describe('Complex Properties', () => {
 
         expect(() => validatePropertyDefinition(rollupProperty)).not.toThrow();
         expect(isValidPropertyDefinition(rollupProperty)).toBe(true);
-        expect(isRollupProperty(rollupProperty)).toBe(true);
-        expect(isComplexProperty(rollupProperty)).toBe(true);
       });
     });
 
@@ -61,17 +53,17 @@ describe('Complex Properties', () => {
 
     it('should reject rollup properties with empty relation or property names', () => {
       const emptyRelation = {
-        type: 'rollup',
+        type: 'rollup' as const,
         relation: '',
         property: 'priority',
-        function: 'count',
+        function: 'count' as const,
       };
 
       const emptyProperty = {
-        type: 'rollup',
+        type: 'rollup' as const,
         relation: 'tasks',
         property: '',
-        function: 'count',
+        function: 'count' as const,
       };
 
       expect(() => validatePropertyDefinition(emptyRelation)).toThrow();
@@ -84,12 +76,12 @@ describe('Complex Properties', () => {
       const schemaWithRollup = {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
-          title: { type: 'title' },
+          title: { type: 'title' as const },
           taskCount: {
-            type: 'rollup',
+            type: 'rollup' as const,
             relation: 'tasks',
             property: 'title',
-            function: 'count',
+            function: 'count' as const,
           },
         },
       };
@@ -98,7 +90,7 @@ describe('Complex Properties', () => {
     });
   });
 
-  describe('Formula Properties', () => {
+  describe('Formula Property Validation', () => {
     it('should validate formula properties with basic return types', () => {
       const basicReturnTypes = ['string', 'number', 'boolean', 'date'] as const;
 
@@ -110,8 +102,6 @@ describe('Complex Properties', () => {
 
         expect(() => validatePropertyDefinition(formulaProperty)).not.toThrow();
         expect(isValidPropertyDefinition(formulaProperty)).toBe(true);
-        expect(isFormulaProperty(formulaProperty)).toBe(true);
-        expect(isComplexProperty(formulaProperty)).toBe(true);
       });
     });
 
@@ -126,20 +116,18 @@ describe('Complex Properties', () => {
 
       expect(() => validatePropertyDefinition(unionFormulaProperty)).not.toThrow();
       expect(isValidPropertyDefinition(unionFormulaProperty)).toBe(true);
-      expect(isFormulaProperty(unionFormulaProperty)).toBe(true);
-      expect(isComplexProperty(unionFormulaProperty)).toBe(true);
     });
 
     it('should validate formula properties with optional expression', () => {
       const formulaWithExpression = {
-        type: 'formula',
-        returnType: 'string',
+        type: 'formula' as const,
+        returnType: 'string' as const,
         expression: 'prop("First Name") + " " + prop("Last Name")',
       };
 
       const formulaWithoutExpression = {
-        type: 'formula',
-        returnType: 'number',
+        type: 'formula' as const,
+        returnType: 'number' as const,
       };
 
       expect(() => validatePropertyDefinition(formulaWithExpression)).not.toThrow();
@@ -150,8 +138,8 @@ describe('Complex Properties', () => {
 
     it('should reject formula properties with invalid return types', () => {
       const invalidFormula = {
-        type: 'formula',
-        returnType: 'invalid_type',
+        type: 'formula' as const,
+        returnType: 'invalid_type' as any,
       };
 
       expect(() => validatePropertyDefinition(invalidFormula)).toThrow();
@@ -162,10 +150,10 @@ describe('Complex Properties', () => {
       const schemaWithFormula = {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
-          title: { type: 'title' },
+          title: { type: 'title' as const },
           fullName: {
-            type: 'formula',
-            returnType: 'string',
+            type: 'formula' as const,
+            returnType: 'string' as const,
             expression: 'prop("First Name") + " " + prop("Last Name")',
           },
         },
@@ -185,14 +173,14 @@ describe('Complex Properties', () => {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
           taskCount: {
-            type: 'rollup',
+            type: 'rollup' as const,
             relation: 'tasks',
             property: 'title',
-            function: 'count',
+            function: 'count' as const,
           },
           fullName: {
-            type: 'formula',
-            returnType: 'string',
+            type: 'formula' as const,
+            returnType: 'string' as const,
           },
         },
       };
@@ -204,60 +192,25 @@ describe('Complex Properties', () => {
       const mixedSchema = {
         databaseId: '12345678-1234-5678-9abc-123456789abc',
         properties: {
-          title: { type: 'title' },
-          description: { type: 'rich_text' },
-          priority: { type: 'number' },
-          status: { type: 'select', options: ['Active', 'Inactive'] },
+          title: { type: 'title' as const },
+          description: { type: 'rich_text' as const },
+          priority: { type: 'number' as const },
+          status: { type: 'select' as const, options: ['Active', 'Inactive'] as const },
           taskCount: {
-            type: 'rollup',
+            type: 'rollup' as const,
             relation: 'tasks',
             property: 'title',
-            function: 'count',
+            function: 'count' as const,
           },
           isComplete: {
-            type: 'formula',
-            returnType: 'boolean',
+            type: 'formula' as const,
+            returnType: 'boolean' as const,
             expression: 'prop("Progress") == 100',
           },
         },
       };
 
       expect(() => validateSchemaDefinition(mixedSchema)).not.toThrow();
-    });
-  });
-
-  describe('Type Guards', () => {
-    const rollupProperty: RollupProperty = {
-      type: 'rollup',
-      relation: 'tasks',
-      property: 'priority',
-      function: 'sum',
-    };
-
-    const formulaProperty: FormulaProperty = {
-      type: 'formula',
-      returnType: 'string',
-      expression: 'prop("Name")',
-    };
-
-    const basicProperty = { type: 'title' as const };
-
-    it('should correctly identify rollup properties', () => {
-      expect(isRollupProperty(rollupProperty)).toBe(true);
-      expect(isRollupProperty(formulaProperty)).toBe(false);
-      expect(isRollupProperty(basicProperty)).toBe(false);
-    });
-
-    it('should correctly identify formula properties', () => {
-      expect(isFormulaProperty(formulaProperty)).toBe(true);
-      expect(isFormulaProperty(rollupProperty)).toBe(false);
-      expect(isFormulaProperty(basicProperty)).toBe(false);
-    });
-
-    it('should correctly identify complex properties', () => {
-      expect(isComplexProperty(rollupProperty)).toBe(true);
-      expect(isComplexProperty(formulaProperty)).toBe(true);
-      expect(isComplexProperty(basicProperty)).toBe(false);
     });
   });
 });
