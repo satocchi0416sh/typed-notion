@@ -51,7 +51,6 @@ jobs:
 
       - name: Run performance benchmarks
         run: npx vitest bench tests/performance
-        continue-on-error: true
 
       - name: Build package
         run: npm run build
