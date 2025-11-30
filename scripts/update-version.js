@@ -1,12 +1,12 @@
 #!/usr/bin/env node
+/* eslint-disable no-undef */
 /**
  * Automatic version update script
  * Updates version references across the codebase when semantic-release runs
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
-import process from 'process';
+const { readFileSync, writeFileSync } = require('fs');
+const { join } = require('path');
 
 const CURRENT_VERSION = process.argv[2] || process.env.SEMANTIC_RELEASE_VERSION;
 
