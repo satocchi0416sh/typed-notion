@@ -83,6 +83,7 @@
     "@vitest/coverage-istanbul": "^4.0.14",
     "@vitest/coverage-v8": "^4.0.14",
     "bundlesize": "^0.18.2",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
