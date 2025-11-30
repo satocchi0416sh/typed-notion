@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/satocchi0416sh/typed-notion/compare/v1.0.0...v1.0.1) (2025-11-30)
+
+### 🐛 Bug Fixes
+
+- **release:** convert update-version script to ES modules ([8019908](https://github.com/satocchi0416sh/typed-notion/commit/8019908618d5e38295da4abfcb22c42687c99176))
+
 ## 1.0.0 (2025-11-30)
 
 ### ✨ Features
