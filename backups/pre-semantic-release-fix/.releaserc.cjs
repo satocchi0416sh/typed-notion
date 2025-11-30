@@ -1,16 +1,10 @@
 /**
  * Semantic Release Configuration
  * Handles automated versioning and releases
- * Optimized for large commit history analysis
  */
 
 module.exports = {
-  // Limit branch scanning for performance optimization
   branches: ['main'],
-  
-  // Performance optimization flags
-  ci: true,
-  debug: false,
   plugins: [
     [
       '@semantic-release/commit-analyzer',
@@ -27,8 +21,6 @@ module.exports = {
         ],
         parserOpts: {
           noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES', 'BREAKING'],
-          // Optimize header pattern for performance with large commit history
-          headerPattern: /^(\w*)(?:\(([\w$.* -]*)\))?: (.*)$/,
         },
       },
     ],
