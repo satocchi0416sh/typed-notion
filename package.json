@@ -1,6 +1,6 @@
 {
   "name": "typed-notion-core-ts",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "Type-safe Notion API library with compile-time validation and runtime type inference",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
