@@ -42,16 +42,11 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # Prevent infinite loops from semantic-release commits
-    if: "!startsWith(github.event.head_commit.message, 'chore(release)')"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -75,13 +70,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Trusted Publishing: no NPM_TOKEN needed, uses OIDC authentication
-
-          # Performance optimization environment variables
-          CI: 'true'
-          DEBUG: 'false'
-
-          # Git configuration for automated commits
-          GIT_COMMITTER_NAME: 'semantic-release[bot]'
-          GIT_COMMITTER_EMAIL: 'semantic-release[bot]@users.noreply.github.com'
-          GIT_AUTHOR_NAME: 'semantic-release[bot]'
-          GIT_AUTHOR_EMAIL: 'semantic-release[bot]@users.noreply.github.com'
