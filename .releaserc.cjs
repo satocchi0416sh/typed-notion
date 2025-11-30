@@ -7,7 +7,7 @@
 module.exports = {
   // Limit branch scanning for performance optimization
   branches: ['main'],
-  
+
   // Performance optimization flags
   ci: true,
   debug: false,
