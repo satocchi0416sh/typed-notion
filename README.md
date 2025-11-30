@@ -13,7 +13,8 @@
 🚀 **Performance Optimized**: Built for speed with intelligent caching  
 📦 **Zero Dependencies**: Lightweight with minimal footprint (7.75KB gzipped)  
 🔧 **Developer Experience**: Excellent IntelliSense and debugging support  
-🎯 **Production Ready**: Comprehensive test suite with 162 passing tests
+🎯 **Production Ready**: Comprehensive test suite with full coverage  
+⚡ **Advanced Types**: Support for rollup and formula property inference
 
 ## Installation
 
