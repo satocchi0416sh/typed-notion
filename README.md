@@ -4,17 +4,14 @@
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> Type-safe Notion API library with compile-time validation and runtime type inference
+> **Type-safe Notion API library** with compile-time validation and runtime type inference.
 
-## Features
+## Key Features
 
-✨ **Type Safety First**: Complete TypeScript support with strict type checking  
-🔒 **Runtime Validation**: Schema validation with detailed error reporting  
-🚀 **Performance Optimized**: Built for speed with intelligent caching  
-📦 **Zero Dependencies**: Lightweight with minimal footprint (7.75KB gzipped)  
-🔧 **Developer Experience**: Excellent IntelliSense and debugging support  
-🎯 **Production Ready**: Comprehensive test suite with full coverage  
-⚡ **Advanced Types**: Support for rollup and formula property inference
+- **Type Safety First**: End-to-end type safety from schema definition to API response
+- **Complex Properties**: Full type inference for Rollups and Formulas using helper functions
+- **Zero Dependencies**: Lightweight (7.75KB gzipped) and ideal for edge environments
+- **Runtime Validation**: Protects your application from silent schema changes in Notion
 
 ## Installation
 
@@ -24,280 +21,246 @@ npm install typed-notion-core-ts
 
 ## Quick Start
 
-```typescript
-import { createTypedSchema, TypedSchema } from 'typed-notion-core-ts';
-
-// Define your Notion database schema
-const userSchema = createTypedSchema({
-  name: { type: 'title' },
-  email: { type: 'email' },
-  age: { type: 'number' },
-  status: {
-    type: 'select',
-    options: ['active', 'inactive', 'pending'],
-  },
-});
-
-// Type-safe database operations
-const users = new TypedSchema(userSchema);
-
-// Compile-time type checking
-const newUser = users.create({
-  name: 'John Doe', // ✅ Required title field
-  email: 'john@email.com', // ✅ Validates email format
-  age: 25, // ✅ Number type
-  status: 'active', // ✅ Must be one of the defined options
-});
-```
-
-## Core Features
-
-### 🔧 Schema Definition
-
-Define type-safe schemas for your Notion databases:
+The core philosophy is **"Schema First"**. Define your schema, and get types for free.
 
 ```typescript
-import { createTypedSchema, PropertyType } from 'typed-notion-core-ts';
+import { createTypedSchema, NotionClient, rollup, formula } from 'typed-notion-core-ts';
 
+// 1. Define your Notion database schema
 const projectSchema = createTypedSchema({
   title: { type: 'title' },
-  description: { type: 'rich_text' },
-  priority: {
+  status: {
     type: 'select',
-    options: ['high', 'medium', 'low'],
+    options: ['Planning', 'In Progress', 'Done'],
   },
-  assignee: { type: 'people' },
-  dueDate: { type: 'date' },
-  completed: { type: 'checkbox' },
-  tags: {
-    type: 'multi_select',
-    options: ['frontend', 'backend', 'design', 'testing'],
-  },
+  // ✨ Automatic type inference for complex properties
+  taskCount: rollup('Tasks', 'Name', 'count'), // -> number | null
+  isOverdue: formula('boolean', 'prop("Due") < now()'), // -> boolean | null
 });
-```
 
-### ✅ Runtime Validation
+// 2. Initialize the client
+const client = new NotionClient({ auth: process.env.NOTION_TOKEN });
 
-Validate data against your schema with detailed error reporting:
+// 3. Type-safe database operations
+const newProject = await client.create(projectSchema, {
+  title: 'Website Redesign',
+  status: 'Planning', // ✅ Auto-completed & Validated
+  // taskCount and isOverdue are read-only, excluded from creation
+});
 
-```typescript
-import { validateSchemaDefinition, SchemaValidationError } from 'typed-notion-core-ts';
-
-try {
-  const result = validateSchemaDefinition(projectSchema);
-  console.log('Schema is valid!', result);
-} catch (error) {
-  if (error instanceof SchemaValidationError) {
-    console.error('Schema validation failed:', error.details);
-  }
+// 4. Type-safe response
+const project = await client.getPage(projectSchema, newProject.id);
+if (project.isOverdue) {
+  console.log(`Warning: ${project.title} has ${project.taskCount} tasks!`);
 }
 ```
 
-### 🚀 Performance Monitoring
+## Core Concepts
 
-Built-in performance tracking and optimization:
+### Schema Definition
+
+Define your database structure once, use it everywhere with full type safety:
 
 ```typescript
-import {
-  measurePerformance,
-  getPerformanceMetrics,
-  checkPerformanceHealth,
-} from 'typed-notion-core-ts';
+import { createTypedSchema, formula, rollup } from 'typed-notion-core-ts';
 
-// Measure operation performance
-const result = await measurePerformance('database-query', async () => {
-  return await users.query({ status: 'active' });
+const schema = createTypedSchema({
+  // Basic properties
+  title: { type: 'title' },
+  completed: { type: 'checkbox' },
+  priority: {
+    type: 'select',
+    options: ['Low', 'Medium', 'High', 'Urgent'],
+  },
+  tags: {
+    type: 'multi_select',
+    options: ['Frontend', 'Backend', 'Design', 'Bug'],
+  },
+  assignee: { type: 'people' },
+  dueDate: { type: 'date' },
+
+  // Complex properties with type inference
+  totalBudget: rollup('Expenses', 'Amount', 'sum'), // -> number | null
+  lastUpdate: rollup('Activity', 'Date', 'latest'), // -> Date | null
+  progress: formula('number', 'prop("Completed") / prop("Total") * 100'),
+  statusLabel: formula('string', 'concat("Task: ", prop("Title"))'),
 });
-
-// Check overall performance health
-const health = checkPerformanceHealth();
-console.log(`Performance score: ${health.score}/100`);
-
-// Get detailed metrics
-const metrics = getPerformanceMetrics();
-console.log('Average response time:', metrics.averageResponseTime);
 ```
-
-## Supported Property Types
-
-| Property Type  | TypeScript Type           | Validation                 |
-| -------------- | ------------------------- | -------------------------- |
-| `title`        | `string`                  | Required, non-empty        |
-| `rich_text`    | `string`                  | Text content               |
-| `number`       | `number`                  | Numeric values             |
-| `select`       | `string` (from options)   | Must match defined options |
-| `multi_select` | `string[]` (from options) | Array of valid options     |
-| `date`         | `Date \| string`          | ISO date format            |
-| `people`       | `NotionUser[]`            | Notion user objects        |
-| `files`        | `File[]`                  | File attachments           |
-| `checkbox`     | `boolean`                 | True/false values          |
-| `url`          | `string`                  | Valid URL format           |
-| `email`        | `string`                  | Valid email format         |
-| `phone_number` | `string`                  | Phone number format        |
-| `formula`      | `any`                     | Computed values            |
-| `relation`     | `string[]`                | Page references            |
-| `rollup`       | `any`                     | Aggregated values          |
-
-## Advanced Usage
 
 ### Type Inference
 
-Automatically infer types from your schema:
+Export TypeScript types directly from your runtime schema:
 
 ```typescript
 import { InferSchemaProperties } from 'typed-notion-core-ts';
 
 // Automatically inferred from schema
-type UserProperties = InferSchemaProperties<typeof userSchema>;
-// Result: { name: string; email: string; age: number; status: 'active' | 'inactive' | 'pending' }
+type Project = InferSchemaProperties<typeof projectSchema>;
 
-function processUser(user: UserProperties) {
-  // Full type safety and IntelliSense
-  console.log(`User ${user.name} has status: ${user.status}`);
-}
-```
-
-### Custom Validation
-
-Create custom property validators:
-
-```typescript
-import { validatePropertyDefinition } from 'typed-notion-core-ts';
-
-const customProperty = {
-  type: 'select',
-  options: ['urgent', 'normal', 'low'],
-  required: true,
-};
-
-const isValid = validatePropertyDefinition('priority', customProperty);
-```
-
-### Error Handling
-
-Comprehensive error types for robust error handling:
-
-```typescript
-import {
-  TypedNotionError,
-  SchemaValidationError,
-  PropertyAccessError,
-  NotionAPIError,
-} from 'typed-notion-core-ts';
-
-try {
-  const result = await users.create(invalidData);
-} catch (error) {
-  if (error instanceof SchemaValidationError) {
-    console.error('Schema validation failed:', error.message);
-    console.error('Validation details:', error.details);
-  } else if (error instanceof PropertyAccessError) {
-    console.error('Property access error:', error.propertyName);
-  } else if (error instanceof NotionAPIError) {
-    console.error('Notion API error:', error.statusCode, error.message);
+function processProject(project: Project) {
+  // TypeScript knows exact types
+  if (project.status === 'Done') {
+    // ✅ 'Planning' | 'In Progress' | 'Done'
+    console.log(project.taskCount); // ✅ number | null
+    console.log(project.title); // ✅ string
   }
 }
 ```
 
-## Package Development & Publishing
+## Database Operations
 
-This library includes built-in tools for package development and npm publishing:
+### Query with Filters
 
 ```typescript
-import { PackageValidator, validatePackage, BuildPipeline } from 'typed-notion-core-ts';
+const activeProjects = await client.query(projectSchema, {
+  filter: {
+    and: [
+      { property: 'status', select: { equals: 'In Progress' } },
+      { property: 'taskCount', number: { greater_than: 0 } },
+    ],
+  },
+  sorts: [{ property: 'dueDate', direction: 'ascending' }],
+});
 
-// Validate package configuration
-const validator = new PackageValidator();
-const result = await validator.validatePackage('./package.json');
+// Type-safe iteration
+activeProjects.results.forEach(project => {
+  // project is fully typed based on schema
+  console.log(`${project.title}: ${project.taskCount} tasks`);
+});
+```
 
-if (result.isValid) {
-  console.log('Package is ready for publishing!');
-} else {
-  console.error('Validation errors:', result.errors);
+### Create and Update
+
+```typescript
+// Create - only writable properties allowed
+const task = await client.create(taskSchema, {
+  title: 'Implement authentication',
+  priority: 'High',
+  tags: ['Backend', 'Security'],
+  assignee: [{ id: 'user-id' }],
+});
+
+// Update - partial updates supported
+await client.update(task.id, taskSchema, {
+  completed: true,
+  tags: ['Backend', 'Security', 'Done'],
+});
+```
+
+### Pagination
+
+```typescript
+let allProjects = [];
+let hasMore = true;
+let cursor = undefined;
+
+while (hasMore) {
+  const response = await client.query(projectSchema, {
+    page_size: 100,
+    start_cursor: cursor,
+  });
+
+  allProjects.push(...response.results);
+  hasMore = response.has_more;
+  cursor = response.next_cursor;
 }
+```
 
-// Build pipeline management
-const pipeline = new BuildPipeline();
-const buildResult = await pipeline.build();
-console.log(`Build completed in ${buildResult.duration}ms`);
+## Advanced Features
+
+### Complex Property Helpers
+
+Helper functions provide ergonomic API for defining complex properties:
+
+```typescript
+import { rollup, formula, union } from 'typed-notion-core-ts';
+
+const advancedSchema = createTypedSchema({
+  // Rollup with automatic type inference
+  totalSpent: rollup('Transactions', 'Amount', 'sum'),
+  earliestTask: rollup('Tasks', 'Created', 'earliest'),
+
+  // Formula with explicit type hints
+  isUrgent: formula('boolean'),
+  displayName: formula('string'),
+  score: formula('number'),
+
+  // Union types for conditional formulas
+  dynamicValue: formula(union('string', 'number'), 'if(prop("IsText"), "Text Value", 42)'), // -> string | number | null
+});
+```
+
+### Schema Validation
+
+Validate that your local schema matches the actual Notion database:
+
+```typescript
+const validation = await client.validateSchema(projectSchema);
+
+if (!validation.isValid) {
+  console.error('Schema mismatch detected:');
+  validation.errors.forEach(error => {
+    console.error(`- ${error.property}: ${error.message}`);
+  });
+}
+```
+
+### Performance Monitoring
+
+Built-in performance tracking for optimization:
+
+```typescript
+const metrics = client.getPerformanceMetrics();
+console.log(`Average response time: ${metrics.averageResponseTime}ms`);
+console.log(`Cache hit rate: ${metrics.cacheHitRate}%`);
+
+// Clear cache when needed
+client.clearCaches();
+```
+
+### Configuration Management
+
+```typescript
+import { DatabaseConfigManager } from 'typed-notion-core-ts';
+
+const config = new DatabaseConfigManager();
+
+// Set database IDs from environment
+config.setDatabaseId('projects', process.env.PROJECTS_DB_ID);
+config.setDatabaseId('tasks', process.env.TASKS_DB_ID);
+
+// Auto-resolve database IDs
+const projects = await client.query(projectSchema); // Uses configured ID
 ```
 
 ## API Reference
 
-### Core Classes
+### Schema Creation
 
-- **`TypedSchema`** - Main schema class for type-safe operations
-- **`PackageValidator`** - Package validation and npm publishing tools
-- **`BuildPipeline`** - Build process management and optimization
+- `createTypedSchema(definition)` - Create a typed schema from property definitions
+- `rollup(relation, property, function)` - Define a rollup property with type inference
+- `formula(returnType, expression?)` - Define a formula with explicit type hint
+- `union(...types)` - Create union type for complex formulas
 
-### Utility Functions
+### Client Operations
 
-- **`createTypedSchema(definition)`** - Create a new typed schema
-- **`validateSchemaDefinition(schema)`** - Validate schema structure
-- **`measurePerformance(name, operation)`** - Measure operation performance
-- **`getPerformanceMetrics()`** - Get current performance metrics
+- `new NotionClient(config)` - Initialize Notion client with authentication
+- `client.query(schema, options?)` - Query database with filters and sorting
+- `client.create(schema, data)` - Create new database entry
+- `client.update(id, schema, data)` - Update existing entry
+- `client.getPage(schema, id)` - Retrieve single page by ID
+- `client.validateSchema(schema)` - Validate schema against database
 
-### Type Definitions
+### Type Utilities
 
-- **`PropertyType`** - All supported property types
-- **`SchemaDefinition`** - Schema definition structure
-- **`InferSchemaProperties<T>`** - Infer types from schema
-- **`NotionUser`** - Notion user object type
-
-## Performance
-
-- **Bundle Size**: 7.75KB gzipped
-- **Build Time**: <1 second
-- **Test Coverage**: 162 tests passing
-- **TypeScript**: Strict mode compatible
-- **Node.js**: 18+ supported
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Build package
-npm run build
-
-# Validate package
-npm run validate
-
-# Run type checking
-npm run typecheck
-```
+- `InferSchemaProperties<T>` - Extract TypeScript type from schema
+- `PropertyType` - Union of all supported Notion property types
+- `SchemaDefinition` - Type for schema configuration object
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/) format
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Workflow
-
-- Follow TypeScript strict mode
-- Add tests for new features
-- Ensure all tests pass (`npm test`)
-- Run validation before submitting (`npm run validate`)
+We welcome contributions! Please see [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for development setup, testing guidelines, and submission process.
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
-
----
-
-**Made with ❤️ for the Notion developer community**
-
-_For more examples and detailed documentation, visit our [GitHub repository](https://github.com/satocchi0416sh/typed-notion)._
+MIT © Satoyoshi
