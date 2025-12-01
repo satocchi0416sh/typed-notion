@@ -233,6 +233,31 @@ config.setDatabaseId('tasks', process.env.TASKS_DB_ID);
 const projects = await client.query(projectSchema); // Uses configured ID
 ```
 
+## Supported Property Types
+
+Type inference covers **100% of Notion property types**. There is no implicit `any`.
+
+| Property Type      | TypeScript Type    | Validation / Inference                                                  |
+| :----------------- | :----------------- | :---------------------------------------------------------------------- |
+| **`title`**        | `string`           | Required, non-empty                                                     |
+| **`rich_text`**    | `string`           | Text content (plain text)                                               |
+| **`number`**       | `number`           | Numeric values                                                          |
+| **`select`**       | `string` (Union)   | Matches defined options exactly                                         |
+| **`multi_select`** | `string[]` (Union) | Array of defined options                                                |
+| **`date`**         | `Date \| string`   | ISO date format support                                                 |
+| **`checkbox`**     | `boolean`          | True / False                                                            |
+| **`people`**       | `NotionUser[]`     | Notion user objects                                                     |
+| **`files`**        | `File[]`           | File objects                                                            |
+| **`url`**          | `string`           | Valid URL format                                                        |
+| **`email`**        | `string`           | Valid email format                                                      |
+| **`phone_number`** | `string`           | Phone number format                                                     |
+| **`relation`**     | `string[]`         | Array of Page IDs                                                       |
+| **`formula`**      | **`T \| null`**    | **Inferred from Developer Hint** (String, Number, Boolean, Date, Union) |
+| **`rollup`**       | **`T \| null`**    | **Auto-inferred from Source** (Matches source property type)            |
+
+> **Note on Nullability:**
+> Unlike standard Notion API responses, this library treats `rollup` and `formula` results as **nullable (`| null`)** by default. This forces you to handle cases where calculation fails or data is missing, preventing runtime crashes.
+
 ## API Reference
 
 ### Schema Creation
