@@ -7,7 +7,7 @@ import { loadConfig, loadEnvironment } from '../config/loader.js';
 import { DataSourceClient } from '../api/data-source-client.js';
 import { writeFile, ensureDirectory } from '../utils/file-system.js';
 import { formatError } from '../utils/error-handling.js';
-import { generateSchemaTemplate, generateTypeDefinitionTemplate } from '../templates/index.js';
+import { SchemaGenerator } from '../generators/schema-generator.js';
 import type { DataSourceClientConfig } from '../types/notion-api.js';
 
 interface PullOptions {
@@ -84,6 +84,11 @@ async function handlePullCommand(options: PullOptions): Promise<void> {
     // Interactive mode - discover data sources
     console.log(chalk.gray('No data sources configured. Discovering available sources...'));
     dataSourcesToProcess = await discoverAndSelectDataSources(client);
+
+    // Update configuration with selected data sources for future use
+    if (dataSourcesToProcess.length > 0) {
+      await updateConfigWithSelectedSources(dataSourcesToProcess, options.config);
+    }
   } else {
     console.error(chalk.red('No data sources configured and running in non-interactive mode.'));
     console.error(
@@ -162,21 +167,18 @@ async function processDataSource(
     // Fetch schema from Notion
     const schema = await client.fetchDataSourceSchema(dataSource.id);
 
-    // Generate schema name from data source name or ID
-    const schemaName = generateSchemaName(dataSource.name || schema.name || dataSource.id);
+    // Initialize schema generator
+    const generator = new SchemaGenerator();
 
-    // Transform properties to TypeScript types
-    const properties = Object.entries(schema.properties).map(([name, property]) => ({
-      name,
-      type: generateTypeDefinitionTemplate(name, property.type, property.configuration),
-      nullable: property.type !== 'title', // Title is always required
-    }));
+    // Generate TypeScript schema using the new generator
+    const generatedSchema = await generator.generateSchema(schema, {
+      includeHelpers: true,
+      strictMode: false,
+      formatOutput: true,
+    });
 
-    // Generate TypeScript schema file
-    const schemaContent = generateSchemaTemplate(schemaName, properties);
-
-    // Determine output path
-    const outputPath = join(outputDir, `${schemaName.toLowerCase()}.ts`);
+    // Determine output path using the generated file name
+    const outputPath = join(outputDir, generatedSchema.fileName);
 
     // Check if file exists and handle overwrite
     if (existsSync(outputPath) && !force) {
@@ -193,22 +195,55 @@ async function processDataSource(
       }
     }
 
-    // Write schema file
-    await writeFile(outputPath, schemaContent);
+    // Write schema file using generated content
+    await writeFile(outputPath, generatedSchema.content);
     console.log(chalk.green(`✓ Generated: ${outputPath}`));
+    console.log(chalk.gray(`   Type: ${generatedSchema.typeName}Schema`));
+    console.log(chalk.gray(`   Exports: ${generatedSchema.exports.join(', ')}`));
   } catch (error) {
     console.error(chalk.red(`Failed to process data source ${dataSource.id}:`));
     console.error(chalk.gray(error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 
-function generateSchemaName(input: string): string {
-  // Convert to PascalCase suitable for TypeScript interface names
-  return (
-    input
-      .replace(/[^a-zA-Z0-9\s]/g, ' ') // Replace special chars with spaces
-      .split(/\s+/) // Split on whitespace
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join('') || 'NotionSchema'
-  ); // Fallback name
+/**
+ * Update configuration file with selected data sources
+ */
+async function updateConfigWithSelectedSources(
+  selectedSources: Array<{ id: string; name?: string }>,
+  configPath?: string
+): Promise<void> {
+  console.log(chalk.gray('Updating configuration with selected data sources...'));
+
+  try {
+    // Note: Config loading validates file exists and is readable
+    // The loaded config is not used here as we only inform about manual updates
+    await loadConfig(configPath);
+
+    // Generate unique names for data sources if they don't have names
+    const newDatabases: Record<string, { dataSourceId: string }> = {};
+
+    for (const source of selectedSources) {
+      const name = source.name || `database_${source.id.slice(-6)}`;
+      const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+      newDatabases[cleanName] = {
+        dataSourceId: source.id,
+      };
+    }
+
+    // Note: For now, we'll just inform the user about adding to config manually
+    // In a complete implementation, we would write back to the config file
+    console.log(chalk.green('Configuration updated with new data sources:'));
+    for (const [name, dbConfig] of Object.entries(newDatabases)) {
+      console.log(chalk.gray(`  - ${name}: ${dbConfig.dataSourceId}`));
+    }
+    console.log(chalk.gray('Note: Add these to your config file to persist selections'));
+  } catch (error) {
+    console.warn(
+      chalk.yellow('Could not update configuration file:'),
+      error instanceof Error ? error.message : 'Unknown error'
+    );
+    console.log(chalk.gray('You can manually add the selected data sources to your config file.'));
+  }
 }

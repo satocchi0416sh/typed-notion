@@ -107,7 +107,7 @@ export function isRetryableError(error: Error): boolean {
  * Sleep for the specified number of milliseconds
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => global.setTimeout(resolve, ms));
 }
 
 /**
