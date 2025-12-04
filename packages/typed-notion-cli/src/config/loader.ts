@@ -29,7 +29,7 @@ const DEFAULT_CONFIG: Partial<CLIConfig> = {
  */
 export async function loadConfig(configPath?: string): Promise<CLIConfig> {
   const resolvedPath = resolveConfigPath(configPath);
-  
+
   if (!existsSync(resolvedPath)) {
     throw new ConfigurationError(
       `Configuration file not found: ${resolvedPath}`,
@@ -41,10 +41,10 @@ export async function loadConfig(configPath?: string): Promise<CLIConfig> {
     // Import the configuration file as an ES module
     const configUrl = pathToFileURL(resolvedPath).href;
     const configModule = await import(configUrl);
-    
+
     // Get the default export
     const configData = configModule.default || configModule;
-    
+
     // Merge with defaults and validate
     const mergedConfig = {
       ...DEFAULT_CONFIG,
@@ -72,7 +72,7 @@ export async function loadConfig(configPath?: string): Promise<CLIConfig> {
     if (error instanceof ConfigurationError) {
       throw error;
     }
-    
+
     throw new ConfigurationError(
       `Failed to load configuration from ${resolvedPath}`,
       'Check that the file exists and has valid TypeScript syntax',
@@ -117,7 +117,7 @@ function resolveConfigPath(configPath?: string): string {
   ];
 
   const cwd = process.cwd();
-  
+
   for (const configFile of configFiles) {
     const fullPath = resolve(cwd, configFile);
     if (existsSync(fullPath)) {
@@ -147,7 +147,9 @@ export function configExists(configPath?: string): boolean {
 /**
  * Validate configuration file without loading it
  */
-export async function validateConfigFile(configPath?: string): Promise<ValidationResult<CLIConfig>> {
+export async function validateConfigFile(
+  configPath?: string
+): Promise<ValidationResult<CLIConfig>> {
   try {
     const config = await loadConfig(configPath);
     return { success: true, data: config };
@@ -155,10 +157,12 @@ export async function validateConfigFile(configPath?: string): Promise<Validatio
     if (error instanceof ConfigurationError) {
       return { success: false, errors: [error.message] };
     }
-    
-    return { 
-      success: false, 
-      errors: [`Configuration validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`] 
+
+    return {
+      success: false,
+      errors: [
+        `Configuration validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ],
     };
   }
 }
@@ -197,7 +201,7 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
  */
 export function createConfigTemplate(): string {
   const template = getDefaultConfig();
-  
+
   return `import { defineConfig } from 'typed-notion-cli';
 
 export default defineConfig({

@@ -1,4 +1,5 @@
 import { Client } from '@notionhq/client';
+import { setTimeout } from 'node:timers/promises';
 import { NotionAPIError } from '../utils/error-handling.js';
 import type { EnvironmentConfig, RetryConfig } from '../config/validator.js';
 
@@ -10,7 +11,8 @@ export interface NotionClientConfig {
 export interface DatabaseInfo {
   id: string;
   title: string;
-  properties: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  properties: Record<string, any>; // Notion API returns dynamic property structure
   url: string;
   createdTime: string;
   lastEditedTime: string;
@@ -80,6 +82,7 @@ export class NotionClientWrapper {
     try {
       const response = await this.executeWithRetry(async () => {
         // Note: This uses the new 2025-09-03 API endpoint
+        // Type cast needed as @notionhq/client v2 doesn't have full types for search
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return await (this.client as any).search({
           filter: {
@@ -180,8 +183,8 @@ export class NotionClientWrapper {
     );
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  private async sleep(ms: number): Promise<void> {
+    await setTimeout(ms);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

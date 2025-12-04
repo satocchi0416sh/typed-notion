@@ -144,10 +144,12 @@ export function is${databaseName}(data: unknown): data is ${databaseName}Schema 
 `;
 }
 
+import type { PropertyConfiguration } from '../types/notion-api.js';
+
 export function generateTypeDefinitionTemplate(
   _typeName: string,
   notionType: string,
-  configuration?: Record<string, unknown>
+  configuration?: PropertyConfiguration
 ): string {
   switch (notionType) {
     case 'title':
@@ -160,7 +162,7 @@ export function generateTypeDefinitionTemplate(
       return `number | null`;
 
     case 'select':
-      if (configuration?.options && Array.isArray(configuration.options)) {
+      if (configuration && 'options' in configuration && Array.isArray(configuration.options)) {
         const options = configuration.options
           .map((opt: unknown) => {
             const option = opt as { name: string };
@@ -172,7 +174,7 @@ export function generateTypeDefinitionTemplate(
       return `string | null`;
 
     case 'multi_select':
-      if (configuration?.options && Array.isArray(configuration.options)) {
+      if (configuration && 'options' in configuration && Array.isArray(configuration.options)) {
         const options = configuration.options
           .map((opt: unknown) => {
             const option = opt as { name: string };
@@ -184,7 +186,7 @@ export function generateTypeDefinitionTemplate(
       return `string[]`;
 
     case 'status':
-      if (configuration?.options && Array.isArray(configuration.options)) {
+      if (configuration && 'options' in configuration && Array.isArray(configuration.options)) {
         const options = configuration.options
           .map((opt: unknown) => {
             const option = opt as { name: string };

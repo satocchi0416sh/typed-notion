@@ -25,7 +25,7 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 'error',
 
     // General
-    'no-console': 'off', // CLI tools need console output
+    'no-console': 'off', // CLI tools need console output for user interaction
     'no-process-exit': 'off', // CLI tools need process.exit
     'prefer-const': 'error',
     'no-var': 'error',

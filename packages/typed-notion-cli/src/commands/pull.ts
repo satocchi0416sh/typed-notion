@@ -8,6 +8,7 @@ import { DataSourceClient } from '../api/data-source-client.js';
 import { writeFile, ensureDirectory } from '../utils/file-system.js';
 import { formatError } from '../utils/error-handling.js';
 import { generateSchemaTemplate, generateTypeDefinitionTemplate } from '../templates/index.js';
+import type { DataSourceClientConfig } from '../types/notion-api.js';
 
 interface PullOptions {
   config: string;
@@ -49,8 +50,7 @@ async function handlePullCommand(options: PullOptions): Promise<void> {
   const environment = loadEnvironment();
 
   // Initialize data source client
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clientConfig: { environment: any; retry?: any } = {
+  const clientConfig: DataSourceClientConfig = {
     environment,
   };
 

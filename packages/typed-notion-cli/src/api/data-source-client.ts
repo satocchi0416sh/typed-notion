@@ -1,12 +1,13 @@
 import { NotionClientWrapper, type DataSourceInfo, type DatabaseInfo } from './notion-client.js';
 import { NotionAPIError } from '../utils/error-handling.js';
 import type { EnvironmentConfig, RetryConfig } from '../config/validator.js';
+import type { PropertyConfiguration } from '../types/notion-api.js';
 
 export interface DataSourceProperty {
   id: string;
   name: string;
   type: string;
-  configuration?: Record<string, any>;
+  configuration?: PropertyConfiguration;
 }
 
 export interface DataSourceSchema {
