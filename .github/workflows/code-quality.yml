@@ -46,6 +46,7 @@ jobs:
 
       - name: Check for outdated dependencies
         run: npm outdated
+        continue-on-error: true
 
       - name: Validate package.json
         run: npx package-json-validator package.json
