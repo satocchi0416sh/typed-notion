@@ -46,12 +46,9 @@ jobs:
 
       - name: Check for outdated dependencies
         run: npm outdated
-        continue-on-error: true
 
       - name: Validate package.json
         run: npx package-json-validator package.json
-        continue-on-error: true
 
       - name: Bundle size check
         run: npm run build && npx bundlesize
-        continue-on-error: true
