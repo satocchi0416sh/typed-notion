@@ -40,11 +40,9 @@ jobs:
 
       - name: Type check
         run: npx tsc --noEmit
-        continue-on-error: true
 
       - name: Security audit
         run: npm audit --audit-level moderate
-        continue-on-error: true
 
       - name: Check for outdated dependencies
         run: npm outdated
@@ -52,8 +50,6 @@ jobs:
 
       - name: Validate package.json
         run: npx package-json-validator package.json
-        continue-on-error: true
 
       - name: Bundle size check
         run: npm run build && npx bundlesize
-        continue-on-error: true

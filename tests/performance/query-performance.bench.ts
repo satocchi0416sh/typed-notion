@@ -60,7 +60,7 @@ describe('Query Performance Benchmarks', () => {
       const client = new NotionClient({ auth: 'test' });
       await client.query(testSchema, {
         filter: {
-          property: 'status',
+          property: 'Status',
           select: { equals: 'Active' },
         },
       });
@@ -81,21 +81,21 @@ describe('Query Performance Benchmarks', () => {
         filter: {
           and: [
             {
-              property: 'status',
+              property: 'Status',
               select: { equals: 'Active' },
             },
             {
-              property: 'completed',
+              property: 'Completed',
               checkbox: { equals: false },
             },
             {
               or: [
                 {
-                  property: 'tags',
+                  property: 'Tags',
                   multi_select: { contains: 'feature' },
                 },
                 {
-                  property: 'tags',
+                  property: 'Tags',
                   multi_select: { contains: 'bug' },
                 },
               ],
@@ -103,8 +103,8 @@ describe('Query Performance Benchmarks', () => {
           ],
         },
         sorts: [
-          { property: 'count', direction: 'descending' },
-          { property: 'title', direction: 'ascending' },
+          { property: 'Count', direction: 'descending' },
+          { property: 'Title', direction: 'ascending' },
         ],
       });
     });
@@ -115,9 +115,9 @@ describe('Query Performance Benchmarks', () => {
       const client = new NotionClient({ auth: 'test' });
       const createPromises = Array.from({ length: 50 }, (_, i) =>
         client.create(testSchema, {
-          title: `Page ${i}`,
-          status: 'Active',
-          count: i,
+          Title: `Page ${i}`,
+          Status: 'Active',
+          Count: i,
         })
       );
 
@@ -140,12 +140,12 @@ describe('Query Performance Benchmarks', () => {
 
       // Mixed operations in parallel
       await Promise.all([
-        client.create(testSchema, { title: 'Task 1', status: 'Active' }),
+        client.create(testSchema, { Title: 'Task 1', Status: 'Active' }),
         client.query(testSchema),
-        client.create(testSchema, { title: 'Task 2', status: 'Inactive' }),
+        client.create(testSchema, { Title: 'Task 2', Status: 'Inactive' }),
         client.query(testSchema, {
           filter: {
-            property: 'status',
+            property: 'Status',
             select: { equals: 'Active' },
           },
         }),
@@ -159,7 +159,7 @@ describe('Query Performance Benchmarks', () => {
 
       let filter = builder;
       for (let i = 0; i < 10; i++) {
-        filter = filter.where('count', { greater_than: i });
+        filter = filter.where('Count', { greater_than: i });
       }
 
       filter.build();
@@ -169,15 +169,15 @@ describe('Query Performance Benchmarks', () => {
       const builder = new FilterBuilder({ definition: testSchema.definition });
 
       builder
-        .where('status', { equals: 'Active' })
+        .where('Status', { equals: 'Active' })
         .and({
           or: [
             {
-              property: 'tags',
+              property: 'Tags',
               multi_select: { contains: 'feature' },
             },
             {
-              property: 'tags',
+              property: 'Tags',
               multi_select: { contains: 'bug' },
             },
           ],
@@ -185,11 +185,11 @@ describe('Query Performance Benchmarks', () => {
         .and({
           and: [
             {
-              property: 'count',
+              property: 'Count',
               number: { greater_than: 5 },
             },
             {
-              property: 'completed',
+              property: 'Completed',
               checkbox: { equals: false },
             },
           ],
@@ -202,7 +202,7 @@ describe('Query Performance Benchmarks', () => {
 
       const filters = generateTestArray(
         () => ({
-          property: 'status',
+          property: 'Status',
           select: { equals: 'Active' },
         }),
         100
@@ -210,7 +210,7 @@ describe('Query Performance Benchmarks', () => {
 
       filters.forEach(_filter =>
         validator.validate({
-          property: 'status',
+          property: 'Status',
           select: { equals: 'Active' },
         })
       );
@@ -221,7 +221,7 @@ describe('Query Performance Benchmarks', () => {
 
       const filters = generateTestArray(
         () => ({
-          property: 'status',
+          property: 'Status',
           select: { equals: 'Active' },
         }),
         100
@@ -229,7 +229,7 @@ describe('Query Performance Benchmarks', () => {
 
       filters.forEach(_filter =>
         converter.toNotionFilter({
-          property: 'status',
+          property: 'Status',
           select: { equals: 'Active' },
         } as NotionFilter<typeof testSchema.definition>)
       );
@@ -277,14 +277,14 @@ describe('Query Performance Benchmarks', () => {
       };
 
       const properties = {
-        title: mockPropertyValues.title('Complex Page Title'),
+        Title: mockPropertyValues.title('Complex Page Title'),
         description: mockPropertyValues.rich_text(
           'Long description with multiple paragraphs...'.repeat(100)
         ),
-        count: mockPropertyValues.number(42),
-        completed: mockPropertyValues.checkbox(true),
-        status: mockPropertyValues.select('Active'),
-        tags: mockPropertyValues.multi_select(['feature', 'urgent', 'backend']),
+        Count: mockPropertyValues.number(42),
+        Completed: mockPropertyValues.checkbox(true),
+        Status: mockPropertyValues.select('Active'),
+        Tags: mockPropertyValues.multi_select(['feature', 'urgent', 'backend']),
       };
 
       Object.entries(properties).forEach(([name, prop]) => {
@@ -337,7 +337,7 @@ describe('Query Performance Benchmarks', () => {
       // Simulate repeated validation calls (should hit cache)
       schemas.forEach(schema => {
         for (let i = 0; i < 5; i++) {
-          schema.validate({ title: `Test ${i}` });
+          schema.validate({ Title: `Test ${i}` });
         }
       });
     });
@@ -434,9 +434,9 @@ describe('Performance Regression Tests', () => {
     const { durationMs } = measureSyncPerformance(() => {
       const builder = new FilterBuilder({ definition: testSchema.definition });
       return builder
-        .where('status', { equals: 'Active' })
-        .where('count', { greater_than: 10 })
-        .where('completed', { equals: false })
+        .where('Status', { equals: 'Active' })
+        .where('Count', { greater_than: 10 })
+        .where('Completed', { equals: false })
         .build();
     }, PERFORMANCE_TARGETS.filterBuilding);
 
