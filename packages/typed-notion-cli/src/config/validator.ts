@@ -103,7 +103,20 @@ export function validateConfig(config: unknown): ValidationResult<CLIConfig> {
     if (error instanceof z.ZodError) {
       const errors = error.errors.map(err => {
         const path = err.path.join('.');
-        return `${path}: ${err.message}`;
+        let message = err.message;
+
+        // Enhance error messages with specific guidance
+        if (path === 'output') {
+          message += '. Example: "./src/lib/notion-schema.ts"';
+        } else if (path.startsWith('databases')) {
+          message += '. Check your database configuration format';
+        } else if (path.includes('dataSourceId')) {
+          message += '. Format should be "src_xxxxx" (get from Notion integration)';
+        } else if (path.includes('databaseId')) {
+          message += '. Format should be a UUID (legacy format - consider using dataSourceId)';
+        }
+
+        return `${path}: ${message}`;
       });
       return { success: false, errors };
     }

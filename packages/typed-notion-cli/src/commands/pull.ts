@@ -8,6 +8,10 @@ import { DataSourceClient } from '../api/data-source-client.js';
 import { writeFile, ensureDirectory } from '../utils/file-system.js';
 import { formatError } from '../utils/error-handling.js';
 import { SchemaGenerator } from '../generators/schema-generator.js';
+import {
+  createCommandLogger as _createCommandLogger,
+  ProgressLogger as _ProgressLogger,
+} from '../utils/logger.js';
 import type { DataSourceClientConfig } from '../types/notion-api.js';
 
 interface PullOptions {

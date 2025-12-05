@@ -41,6 +41,9 @@
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
+    "build:prod": "NODE_ENV=production tsup",
+    "build:analyze": "tsup --metafile && npx esbuild-visualizer dist/metafile.json --metadata dist/meta.json",
+    "bundle:size": "npm run build:prod && npx bundlesize",
     "dev": "tsx src/index.ts",
     "test": "vitest",
     "test:run": "vitest run",

@@ -7,6 +7,7 @@ import type { DataSourceSchema, DataSourceProperty } from '../api/data-source-cl
 import { TypeMapper } from './type-mapper.js';
 import { CodeFormatter } from './code-formatter.js';
 import { NotionAPIError } from '../utils/error-handling.js';
+import { timeFunction } from '../utils/performance.js';
 
 export interface GeneratedSchema {
   fileName: string;
@@ -53,6 +54,23 @@ export class SchemaGenerator {
    * Generate TypeScript schema from Notion data source
    */
   async generateSchema(
+    dataSourceSchema: DataSourceSchema,
+    options: SchemaGeneratorOptions = {}
+  ): Promise<GeneratedSchema> {
+    const { result } = await timeFunction(
+      `schema-generation-${dataSourceSchema.name}`,
+      async () => {
+        return await this._generateSchemaInternal(dataSourceSchema, options);
+      }
+    );
+
+    return result;
+  }
+
+  /**
+   * Internal implementation of schema generation (for performance tracking)
+   */
+  private async _generateSchemaInternal(
     dataSourceSchema: DataSourceSchema,
     options: SchemaGeneratorOptions = {}
   ): Promise<GeneratedSchema> {

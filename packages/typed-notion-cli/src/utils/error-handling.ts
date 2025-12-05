@@ -157,3 +157,83 @@ export function createCLIError(error: unknown, context: string, suggestion?: str
 
   return new CLIError(message, 1, suggestion, cause);
 }
+
+/**
+ * Common error scenarios with actionable suggestions
+ */
+export const ERROR_SCENARIOS = {
+  INVALID_TOKEN: {
+    message: 'Invalid or expired Notion token',
+    suggestion:
+      'Check your NOTION_TOKEN in .env file and ensure it starts with "secret_". Generate a new token at https://www.notion.so/my-integrations',
+  },
+  MISSING_PERMISSIONS: {
+    message: 'Insufficient permissions to access Notion database',
+    suggestion:
+      'Share the database with your integration in Notion. Go to database settings → Add connections → Select your integration',
+  },
+  DATABASE_NOT_FOUND: {
+    message: 'Database or data source not found',
+    suggestion:
+      'Verify the database ID/data source ID is correct and the integration has access. Run "typed-notion pull" to discover available sources',
+  },
+  NETWORK_ERROR: {
+    message: 'Network connection failed',
+    suggestion:
+      'Check your internet connection and try again. If behind a proxy, configure npm proxy settings',
+  },
+  CONFIG_FILE_MISSING: {
+    message: 'Configuration file not found',
+    suggestion: 'Run "typed-notion init" to create a new configuration file',
+  },
+  CONFIG_FILE_INVALID: {
+    message: 'Configuration file is invalid',
+    suggestion:
+      'Check the syntax of your typed-notion.config.ts file. Run "typed-notion init --force" to recreate it',
+  },
+  ENV_FILE_MISSING: {
+    message: 'Environment file (.env) not found',
+    suggestion: 'Create a .env file with NOTION_TOKEN=your_token_here or run "typed-notion init"',
+  },
+  OUTPUT_DIRECTORY_ERROR: {
+    message: 'Cannot write to output directory',
+    suggestion: 'Check directory permissions and ensure the output path in your config is writable',
+  },
+  SCHEMA_GENERATION_FAILED: {
+    message: 'Schema generation failed',
+    suggestion:
+      'Check the database structure in Notion. Ensure all properties have valid names and types',
+  },
+  VALIDATION_FAILED: {
+    message: 'Schema validation failed',
+    suggestion:
+      'Your local schema is out of sync with Notion. Run "typed-notion pull" to update schemas or use --fix flag',
+  },
+} as const;
+
+/**
+ * Create specific error with pre-defined scenarios
+ */
+export function createScenarioError(
+  scenario: keyof typeof ERROR_SCENARIOS,
+  additionalContext?: string
+): CLIError {
+  const { message, suggestion } = ERROR_SCENARIOS[scenario];
+  const fullMessage = additionalContext ? `${message}: ${additionalContext}` : message;
+  return new CLIError(fullMessage, 1, suggestion);
+}
+
+/**
+ * Enhanced error formatter with context and troubleshooting
+ */
+export function formatDetailedError(error: Error, command?: string): string {
+  let formatted = formatError(error);
+
+  if (command) {
+    formatted += `\n${chalk.gray(`Command: ${command}`)}`;
+  }
+
+  formatted += `\n${chalk.gray('For more help, visit: https://github.com/your-org/typed-notion-cli/docs')}`;
+
+  return formatted;
+}
